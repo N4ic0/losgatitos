@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0a0a0a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #D4AF37;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #C49A2C;
+    }
+}
+
+@layer components {
+    .glass {
+        @apply bg-white/5 backdrop-blur-xl border border-white/10;
+    }
+
+    .glass-gold {
+        @apply bg-[#D4AF37]/5 backdrop-blur-xl border border-[#D4AF37]/20;
+    }
+
+    .btn-gold {
+        @apply bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-bold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg shadow-[#D4AF37]/25 hover:shadow-[#D4AF37]/40;
+    }
+
+    .btn-ghost {
+        @apply bg-white/5 hover:bg-white/10 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 border border-white/10;
+    }
+
+    .card {
+        @apply glass rounded-2xl p-6;
+    }
+
+    .input-dark {
+        @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all outline-none;
+    }
+}
+
+@layer utilities {
+    .text-glow {
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.5), 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .shadow-glow {
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+    }
+}

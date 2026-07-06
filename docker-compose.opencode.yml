@@ -1,0 +1,22 @@
+services:
+  opencode:
+    image: openeuler/opencode:latest
+    container_name: opencode_agent
+    ports:
+      - "4096:4096"
+    volumes:
+      # Monta tu proyecto
+      - ./src:/workspace
+      # Monta configuración de OpenCode
+      - ./opencode:/root/.config/opencode
+    environment:
+      - OPENCODE_PORT=4096
+      - OPENCODE_HOST=0.0.0.0
+    command: --host 0.0.0.0 --port 4096 /workspace
+    restart: unless-stopped
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    external: true
