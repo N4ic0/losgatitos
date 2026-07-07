@@ -375,8 +375,8 @@
 
 {{-- HERO --}}
 <section class="hero">
-    <video class="hero-video" autoplay loop muted playsinline>
-        <source src="img/inicio.mp4" type="video/mp4">
+    <video class="hero-video" autoplay loop muted playsinline preload="auto" poster="img/habitaciones.jpeg">
+        <source src="img/inicio_web.mp4" type="video/mp4">
     </video>
     <div class="hero-fallback"></div>
     <div class="hero-overlay"></div>
@@ -552,6 +552,20 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
     AOS.init({ duration: 800, once: true, offset: 100 });
+
+    // Force video autoplay (handles browser restrictions on GitHub Pages)
+    document.addEventListener('DOMContentLoaded', function() {
+        var video = document.querySelector('.hero-video');
+        if (video) {
+            video.play().catch(function() {
+                // Autoplay blocked, try again on first user interaction
+                document.addEventListener('click', function playOnClick() {
+                    video.play();
+                    document.removeEventListener('click', playOnClick);
+                });
+            });
+        }
+    });
 </script>
 </body>
 </html>
