@@ -26,6 +26,7 @@ class Promocion extends Model
             'fecha_inicio' => 'date',
             'fecha_fin' => 'date',
             'activo' => 'boolean',
+            'reglas' => 'json',
         ];
     }
 
@@ -39,5 +40,10 @@ class Promocion extends Model
     public function scopeVigentes($query)
     {
         return $query->where('fecha_fin', '>=', now());
+    }
+
+    public function productos()
+    {
+        return $this->belongsToMany(Producto::class, 'promocion_producto')->withPivot('cantidad');
     }
 }

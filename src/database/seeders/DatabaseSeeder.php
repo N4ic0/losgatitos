@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             HabitacionSeeder::class,
             TarifaSeeder::class,
+            ProductoSeeder::class,
             PromocionSeeder::class,
             ConfiguracionSeeder::class,
         ]);

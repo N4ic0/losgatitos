@@ -26,4 +26,24 @@ class Habitacion extends Model
     {
         return $this->hasOne(Reserva::class)->whereIn('estado', ['Reservada', 'Ingresada']);
     }
+
+    public function historialEstados()
+    {
+        return $this->hasMany(HistorialEstado::class);
+    }
+
+    public function ultimoEstado()
+    {
+        return $this->hasOne(HistorialEstado::class)->whereNull('fecha_fin')->latestOfMany();
+    }
+
+    public function ocupaciones()
+    {
+        return $this->hasMany(Ocupacion::class);
+    }
+
+    public function ocupacionActiva()
+    {
+        return $this->hasOne(Ocupacion::class)->whereNull('fecha_fin')->latestOfMany();
+    }
 }

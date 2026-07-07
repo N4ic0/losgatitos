@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HabitacionController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\TarifaController;
@@ -48,6 +49,19 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Holidays
     Route::resource('feriados', FeriadoController::class)->only(['index', 'store', 'destroy']);
     Route::post('feriados/importar', [FeriadoController::class, 'importar'])->name('feriados.importar');
+
+    // Dashboard AJAX
+    Route::get('dashboard/habitacion/{habitacion}', [DashboardController::class, 'datosHabitacion'])->name('dashboard.habitacion');
+    Route::post('dashboard/habitacion/{habitacion}/cambiar-estado', [DashboardController::class, 'cambiarEstado'])->name('dashboard.cambiar-estado');
+    Route::post('dashboard/habitacion/{habitacion}/iniciar-ocupacion', [DashboardController::class, 'iniciarOcupacion'])->name('dashboard.iniciar-ocupacion');
+    Route::get('dashboard/ocupacion/{ocupacion}', [DashboardController::class, 'datosOcupacion'])->name('dashboard.ocupacion');
+    Route::post('dashboard/ocupacion/{ocupacion}/cliente', [DashboardController::class, 'registrarCliente'])->name('dashboard.registrar-cliente');
+    Route::post('dashboard/ocupacion/{ocupacion}/consumo', [DashboardController::class, 'agregarConsumo'])->name('dashboard.agregar-consumo');
+    Route::post('dashboard/ocupacion/{ocupacion}/pago', [DashboardController::class, 'registrarPago'])->name('dashboard.registrar-pago');
+    Route::post('dashboard/ocupacion/{ocupacion}/finalizar', [DashboardController::class, 'finalizarOcupacion'])->name('dashboard.finalizar-ocupacion');
+    Route::post('dashboard/ocupacion/{ocupacion}/observacion', [DashboardController::class, 'agregarObservacion'])->name('dashboard.agregar-observacion');
+    Route::get('dashboard/productos', [DashboardController::class, 'productos'])->name('dashboard.productos');
+    Route::get('dashboard/promociones', [DashboardController::class, 'promociones'])->name('dashboard.promociones');
 
     // Profile
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('perfil');
