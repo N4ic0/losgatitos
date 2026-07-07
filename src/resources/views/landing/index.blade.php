@@ -23,6 +23,23 @@
             <a href="{{ route('landing.habitaciones') }}" class="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-10 py-4 rounded-full transition-all duration-300 text-lg border border-white/20">Ver Habitaciones</a>
             <a href="{{ route('landing.promociones') }}" class="text-[#D4AF37] hover:text-white font-semibold px-6 py-4 transition-all duration-300 text-lg">Promociones →</a>
         </div>
+
+        {{-- AVAILABILITY --}}
+        @php
+            $suiteCount = $habitaciones->where('categoria', 'Suite')->count();
+            $deptoCount = $habitaciones->where('categoria', 'Departamento')->count();
+            $totalDisponibles = $suiteCount + $deptoCount;
+        @endphp
+        <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="800" class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">
+            <div class="bg-white/5 backdrop-blur-xl rounded-2xl px-8 py-5 border border-white/10 min-w-[200px] text-center">
+                <p class="text-[#D4AF37] text-3xl font-bold">{{ $suiteCount }}</p>
+                <p class="text-gray-400 text-sm mt-1">Suite Disponible{{ $suiteCount !== 1 ? 's' : '' }}</p>
+            </div>
+            <div class="bg-white/5 backdrop-blur-xl rounded-2xl px-8 py-5 border border-white/10 min-w-[200px] text-center">
+                <p class="text-[#D4AF37] text-3xl font-bold">{{ $deptoCount }}</p>
+                <p class="text-gray-400 text-sm mt-1">Departamento Disponible{{ $deptoCount !== 1 ? 's' : '' }}</p>
+            </div>
+        </div>
     </div>
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
