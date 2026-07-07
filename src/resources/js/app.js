@@ -3,6 +3,8 @@ import Swiper from 'swiper';
 import AOS from 'aos';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Swal from 'sweetalert2';
+window.Swal = Swal;
 
 window.Alpine = Alpine;
 Alpine.start();

@@ -11,15 +11,13 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label class="block text-gray-300 text-sm font-medium mb-2">Categoría</label>
-                <select name="categoria" disabled class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-gray-500 outline-none cursor-not-allowed">
-                    <option value="{{ $tarifa->categoria }}">{{ $tarifa->categoria }}</option>
-                </select>
+                <input type="hidden" name="categoria" value="{{ $tarifa->categoria }}">
+                <p class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-gray-400">{{ $tarifa->categoria }}</p>
             </div>
             <div>
                 <label class="block text-gray-300 text-sm font-medium mb-2">Tipo de Tiempo</label>
-                <select name="tipo_tiempo" disabled class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-gray-500 outline-none cursor-not-allowed">
-                    <option value="{{ $tarifa->tipo_tiempo }}">{{ $tarifa->tipo_tiempo }}</option>
-                </select>
+                <input type="hidden" name="tipo_tiempo" value="{{ $tarifa->tipo_tiempo }}">
+                <p class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-gray-400">{{ $tarifa->tipo_tiempo }}</p>
             </div>
             <div>
                 <label class="block text-gray-300 text-sm font-medium mb-2">Precio D-J</label>

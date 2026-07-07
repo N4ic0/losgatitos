@@ -100,12 +100,19 @@
         <main class="flex-1 overflow-y-auto lg:ml-0 pt-14 lg:pt-0">
             <div class="p-4 sm:p-6 lg:p-8">
                 @if(session('success'))
-                <div x-data="{ show: true }" x-show="show" class="mb-6 bg-green-500/10 border border-green-500/20 text-green-400 px-6 py-4 rounded-2xl flex items-center justify-between">
-                    <span>{{ session('success') }}</span>
-                    <button @click="show = false" class="text-green-400 hover:text-green-300">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '{{ session('success') }}',
+                            timer: 2000,
+                            showConfirmButton: true,
+                            confirmButtonColor: '#D4AF37',
+                            confirmButtonText: 'Aceptar',
+                            timerProgressBar: true,
+                        });
+                    });
+                </script>
                 @endif
                 @yield('content')
             </div>
