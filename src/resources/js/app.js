@@ -4,7 +4,24 @@ import AOS from 'aos';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Swal from 'sweetalert2';
-window.Swal = Swal;
+
+const DarkSwal = Swal.mixin({
+    background: '#1a1a2e',
+    color: '#e5e7eb',
+    confirmButtonColor: '#D4AF37',
+    cancelButtonColor: '#6b7280',
+    iconColor: '#D4AF37',
+    customClass: {
+        popup: 'rounded-2xl border border-white/10 shadow-2xl',
+        title: 'text-white font-bold text-lg',
+        htmlContainer: 'text-gray-300',
+        confirmButton: 'font-semibold px-6 py-3 rounded-xl text-sm',
+        cancelButton: 'font-semibold px-6 py-3 rounded-xl text-sm',
+        icon: 'border-0',
+        timerProgressBar: 'bg-gold',
+    },
+});
+window.Swal = DarkSwal;
 
 window.Alpine = Alpine;
 Alpine.start();
