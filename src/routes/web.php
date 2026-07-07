@@ -29,10 +29,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
     // Rooms
-    Route::resource('habitaciones', HabitacionController::class)->except(['show']);
+    Route::resource('habitaciones', HabitacionController::class)->parameters(['habitaciones' => 'habitacion'])->except(['show']);
 
     // Reservations
-    Route::resource('reservas', ReservaController::class);
+    Route::resource('reservas', ReservaController::class)->parameters(['reservas' => 'reserva']);
     Route::post('reservas/{reserva}/asignar', [ReservaController::class, 'asignarHabitacion'])->name('reservas.asignar');
     Route::post('reservas/{reserva}/liberar', [ReservaController::class, 'liberar'])->name('reservas.liberar');
     Route::post('reservas/{reserva}/cobrar-horas', [ReservaController::class, 'cobrarHoras'])->name('reservas.cobrar-horas');
@@ -43,7 +43,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('tarifas', TarifaController::class)->only(['index', 'edit', 'update']);
 
     // Promotions
-    Route::resource('promociones', PromocionController::class);
+    Route::resource('promociones', PromocionController::class)->parameters(['promociones' => 'promocion']);
 
     // Holidays
     Route::resource('feriados', FeriadoController::class)->only(['index', 'store', 'destroy']);

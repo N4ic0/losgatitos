@@ -3,274 +3,423 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motel Los Gatitos</title>
+    <title>Motel Los Gatitos - Hotel de Lujo en Santiago</title>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Figtree', sans-serif;
             background: #0a0a0a;
             color: #f5f5f5;
             line-height: 1.6;
+            overflow-x: hidden;
         }
-        .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-        header {
-            padding: 80px 0 40px;
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+        }
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+        }
+        .hero-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 60%, #0a0a0a);
+        }
+        .hero-content {
+            position: relative;
+            z-index: 10;
             text-align: center;
-            border-bottom: 1px solid #222;
+            padding: 0 24px;
+            max-width: 800px;
+            margin: 0 auto;
         }
-        header h1 {
-            font-size: 3rem;
-            font-weight: 700;
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
             letter-spacing: -1px;
-            color: #D4AF37;
+            margin-bottom: 16px;
         }
-        header p {
-            margin-top: 12px;
-            font-size: 1.15rem;
-            color: #888;
+        .hero h1 span { color: #D4AF37; }
+        .hero p {
+            color: #9ca3af;
+            font-size: 1.25rem;
+            margin-bottom: 40px;
+            font-weight: 300;
         }
-        .badges { margin-top: 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-        .badge {
+        .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn {
             display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: .83rem;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            color: #ccc;
+            padding: 16px 40px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+            transition: all .3s;
         }
-        .badge.gold { border-color: #D4AF37; color: #D4AF37; }
-        section { padding: 60px 0; border-bottom: 1px solid #222; }
-        section:last-child { border-bottom: none; }
-        h2 {
-            font-size: 1.75rem;
-            margin-bottom: 24px;
+        .btn-primary {
+            background: #D4AF37;
+            color: #000;
+            box-shadow: 0 4px 20px rgba(212,175,55,.3);
+        }
+        .btn-primary:hover {
+            background: #C49A2C;
+            transform: scale(1.05);
+            box-shadow: 0 4px 30px rgba(212,175,55,.5);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,.1);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.2);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,.2); }
+        .scroll-down {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            z-index: 10;
+        }
+        @keyframes bounce {
+            0%,100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+        .section {
+            position: relative;
+            padding: 120px 0;
+            overflow: hidden;
+        }
+        .section-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .section-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,.7), rgba(0,0,0,.4), rgba(0,0,0,.7));
+        }
+        .section-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .section-label {
             color: #D4AF37;
+            text-transform: uppercase;
+            letter-spacing: .2em;
+            font-size: .8rem;
+            font-weight: 600;
+            text-align: center;
         }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 16px;
+            margin-bottom: 48px;
         }
+        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 32px; }
+        .grid-4 { display: grid; grid-template-columns: 1fr; gap: 24px; }
         .card {
-            background: #111;
-            border: 1px solid #222;
-            border-radius: 12px;
-            padding: 24px;
+            background: rgba(255,255,255,.05);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid rgba(255,255,255,.1);
+            transition: all .5s;
         }
-        .card h3 { font-size: 1.1rem; margin-bottom: 8px; }
-        .card p { color: #888; font-size: .9rem; }
-        .card ul { list-style: none; margin-top: 12px; }
+        .card:hover {
+            border-color: rgba(212,175,55,.3);
+            box-shadow: 0 8px 40px rgba(212,175,55,.05);
+        }
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(212,175,55,.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .card-icon svg { width: 32px; height: 32px; color: #D4AF37; }
+        .card h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; }
+        .card p { color: #9ca3af; }
+        .card ul { list-style: none; margin-top: 16px; }
         .card li {
-            color: #aaa;
-            font-size: .85rem;
-            padding: 4px 0;
+            color: #9ca3af;
+            font-size: .9rem;
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
         }
-        .card li::before { content: "▸ "; color: #D4AF37; }
-        .tech-list { display: flex; gap: 10px; flex-wrap: wrap; }
-        .tech-item {
-            background: #1a1a1a;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: .85rem;
-            border: 1px solid #333;
-        }
-        .status-bar {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 24px;
-            margin-top: 20px;
-        }
-        .status-item {
+        .card li svg { width: 16px; height: 16px; color: #D4AF37; margin-right: 8px; flex-shrink: 0; }
+        .card .price { font-size: 1.5rem; font-weight: 700; color: #D4AF37; margin-top: 16px; }
+        .card .price-sub { color: #6b7280; font-size: .85rem; }
+        .price-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #222;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,.05);
         }
-        .status-item:last-child { border-bottom: none; }
-        .status-label { color: #aaa; }
-        .status-dot {
-            width: 10px; height: 10px;
-            border-radius: 50%;
+        .price-row:last-child { border-bottom: none; }
+        .price-label { color: #d1d5db; }
+        .price-value { color: #fff; font-weight: 700; }
+        .promo-card {
+            max-width: 700px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(212,175,55,.1), transparent);
+            border-radius: 24px;
+            padding: 48px;
+            border: 1px solid rgba(212,175,55,.2);
+            text-align: center;
+        }
+        .promo-badge {
             display: inline-block;
-            margin-right: 8px;
+            background: #D4AF37;
+            color: #000;
+            font-size: .75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            margin-bottom: 16px;
         }
-        .status-dot.done { background: #22c55e; }
-        .status-dot.wip { background: #eab308; }
-        .status-dot.pending { background: #555; }
-        .status-value { font-size: .9rem; }
+        .promo-card h3 { font-size: 1.75rem; font-weight: 700; margin-bottom: 16px; }
+        .promo-card p { color: #9ca3af; margin-bottom: 24px; line-height: 1.8; }
+        .map-container {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.1);
+            height: 400px;
+        }
+        .map-container iframe { width: 100%; height: 100%; border: 0; }
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 16px; }
+        .mb-4 { margin-bottom: 16px; }
+        .text-gray { color: #9ca3af; }
+        .text-sm { font-size: .85rem; }
+        .text-xs { font-size: .75rem; }
         footer {
             text-align: center;
-            padding: 40px 0;
-            color: #555;
+            padding: 48px 24px;
+            color: #6b7280;
             font-size: .85rem;
         }
         footer a { color: #D4AF37; text-decoration: none; }
         footer a:hover { text-decoration: underline; }
-        .btn {
-            display: inline-block;
-            padding: 12px 28px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            background: #D4AF37;
-            color: #0a0a0a;
-            margin: 8px 4px;
+
+        @media (min-width: 768px) {
+            .grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .grid-4 { grid-template-columns: repeat(4, 1fr); }
+            .hero h1 { font-size: 4.5rem; }
+            .section-title { font-size: 3rem; }
         }
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #D4AF37;
-            color: #D4AF37;
-        }
-        @media (max-width: 600px) {
-            header { padding: 50px 0 30px; }
-            header h1 { font-size: 2rem; }
+        @media (min-width: 1024px) {
+            .hero h1 { font-size: 5rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Motel Los Gatitos</h1>
-            <p>Sistema de gestión hotelera — Reservas, habitaciones, tarifas y más</p>
-            <div class="badges">
-                <span class="badge gold">Laravel 13</span>
-                <span class="badge">PHP 8.4</span>
-                <span class="badge">MySQL 8.0</span>
-                <span class="badge">Docker</span>
-                <span class="badge">Tailwind CSS</span>
-                <span class="badge">Alpine.js</span>
-            </div>
-        </header>
 
-        <section>
-            <h2>Stack Tecnológico</h2>
-            <div class="tech-list">
-                <span class="tech-item">🐘 Laravel 13.x</span>
-                <span class="tech-item">⚡ PHP 8.4</span>
-                <span class="tech-item">🐬 MySQL 8.0</span>
-                <span class="tech-item">🐳 Docker + Nginx</span>
-                <span class="tech-item">🎨 Tailwind CSS 3</span>
-                <span class="tech-item">⚙️ Alpine.js</span>
-                <span class="tech-item">📦 Vite</span>
-                <span class="tech-item">🔐 Laravel Breeze</span>
-                <span class="tech-item">🇨🇱 RUT chileno</span>
-            </div>
-        </section>
-
-        <section>
-            <h2>Módulos del Sistema</h2>
-            <div class="grid">
-                <div class="card">
-                    <h3>🌐 Landing Page</h3>
-                    <p>Sitio web público con información del motel</p>
-                    <ul>
-                        <li>Hero con video de fondo</li>
-                        <li>Galería de habitaciones</li>
-                        <li>Promociones activas</li>
-                        <li>Formulario de reserva con cálculo de precio en vivo</li>
-                        <li>Sección de contacto con Google Maps</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>🔐 Autenticación</h3>
-                    <p>Login y registro con Laravel Breeze</p>
-                    <ul>
-                        <li>Login con email y contraseña</li>
-                        <li>Roles: administrador / recepcionista</li>
-                        <li>Recuperación de contraseña</li>
-                        <li>Verificación de email</li>
-                        <li>Perfil de usuario</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>🛏️ Admin Panel</h3>
-                    <p>Panel de administración completo</p>
-                    <ul>
-                        <li>Dashboard con estado de habitaciones en tiempo real</li>
-                        <li>CRUD de habitaciones, reservas, tarifas</li>
-                        <li>Gestión de promociones y feriados</li>
-                        <li>Asignación y liberación de habitaciones</li>
-                        <li>Cobro de horas adicionales</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>💰 Tarifas Dinámicas</h3>
-                    <p>Precios según día y categoría</p>
-                    <ul>
-                        <li>Tarifas diferenciadas: DJ / viernes / sábado / víspera</li>
-                        <li>Recargo por tercera persona</li>
-                        <li>Horas adicionales</li>
-                        <li>Promociones por fecha</li>
-                        <li>Detección automática de feriados</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h2>Estado del Proyecto</h2>
-            <div class="status-bar">
-                <div class="status-item">
-                    <span class="status-label">🌐 Landing Page</span>
-                    <span class="status-value"><span class="status-dot done"></span>Completado</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">🔐 Autenticación (Breeze)</span>
-                    <span class="status-value"><span class="status-dot done"></span>Completado</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">🛏️ Admin - Habitaciones</span>
-                    <span class="status-value"><span class="status-dot done"></span>Completado</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">📅 Admin - Reservas</span>
-                    <span class="status-value"><span class="status-dot done"></span>Completado</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">💰 Admin - Tarifas</span>
-                    <span class="status-value"><span class="status-dot done"></span>Completado</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">🏷️ Admin - Promociones</span>
-                    <span class="status-value"><span class="status-dot done"></span>Completado</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">📋 Admin - Feriados</span>
-                    <span class="status-value"><span class="status-dot done"></span>Completado</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">📊 Dashboard</span>
-                    <span class="status-value"><span class="status-dot done"></span>Completado</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">🐳 Docker Setup</span>
-                    <span class="status-value"><span class="status-dot done"></span>Completado</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">🚀 CI/CD (Producción)</span>
-                    <span class="status-value"><span class="status-dot wip"></span>En progreso</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">🧪 Tests</span>
-                    <span class="status-value"><span class="status-dot pending"></span>Pendiente</span>
-                </div>
-            </div>
-        </section>
-
-        <section style="text-align:center; border-bottom: none;">
-            <h2>Próximamente</h2>
-            <p style="color:#888; margin-bottom: 20px;">Despliegue en producción con CI/CD</p>
-            <a href="https://github.com/N4ic0/losgatitos" class="btn" target="_blank">Ver en GitHub</a>
-            <a href="http://localhost:8080" class="btn btn-outline" target="_blank">Demo Local</a>
-        </section>
-
-        <footer>
-            <p>Motel Los Gatitos &copy; 2026 &mdash; <a href="https://github.com/N4ic0/losgatitos">github.com/N4ic0/losgatitos</a></p>
-        </footer>
+{{-- HERO --}}
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-gradient"></div>
+    <div class="hero-content">
+        <h1 data-aos="fade-up" data-aos-duration="1000">Motel <span>Los Gatitos</span></h1>
+        <p data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">Tu momento perfecto te espera. Disfruta de una experiencia única en un ambiente de lujo y privacidad.</p>
+        <div class="btn-group" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
+            <a href="https://github.com/N4ic0/losgatitos" class="btn btn-primary" target="_blank">Ver Proyecto</a>
+            <a href="#habitaciones" class="btn btn-secondary">Ver Habitaciones</a>
+        </div>
     </div>
+    <svg class="scroll-down" width="24" height="24" fill="none" stroke="rgba(255,255,255,.4)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+</section>
+
+{{-- HABITACIONES --}}
+<section id="habitaciones" class="section">
+    <div class="section-bg" style="background-image: url('img/habitaciones.jpeg');"></div>
+    <div class="section-overlay"></div>
+    <div class="section-content">
+        <div data-aos="fade-up">
+            <p class="section-label">Nuestras Habitaciones</p>
+            <h2 class="section-title">Elige tu espacio perfecto</h2>
+            <p class="text-center text-gray" style="max-width:600px;margin:0 auto 48px;">Descubre nuestras suites y departamentos diseñados para brindarte la mejor experiencia.</p>
+        </div>
+        <div class="grid-2">
+            <div data-aos="fade-right" class="card">
+                <div class="card-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                </div>
+                <h3>Suite</h3>
+                <p>Ambiente íntimo y acogedor. Perfecta para parejas que buscan una experiencia inolvidable.</p>
+                <ul>
+                    <li><svg fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Cama King Size</li>
+                    <li><svg fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Jacuzzi</li>
+                    <li><svg fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> TV LED 50"</li>
+                    <li><svg fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Aire Acondicionado</li>
+                </ul>
+                <div class="price">Desde $44.200</div>
+                <div class="price-sub">8 horas</div>
+            </div>
+            <div data-aos="fade-left" class="card">
+                <div class="card-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </div>
+                <h3>Departamento</h3>
+                <p>Más espacio y comodidad. Ideal para quienes buscan una estadía prolongada con todas las facilidades.</p>
+                <ul>
+                    <li><svg fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Sala de Estar</li>
+                    <li><svg fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Hidromasaje</li>
+                    <li><svg fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Mini Bar</li>
+                    <li><svg fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Wifi Premium</li>
+                </ul>
+                <div class="price">Desde $49.200</div>
+                <div class="price-sub">8 horas</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- SERVICIOS --}}
+<section class="section">
+    <div class="section-bg" style="background-image: url('img/servicios.jpeg');"></div>
+    <div class="section-overlay"></div>
+    <div class="section-content">
+        <div data-aos="fade-up">
+            <p class="section-label">Servicios</p>
+            <h2 class="section-title">Todo lo que necesitas</h2>
+        </div>
+        <div class="grid-4">
+            <div data-aos="fade-up" class="card" style="text-align:center;">
+                <div class="card-icon" style="margin:0 auto 16px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 style="font-size:1.1rem;">24 Horas</h3>
+                <p style="font-size:.9rem;">Atención y check-in las 24 horas del día</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="100" class="card" style="text-align:center;">
+                <div class="card-icon" style="margin:0 auto 16px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                </div>
+                <h3 style="font-size:1.1rem;">Estacionamiento</h3>
+                <p style="font-size:.9rem;">Estacionamiento privado y seguro</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="200" class="card" style="text-align:center;">
+                <div class="card-icon" style="margin:0 auto 16px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 style="font-size:1.1rem;">TV & Streaming</h3>
+                <p style="font-size:.9rem;">TV LED con Netflix y Disney+</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="300" class="card" style="text-align:center;">
+                <div class="card-icon" style="margin:0 auto 16px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                </div>
+                <h3 style="font-size:1.1rem;">WiFi Premium</h3>
+                <p style="font-size:.9rem;">Internet de alta velocidad gratuito</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- TARIFAS --}}
+<section class="section">
+    <div class="section-bg" style="background-image: url('img/precios.jpeg');"></div>
+    <div class="section-overlay"></div>
+    <div class="section-content">
+        <div data-aos="fade-up">
+            <p class="section-label">Tarifas</p>
+            <h2 class="section-title">Precios transparentes</h2>
+        </div>
+        <div class="grid-2">
+            <div data-aos="fade-right" class="card">
+                <h3 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Suite</h3>
+                <p style="color:#9ca3af;margin-bottom:24px;">8 horas</p>
+                <div class="price-row"><span class="price-label">Domingo a Jueves</span><span class="price-value">$44.200</span></div>
+                <div class="price-row"><span class="price-label">Viernes</span><span class="price-value">$47.200</span></div>
+                <div class="price-row"><span class="price-label">Sábado</span><span class="price-value">$47.200</span></div>
+            </div>
+            <div data-aos="fade-left" class="card">
+                <h3 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Departamento</h3>
+                <p style="color:#9ca3af;margin-bottom:24px;">8 horas</p>
+                <div class="price-row"><span class="price-label">Domingo a Jueves</span><span class="price-value">$49.200</span></div>
+                <div class="price-row"><span class="price-label">Viernes</span><span class="price-value">$53.200</span></div>
+                <div class="price-row"><span class="price-label">Sábado</span><span class="price-value">$53.200</span></div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <p class="text-gray text-sm">Hora adicional: $5.500 D-J | $6.000 V-S</p>
+            <p class="text-gray text-xs mt-4">* Tercera persona tiene un cargo adicional del 50% de la tarifa base</p>
+        </div>
+    </div>
+</section>
+
+{{-- PROMOCIONES --}}
+<section class="section">
+    <div class="section-bg" style="background-image: url('img/ofertas.jpeg');"></div>
+    <div class="section-overlay"></div>
+    <div class="section-content">
+        <div data-aos="fade-up">
+            <p class="section-label">Promociones</p>
+            <h2 class="section-title">Ofertas especiales</h2>
+        </div>
+        <div data-aos="zoom-in" class="promo-card">
+            <span class="promo-badge">Activa</span>
+            <h3>Promoción Noche Especial</h3>
+            <p>Disfruta de una noche especial con tu pareja. Al reservar de domingo a jueves entre las 21:00 y 00:00 hrs, extiende tu estadía de 8 a 12 horas completamente gratis. Incluye snack de cortesía.</p>
+            <a href="https://github.com/N4ic0/losgatitos" class="btn btn-primary" target="_blank" style="font-size:.9rem;padding:12px 32px;">Ver Proyecto</a>
+        </div>
+    </div>
+</section>
+
+{{-- MAPA --}}
+<section class="section" style="background:#0a0a0a;">
+    <div class="section-content">
+        <div data-aos="fade-up">
+            <p class="section-label">Ubicación</p>
+            <h2 class="section-title">Encuéntranos</h2>
+            <p class="text-center text-gray mb-4">Av. Macul 4849, Santiago, Chile</p>
+        </div>
+        <div data-aos="fade-up" class="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3327.1404011832533!2d-70.60026012574865!3d-33.49772407337079!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662d03e1f3b2cdd%3A0xef9e7076e7a11612!2sAv.%20Macul%204849%2C%207821081%20Macul%2C%20Regi%C3%B3n%20Metropolitana!5e0!3m2!1ses!2scl!4v1782945633381!5m2!1ses!2scl" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+</section>
+
+{{-- FOOTER --}}
+<footer>
+    <p>Motel Los Gatitos &copy; 2026 &mdash; <a href="https://github.com/N4ic0/losgatitos">github.com/N4ic0/losgatitos</a></p>
+    <p class="text-xs mt-4">Construido con Laravel 13 + Tailwind CSS + Alpine.js + Docker</p>
+</footer>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 800, once: true, offset: 100 });
+</script>
 </body>
 </html>
