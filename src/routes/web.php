@@ -47,6 +47,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Holidays
     Route::resource('feriados', FeriadoController::class)->only(['index', 'store', 'destroy']);
+    Route::post('feriados/importar', [FeriadoController::class, 'importar'])->name('feriados.importar');
 
     // Profile
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('perfil');

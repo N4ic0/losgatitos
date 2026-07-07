@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Feriado;
 use App\Services\AuditoriaService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class FeriadoController extends Controller
 {
@@ -34,5 +35,44 @@ class FeriadoController extends Controller
         $this->auditoriaService->registrar('eliminar', 'feriados', $feriado->id, $feriado->toArray(), null);
         $feriado->delete();
         return redirect()->route('admin.feriados.index')->with('success', 'Feriado eliminado.');
+    }
+
+    public function importar()
+    {
+        $response = Http::get('https://api.boostr.cl/holidays.json');
+
+        if ($response->failed()) {
+            return redirect()->route('admin.feriados.index')
+                ->with('error', 'No se pudo conectar con feriados.cl.');
+        }
+
+        $feriados = $response->json('data', []);
+        $creados = 0;
+        $actualizados = 0;
+
+        foreach ($feriados as $item) {
+            $feriado = Feriado::where('fecha', $item['date'])->first();
+
+            if ($feriado) {
+                if ($feriado->descripcion !== $item['title']) {
+                    $feriado->update(['descripcion' => $item['title']]);
+                    $actualizados++;
+                }
+            } else {
+                Feriado::create([
+                    'fecha' => $item['date'],
+                    'descripcion' => $item['title'],
+                ]);
+                $creados++;
+            }
+        }
+
+        $mensaje = "Importación completada. {$creados} feriados creados";
+        if ($actualizados > 0) {
+            $mensaje .= ", {$actualizados} actualizados";
+        }
+        $mensaje .= '.';
+
+        return redirect()->route('admin.feriados.index')->with('success', $mensaje);
     }
 }
