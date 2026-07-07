@@ -58,7 +58,7 @@
                 </div>
                 <p class="text-gray-500 text-xs mt-4">Estado actual: <span class="text-white font-medium" x-text="habitacion.estado"></span></p>
 
-                <template x-if="habitacion.estado === 'Disponible'">
+                <template x-if="habitacion.estado === 'Disponible' || habitacion.estado === 'Reservada'">
                     <div class="mt-6 p-4 bg-[#D4AF37]/5 rounded-xl border border-[#D4AF37]/10">
                         <h4 class="text-white font-medium mb-3">Iniciar Ocupación</h4>
                         <select x-ref="promocionSelect" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[#D4AF37]">

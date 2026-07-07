@@ -40,8 +40,8 @@ class DashboardController extends Controller
     {
         $request->validate(['promocion_id' => 'nullable|exists:promociones,id']);
 
-        if ($habitacion->estado !== 'Disponible') {
-            return response()->json(['error' => 'La habitación debe estar disponible.'], 422);
+        if (!in_array($habitacion->estado, ['Disponible', 'Reservada'])) {
+            return response()->json(['error' => 'La habitación debe estar disponible o reservada.'], 422);
         }
 
         $ocupacion = $this->ocupacionService->iniciarOcupacion($habitacion, $request->promocion_id);
