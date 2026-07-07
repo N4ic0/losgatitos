@@ -26,7 +26,6 @@
 
     {{-- Room Grid --}}
     <div>
-        <h2 class="text-xl font-bold text-white mb-4">Estado de Habitaciones</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             @foreach($habitaciones as $habitacion)
             <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-5 border border-white/5 hover:border-[#D4AF37]/30 transition-all duration-300">

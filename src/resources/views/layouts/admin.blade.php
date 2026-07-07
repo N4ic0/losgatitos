@@ -7,7 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" href="/img/icono.png">
 </head>
-<body class="bg-[#0a0a0a] text-white font-sans antialiased">
+<body x-data class="bg-[#0a0a0a] text-white font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
         {{-- Sidebar --}}
         <aside class="hidden lg:flex lg:flex-col w-64 bg-black border-r border-white/5 overflow-y-auto">
@@ -61,14 +61,14 @@
                     <img src="/img/logo.png" alt="Logo" class="h-7 w-auto">
                     <span class="text-white font-bold">Los Gatitos</span>
                 </a>
-                <button x-data @click="$refs.mobileSidebar.classList.toggle('-translate-x-full')" class="text-white p-2">
+                <button @click="$refs.mobileSidebar.classList.toggle('-translate-x-full')" class="text-white p-2">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
             </div>
         </div>
 
         {{-- Mobile Sidebar --}}
-        <div x-data x-ref="mobileSidebar" class="fixed inset-0 z-50 -translate-x-full transition-transform duration-300 lg:hidden">
+        <div x-ref="mobileSidebar" class="fixed inset-0 z-50 -translate-x-full transition-transform duration-300 lg:hidden">
             <div @click="$refs.mobileSidebar.classList.add('-translate-x-full')" class="absolute inset-0 bg-black/50"></div>
             <div class="relative w-64 h-full bg-black border-r border-white/5 p-6 overflow-y-auto">
                 <div class="flex items-center justify-between mb-8">
