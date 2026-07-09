@@ -8,7 +8,7 @@ class StoreHabitacionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()?->role === 'administrador';
+        return auth()->user()?->hasPermission('habitaciones.create') || auth()->user()?->hasPermission('habitaciones.edit');
     }
 
     public function rules(): array

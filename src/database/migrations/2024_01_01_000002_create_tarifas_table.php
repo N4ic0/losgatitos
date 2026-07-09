@@ -19,6 +19,8 @@ return new class extends Migration
             $table->integer('precio_viernes');
             $table->integer('precio_sabado');
             $table->integer('precio_vispera')->nullable();
+            $table->time('hora_inicio')->nullable();
+            $table->time('hora_termino')->nullable();
             $table->boolean('activo')->default(true);
             $table->timestamps();
         });

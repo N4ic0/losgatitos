@@ -18,6 +18,8 @@
                     <th class="text-left px-6 py-4">Viernes</th>
                     <th class="text-left px-6 py-4">Sábado</th>
                     <th class="text-left px-6 py-4">Víspera</th>
+                    <th class="text-left px-6 py-4">Hora Inicio</th>
+                    <th class="text-left px-6 py-4">Hora Término</th>
                     <th class="text-left px-6 py-4">Estado</th>
                     <th class="text-right px-6 py-4">Acciones</th>
                 </tr>
@@ -31,6 +33,8 @@
                     <td class="px-6 py-4 text-gray-300">${{ number_format($tarifa->precio_viernes, 0, '', '.') }}</td>
                     <td class="px-6 py-4 text-gray-300">${{ number_format($tarifa->precio_sabado, 0, '', '.') }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ $tarifa->precio_vispera ? '$'.number_format($tarifa->precio_vispera, 0, '', '.') : '-' }}</td>
+                    <td class="px-6 py-4 text-gray-300">{{ $tarifa->hora_inicio ?? '-' }}</td>
+                    <td class="px-6 py-4 text-gray-300">{{ $tarifa->hora_termino ?? '-' }}</td>
                     <td class="px-6 py-4">
                         <span class="text-xs px-3 py-1 rounded-full font-medium {{ $tarifa->activo ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400' }}">
                             {{ $tarifa->activo ? 'Activo' : 'Inactivo' }}

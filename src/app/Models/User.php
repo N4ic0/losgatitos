@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'rut', 'telefono', 'role'])]
+#[Fillable(['name', 'email', 'password', 'rut', 'telefono', 'role', 'role_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -39,5 +39,16 @@ class User extends Authenticatable
     public function auditorias()
     {
         return $this->hasMany(Auditorium::class);
+    }
+
+    public function userRole()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        $role = $this->relationLoaded('userRole') ? $this->getRelation('userRole') : $this->userRole()->first();
+        return $role?->hasPermission($permission) ?? false;
     }
 }

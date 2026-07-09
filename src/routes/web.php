@@ -7,7 +7,12 @@ use App\Http\Controllers\HabitacionController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\TarifaController;
 use App\Http\Controllers\PromocionController;
+use App\Http\Controllers\PromocionProductoController;
 use App\Http\Controllers\FeriadoController;
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\OcupacionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +50,21 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Promotions
     Route::resource('promociones', PromocionController::class)->parameters(['promociones' => 'promocion']);
+
+    // Product combos (promocion_producto)
+    Route::resource('promocion-productos', PromocionProductoController::class)->parameters(['promocion-productos' => 'promocionProducto']);
+
+    // Products
+    Route::resource('productos', ProductoController::class)->parameters(['productos' => 'producto']);
+
+    // Occupations
+    Route::resource('ocupaciones', OcupacionController::class)->parameters(['ocupaciones' => 'ocupacion'])->only(['index', 'show', 'destroy']);
+
+    // Roles
+    Route::resource('roles', RoleController::class)->parameters(['roles' => 'role']);
+
+    // Users
+    Route::resource('usuarios', UserController::class)->parameters(['usuarios' => 'user']);
 
     // Holidays
     Route::resource('feriados', FeriadoController::class)->only(['index', 'store', 'destroy']);

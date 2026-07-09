@@ -15,6 +15,8 @@ class Tarifa extends Model
         'precio_viernes',
         'precio_sabado',
         'precio_vispera',
+        'hora_inicio',
+        'hora_termino',
         'activo',
     ];
 

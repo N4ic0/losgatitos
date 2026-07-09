@@ -39,6 +39,24 @@
                 <span class="text-gray-300 text-sm">Activo</span>
             </label>
         </div>
+        <div>
+            <label class="block text-gray-300 text-sm font-medium mb-3">Productos incluidos</label>
+            <div class="space-y-2 max-h-48 overflow-y-auto">
+                @foreach($productos as $producto)
+                <label class="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" name="productos[]" value="{{ $producto->id }}" class="w-4 h-4 rounded bg-white/5 border-white/10 text-[#D4AF37] focus:ring-[#D4AF37]">
+                        <span class="text-gray-300 text-sm">{{ $producto->nombre }}</span>
+                        <span class="text-gray-500 text-xs">(${{ number_format($producto->precio, 0, '', '.') }})</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-gray-500 text-xs">Cant:</span>
+                        <input type="number" name="cantidades[{{ $producto->id }}]" value="1" min="1" class="w-16 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white text-sm focus:border-[#D4AF37] outline-none">
+                    </div>
+                </label>
+                @endforeach
+            </div>
+        </div>
         <div class="flex justify-end space-x-4">
             <a href="{{ route('admin.promociones.index') }}" class="px-6 py-3 text-gray-400 hover:text-white transition-colors">Cancelar</a>
             <button type="submit" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-6 py-3 rounded-xl transition-all">Crear Promoción</button>

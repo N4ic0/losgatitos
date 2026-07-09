@@ -7,7 +7,7 @@ class StoreTarifaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()?->role === 'administrador';
+        return auth()->user()?->hasPermission('tarifas.edit');
     }
 
     public function rules(): array
@@ -19,6 +19,8 @@ class StoreTarifaRequest extends FormRequest
             'precio_viernes' => 'required|integer|min:0',
             'precio_sabado' => 'required|integer|min:0',
             'precio_vispera' => 'nullable|integer|min:0',
+            'hora_inicio' => 'nullable',
+            'hora_termino' => 'nullable',
             'activo' => 'boolean',
         ];
     }

@@ -7,7 +7,7 @@ class StorePromocionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()?->role === 'administrador';
+        return auth()->user()?->hasPermission('promociones.create') || auth()->user()?->hasPermission('promociones.edit');
     }
 
     public function rules(): array
@@ -20,6 +20,10 @@ class StorePromocionRequest extends FormRequest
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'activo' => 'boolean',
             'orden' => 'integer|min:0',
+            'productos' => 'nullable|array',
+            'productos.*' => 'exists:productos,id',
+            'cantidades' => 'nullable|array',
+            'cantidades.*' => 'integer|min:1',
         ];
     }
 }

@@ -35,6 +35,14 @@
                 <label class="block text-gray-300 text-sm font-medium mb-2">Precio Víspera</label>
                 <input type="number" name="precio_vispera" value="{{ old('precio_vispera', $tarifa->precio_vispera) }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
             </div>
+            <div>
+                <label class="block text-gray-300 text-sm font-medium mb-2">Hora Inicio</label>
+                <input type="time" name="hora_inicio" value="{{ old('hora_inicio', $tarifa->hora_inicio ? \Carbon\Carbon::parse($tarifa->hora_inicio)->format('H:i') : '') }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
+            </div>
+            <div>
+                <label class="block text-gray-300 text-sm font-medium mb-2">Hora Término</label>
+                <input type="time" name="hora_termino" value="{{ old('hora_termino', $tarifa->hora_termino ? \Carbon\Carbon::parse($tarifa->hora_termino)->format('H:i') : '') }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
+            </div>
             <div class="md:col-span-2">
                 <label class="flex items-center space-x-3">
                     <input type="checkbox" name="activo" value="1" {{ old('activo', $tarifa->activo) ? 'checked' : '' }} class="w-5 h-5 rounded bg-white/5 border-white/10 text-[#D4AF37] focus:ring-[#D4AF37]">
