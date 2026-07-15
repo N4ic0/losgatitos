@@ -7,12 +7,12 @@ class PromocionRepository
 {
     public function getAll()
     {
-        return Promocion::orderBy('orden')->get();
+        return Promocion::orderBy('created_at', 'desc')->get();
     }
 
     public function getActivas()
     {
-        return Promocion::activas()->orderBy('orden')->get();
+        return Promocion::activas()->orderBy('created_at', 'desc')->get();
     }
 
     public function findById(int $id): ?Promocion
