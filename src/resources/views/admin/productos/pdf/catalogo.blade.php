@@ -9,7 +9,7 @@
 
 body {
     font-family: 'serif';
-    color: #2d2d2d;
+    color: #1a1a1a;
     font-size: 10pt;
     line-height: 1.5;
 }
@@ -18,32 +18,54 @@ body {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    margin-left: -200px;
+    margin-top: -200px;
     opacity: 0.06;
     z-index: -1;
 }
 
-.header {
+.cover {
     text-align: center;
-    padding-bottom: 8mm;
-    margin-bottom: 5mm;
-    border-bottom: 2px solid #c9a84c;
+    padding-top: 100mm;
+    page-break-after: always;
 }
 
-.header h1 {
-    color: #2d2d2d;
-    font-size: 22pt;
+.cover h1 {
+    color: #111;
+    font-size: 26pt;
     margin: 0;
-    letter-spacing: 4px;
+    letter-spacing: 6px;
     text-transform: uppercase;
     font-weight: 400;
 }
 
-.header .subtitle {
-    color: #8a8a8a;
-    font-size: 8pt;
-    letter-spacing: 2px;
-    margin-top: 2mm;
+.cover .subtitle {
+    color: #666;
+    font-size: 9pt;
+    letter-spacing: 3px;
+    margin-top: 4mm;
+}
+
+.cover .line {
+    width: 60mm;
+    border-top: 1px solid #c9a84c;
+    margin: 6mm auto 0 auto;
+}
+
+.content-header {
+    text-align: center;
+    padding-bottom: 6mm;
+    margin-bottom: 5mm;
+    border-bottom: 2px solid #c9a84c;
+}
+
+.content-header h2 {
+    color: #111;
+    font-size: 16pt;
+    margin: 0;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 400;
 }
 
 .category-section {
@@ -62,33 +84,37 @@ body {
 }
 
 .products-grid {
-    display: flex;
-    flex-wrap: wrap;
+    overflow: hidden;
 }
 
 .product-item {
+    float: left;
     width: 48%;
-    padding: 1.5mm 2mm;
-    border-bottom: 1px dotted #e8e0d0;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+    padding: 1.5mm 0;
+    border-bottom: 1px dotted #e0d5b8;
 }
 
 .product-item:nth-child(odd) {
+    clear: left;
     margin-right: 4%;
+}
+
+.product-item .inner {
+    display: block;
+    overflow: hidden;
 }
 
 .product-name {
     font-size: 10pt;
-    color: #3a3a3a;
+    color: #1a1a1a;
+    float: left;
 }
 
 .product-price {
     font-size: 10pt;
     color: #c9a84c;
     font-weight: bold;
-    white-space: nowrap;
+    float: right;
 }
 
 .footer {
@@ -97,7 +123,7 @@ body {
     left: 15mm;
     right: 15mm;
     text-align: center;
-    color: #bbb;
+    color: #999;
     font-size: 7pt;
     border-top: 1px solid #e0d5b8;
     padding-top: 2mm;
@@ -110,9 +136,15 @@ body {
     <img src="{{ $iconoPath }}" width="400">
 </div>
 
-<div class="header">
+<div class="cover">
     <h1>Catálogo de Productos</h1>
-    <div class="subtitle">Los Gatitos Hotel • {{ now()->format('d/m/Y') }}</div>
+    <div class="subtitle">Los Gatitos Hotel</div>
+    <div class="subtitle">{{ now()->format('d/m/Y') }}</div>
+    <div class="line"></div>
+</div>
+
+<div class="content-header">
+    <h2>Nuestros Productos</h2>
 </div>
 
 @foreach($productos as $categoria => $items)
@@ -121,8 +153,10 @@ body {
     <div class="products-grid">
         @foreach($items as $producto)
         <div class="product-item">
-            <span class="product-name">{{ $producto->nombre }}</span>
-            <span class="product-price">${{ number_format($producto->precio, 0, ',', '.') }}</span>
+            <div class="inner">
+                <span class="product-name">{{ $producto->nombre }}</span>
+                <span class="product-price">${{ number_format($producto->precio, 0, ',', '.') }}</span>
+            </div>
         </div>
         @endforeach
     </div>
