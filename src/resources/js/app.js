@@ -1,13 +1,15 @@
 import 'flowbite';
-import Alpine from 'alpinejs';
+import 'bootstrap';
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
 import Swiper from 'swiper';
 import AOS from 'aos';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Swal from 'sweetalert2';
 
-import { TabulatorFull as Tabulator } from 'tabulator-tables';
-window.Tabulator = Tabulator;
+import 'datatables.net-bs5';
 
 const DarkSwal = Swal.mixin({
     background: '#1a1a2e',
@@ -26,9 +28,6 @@ const DarkSwal = Swal.mixin({
     },
 });
 window.Swal = DarkSwal;
-
-window.Alpine = Alpine;
-Alpine.start();
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -75,4 +74,5 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'aos/dist/aos.css';
-import 'tabulator-tables/dist/css/tabulator.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';

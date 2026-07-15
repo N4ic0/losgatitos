@@ -219,24 +219,40 @@
 
 {{-- POPUP PROMOCIÓN --}}
 @if(isset($promocionActiva) && $promocionActiva)
-<div x-data="{ show: !localStorage.getItem('promo_seen_{{ $promocionActiva->id }}') }"
-     x-show="show"
-     x-init="$watch('show', val => { if(!val) localStorage.setItem('promo_seen_{{ $promocionActiva->id }}', '1') })"
-     class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-    <div @click.outside="show = false" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90" class="bg-gradient-to-br from-[#1a1a2e] to-black rounded-3xl p-8 lg:p-12 max-w-lg w-full border border-[#D4AF37]/20 shadow-2xl shadow-[#D4AF37]/10 relative">
-        <button @click="show = false" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-        <div class="text-center">
-            <div class="w-16 h-16 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+<div class="modal fade" id="promoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-gradient-to-br from-[#1a1a2e] to-black rounded-3xl p-8 lg:p-12 border border-[#D4AF37]/20 shadow-2xl shadow-[#D4AF37]/10">
+            <button type="button" class="btn-close btn-close-white absolute top-4 right-4" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                </div>
+                <span class="text-[#D4AF37] uppercase tracking-[0.2em] text-xs font-semibold">Promoción Especial</span>
+                <h3 class="text-2xl font-bold text-white mt-3 mb-4">{{ $promocionActiva->titulo }}</h3>
+                <p class="text-gray-300 text-sm leading-relaxed mb-6">{{ $promocionActiva->descripcion }}</p>
+                <a href="{{ route('landing.reservar') }}" class="inline-block bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-bold px-8 py-3 rounded-full transition-all duration-300">Aprovechar Oferta</a>
             </div>
-            <span class="text-[#D4AF37] uppercase tracking-[0.2em] text-xs font-semibold">Promoción Especial</span>
-            <h3 class="text-2xl font-bold text-white mt-3 mb-4">{{ $promocionActiva->titulo }}</h3>
-            <p class="text-gray-300 text-sm leading-relaxed mb-6">{{ $promocionActiva->descripcion }}</p>
-            <a href="{{ route('landing.reservar') }}" @click="show = false" class="inline-block bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-bold px-8 py-3 rounded-full transition-all duration-300">Aprovechar Oferta</a>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var promoId = {{ $promocionActiva->id }};
+    var seen = localStorage.getItem('promo_seen_' + promoId);
+    if (!seen) {
+        var modal = new bootstrap.Modal(document.getElementById('promoModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+        modal.show();
+        document.getElementById('promoModal').addEventListener('hidden.bs.modal', function() {
+            localStorage.setItem('promo_seen_' + promoId, '1');
+        });
+    }
+});
+</script>
+@endpush
 @endif
 @endsection
