@@ -6,7 +6,10 @@
 <div x-data="productosManager()" class="space-y-6">
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-white">Productos</h1>
+    <div class="flex gap-2">
+    <a href="{{ route('admin.productos.catalogo') }}" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold px-5 py-2.5 rounded-xl transition-all text-sm">Catálogo PDF</a>
     <a href="{{ route('admin.productos.create') }}" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-5 py-2.5 rounded-xl transition-all text-sm">Nuevo Producto</a>
+    </div>
 </div>
 
 <div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/5 p-4">

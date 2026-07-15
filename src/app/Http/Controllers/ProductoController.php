@@ -5,6 +5,7 @@ use App\Models\Producto;
 use App\Models\Categoria;
 use App\Http\Requests\StoreProductoRequest;
 use App\Services\AuditoriaService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -17,6 +18,15 @@ class ProductoController extends Controller
     public function index()
     {
         return view('admin.productos.index');
+    }
+
+    public function catalogo()
+    {
+        $productos = Producto::where('activo', true)->orderBy('categoria')->orderBy('nombre')->get()->groupBy('categoria');
+        $iconoPath = public_path('img/icono.png');
+        $pdf = Pdf::loadView('admin.productos.pdf.catalogo', compact('productos', 'iconoPath'));
+        $pdf->setPaper('A4', 'portrait');
+        return $pdf->stream('catalogo-productos.pdf');
     }
 
     public function data()

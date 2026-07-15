@@ -59,6 +59,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Products
     Route::get('productos-json', [ProductoController::class, 'data'])->name('productos.data');
     Route::post('productos/{producto}/toggle', [ProductoController::class, 'toggle'])->name('productos.toggle');
+    Route::get('productos/catalogo', [ProductoController::class, 'catalogo'])->name('productos.catalogo');
     Route::resource('productos', ProductoController::class)->parameters(['productos' => 'producto']);
 
     // Stock ingresos
