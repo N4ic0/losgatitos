@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <style>
 @page {
-    margin: 20mm 15mm 15mm 15mm;
+    margin: 18mm 12mm 12mm 12mm;
 }
 
 body {
     font-family: 'serif';
     color: #1a1a1a;
     font-size: 10pt;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .watermark {
@@ -24,94 +24,77 @@ body {
     z-index: -1;
 }
 
-.cover {
+.header {
     text-align: center;
-    padding-top: 100mm;
-    page-break-after: always;
-}
-
-.cover h1 {
-    color: #111;
-    font-size: 26pt;
-    margin: 0;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    font-weight: 400;
-}
-
-.cover .subtitle {
-    color: #666;
-    font-size: 9pt;
-    letter-spacing: 3px;
-    margin-top: 4mm;
-}
-
-.cover .line {
-    width: 60mm;
-    border-top: 1px solid #c9a84c;
-    margin: 6mm auto 0 auto;
-}
-
-.content-header {
-    text-align: center;
-    padding-bottom: 6mm;
-    margin-bottom: 5mm;
+    padding-bottom: 4mm;
+    margin-bottom: 4mm;
     border-bottom: 2px solid #c9a84c;
 }
 
-.content-header h2 {
+.header h1 {
     color: #111;
-    font-size: 16pt;
+    font-size: 18pt;
     margin: 0;
-    letter-spacing: 3px;
+    letter-spacing: 4px;
     text-transform: uppercase;
     font-weight: 400;
 }
 
-.category-section {
-    margin-bottom: 6mm;
-    page-break-inside: avoid;
+.header .hotel {
+    color: #666;
+    font-size: 8pt;
+    letter-spacing: 2px;
+    margin-top: 2mm;
+}
+
+.header .fecha {
+    color: #888;
+    font-size: 7pt;
+    letter-spacing: 1px;
+    margin-top: 1mm;
+}
+
+.columns {
+    width: 100%;
+}
+
+.columns td {
+    width: 50%;
+    vertical-align: top;
+    padding-right: 6mm;
+}
+
+.columns td:last-child {
+    padding-right: 0;
+    padding-left: 6mm;
 }
 
 .category-title {
-    font-size: 12pt;
+    font-size: 11pt;
     color: #c9a84c;
     text-transform: uppercase;
-    letter-spacing: 3px;
-    margin-bottom: 3mm;
-    padding-bottom: 1mm;
+    letter-spacing: 2px;
+    margin-top: 3mm;
+    margin-bottom: 2mm;
+    padding-bottom: 0.5mm;
     border-bottom: 1px solid #e0d5b8;
 }
 
-.products-grid {
-    overflow: hidden;
-}
-
-.product-item {
-    float: left;
-    width: 48%;
-    padding: 1.5mm 0;
-    border-bottom: 1px dotted #e0d5b8;
-}
-
-.product-item:nth-child(odd) {
-    clear: left;
-    margin-right: 4%;
-}
-
-.product-item .inner {
-    display: block;
+.product-row {
+    padding: 0.8mm 0;
+    border-bottom: 1px dotted #ece5d5;
     overflow: hidden;
 }
 
 .product-name {
-    font-size: 10pt;
+    font-size: 9pt;
     color: #1a1a1a;
     float: left;
+    max-width: 70%;
 }
 
 .product-price {
-    font-size: 10pt;
+    font-size: 9pt;
     color: #c9a84c;
     font-weight: bold;
     float: right;
@@ -119,14 +102,34 @@ body {
 
 .footer {
     position: fixed;
-    bottom: 10mm;
-    left: 15mm;
-    right: 15mm;
+    bottom: 8mm;
+    left: 12mm;
+    right: 12mm;
     text-align: center;
-    color: #999;
-    font-size: 7pt;
+    color: #aaa;
+    font-size: 6.5pt;
     border-top: 1px solid #e0d5b8;
     padding-top: 2mm;
+}
+
+.pdftable {
+    width: 100%;
+    border-collapse: collapse;
+}
+.pdftable td {
+    width: 50%;
+    vertical-align: top;
+    padding: 0;
+}
+.pdftable .left-col {
+    padding-right: 5mm;
+}
+.pdftable .right-col {
+    padding-left: 5mm;
+}
+
+.page-break {
+    page-break-before: always;
 }
 </style>
 </head>
@@ -136,32 +139,42 @@ body {
     <img src="{{ $iconoPath }}" width="400">
 </div>
 
-<div class="cover">
+<div class="header">
     <h1>Catálogo de Productos</h1>
-    <div class="subtitle">Los Gatitos Hotel</div>
-    <div class="subtitle">{{ now()->format('d/m/Y') }}</div>
-    <div class="line"></div>
+    <div class="hotel">Los Gatitos Hotel</div>
+    <div class="fecha">{{ now()->format('d/m/Y') }}</div>
 </div>
 
-<div class="content-header">
-    <h2>Nuestros Productos</h2>
-</div>
+@php
+    $leftCat = 'Alcohol';
+    $leftItems = $productos->get($leftCat, collect());
+    $rightCats = $productos->except($leftCat);
+@endphp
 
-@foreach($productos as $categoria => $items)
-<div class="category-section">
+<table class="pdftable">
+<tr>
+<td class="left-col">
+    <div class="category-title">{{ $leftCat }}</div>
+    @foreach($leftItems as $producto)
+    <div class="product-row">
+        <span class="product-name">{{ $producto->nombre }}</span>
+        <span class="product-price">${{ number_format($producto->precio, 0, ',', '.') }}</span>
+    </div>
+    @endforeach
+</td>
+<td class="right-col">
+    @foreach($rightCats as $categoria => $items)
     <div class="category-title">{{ $categoria }}</div>
-    <div class="products-grid">
         @foreach($items as $producto)
-        <div class="product-item">
-            <div class="inner">
-                <span class="product-name">{{ $producto->nombre }}</span>
-                <span class="product-price">${{ number_format($producto->precio, 0, ',', '.') }}</span>
-            </div>
+        <div class="product-row">
+            <span class="product-name">{{ $producto->nombre }}</span>
+            <span class="product-price">${{ number_format($producto->precio, 0, ',', '.') }}</span>
         </div>
         @endforeach
-    </div>
-</div>
-@endforeach
+    @endforeach
+</td>
+</tr>
+</table>
 
 <div class="footer">
     Los Gatitos Hotel &mdash; Catálogo de Productos &mdash; {{ now()->format('d/m/Y') }}
