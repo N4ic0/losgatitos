@@ -16,9 +16,9 @@
                 <span class="text-xs px-3 py-1 rounded-full font-medium"
                       :class="'bg-' + estadoColor(habitacion.estado) + '-500/20 text-' + estadoColor(habitacion.estado) + '-400'"
                       x-text="habitacion.estado"></span>
-                <template x-if="habitacion.ultimo_estado">
+                <template x-if="habitacion.ultimo_estado && habitacion.estado !== 'Disponible'">
                     <span class="text-[#D4AF37] text-xs font-mono timer-modal"
-                          :data-inicio="habitacion.ultimo_estado.fecha_inicio">
+                          :data-inicio="new Date(habitacion.ultimo_estado.fecha_inicio).getTime() / 1000">
                         <span class="tiempo-valor">00:00:00</span>
                     </span>
                 </template>
@@ -44,7 +44,7 @@
             {{-- TAB: Estado --}}
             <div x-show="activeTab === 'estado'">
                 <h3 class="text-white font-semibold mb-4">Cambiar Estado</h3>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-4 gap-3">
                     <template x-for="estado in ['Disponible', 'Reservada', 'Ocupada', 'Limpieza']" :key="estado">
                         <button @click="cambiarEstado(estado)"
                                 :disabled="habitacion.estado === estado"
@@ -56,17 +56,53 @@
                         </button>
                     </template>
                 </div>
-                <p class="text-gray-500 text-xs mt-4">Estado actual: <span class="text-white font-medium" x-text="habitacion.estado"></span></p>
+                
 
                 <template x-if="habitacion.estado === 'Disponible' || habitacion.estado === 'Reservada'">
                     <div class="mt-6 p-4 bg-[#D4AF37]/5 rounded-xl border border-[#D4AF37]/10">
                         <h4 class="text-white font-medium mb-3">Iniciar Ocupación</h4>
-                        <select x-ref="promocionSelect" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[#D4AF37]">
-                            <option value="">Sin promoción</option>
-                            <template x-for="p in promociones" :key="p.id">
-                                <option :value="p.id" x-text="p.titulo"></option>
+                        <div class="flex space-x-2 mb-3">
+                            <button @click="tipoTiempo = '3h'; calcularTarifaPreview()"
+                                    class="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border"
+                                    :class="tipoTiempo === '3h'
+                                        ? 'bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]'
+                                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'">
+                                3 Horas
+                            </button>
+                            <button @click="tipoTiempo = '8h'; calcularTarifaPreview()"
+                                    class="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border"
+                                    :class="tipoTiempo === '8h'
+                                        ? 'bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]'
+                                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'">
+                                8 Horas
+                            </button>
+                        </div>
+                        <template x-if="tarifaInfo">
+                            <div class="mb-3 p-3 bg-white/5 rounded-xl text-xs space-y-1">
+                                <div class="flex justify-between text-gray-400"><span>Tarifa:</span><span class="text-white" x-text="tarifaInfo.categoria + ' - ' + tarifaInfo.tipo_tiempo"></span></div>
+                                <div class="flex justify-between text-gray-400"><span>Regla:</span><span class="text-[#D4AF37]" x-text="tarifaInfo.regla"></span></div>
+                                <div class="flex justify-between text-gray-400"><span>Valor:</span><span class="text-green-400 font-bold" x-text="formatCurrency(tarifaInfo.precio)"></span></div>
+                                <div class="flex justify-between text-gray-400"><span>Horario:</span><span class="text-white" x-text="tarifaInfo.hora_inicio + ' - ' + tarifaInfo.hora_termino"></span></div>
+                            </div>
+                        </template>
+                        <template x-if="tarifaInfo">
+                        <div class="mb-3 p-3 bg-white/5 rounded-xl border border-white/5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-300 text-sm">Personas adicionales</span>
+                                <div class="flex items-center space-x-3">
+                                    <button @click="personasAdicionales = Math.max(0, personasAdicionales - 1)" class="w-8 h-8 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center font-bold text-lg">−</button>
+                                    <span class="text-[#D4AF37] font-bold text-lg w-8 text-center" x-text="personasAdicionales"></span>
+                                    <button @click="personasAdicionales++" class="w-8 h-8 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center font-bold text-lg">+</button>
+                                </div>
+                            </div>
+                            <template x-if="personasAdicionales > 0">
+                                <div class="mt-2 pt-2 border-t border-white/5 flex justify-between text-xs">
+                                    <span class="text-gray-400">+ 50% c/u:</span>
+                                    <span class="text-[#D4AF37] font-bold" x-text="formatCurrency(Math.round(tarifaInfo.precio * 0.5 * personasAdicionales))"></span>
+                                </div>
                             </template>
-                        </select>
+                        </div>
+                        </template>
                         <button @click="iniciarOcupacion()" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-3 rounded-xl transition-all w-full">
                             Iniciar Ocupación
                         </button>
@@ -87,15 +123,54 @@
                         <div class="bg-white/5 rounded-xl p-4 border border-white/5">
                             <div class="grid grid-cols-2 gap-4 text-sm">
                                 <div><span class="text-gray-400">Inicio:</span> <span class="text-white ml-1" x-text="new Date(ocupacion.fecha_inicio).toLocaleString('es-CL')"></span></div>
-                                <div><span class="text-gray-400">Tarifa base:</span> <span class="text-white ml-1" x-text="formatCurrency(ocupacion.precio_base)"></span></div>
-                                <template x-if="ocupacion.promocion">
-                                    <div class="col-span-2"><span class="text-gray-400">Promoción:</span> <span class="text-[#D4AF37] ml-1" x-text="ocupacion.promocion.titulo"></span></div>
+                                <div><span class="text-gray-400">Tarifa base:</span> <span class="text-[#D4AF37] font-bold ml-1" x-text="formatCurrency(ocupacion.precio_base)"></span></div>
+                                <template x-if="ocupacion.tarifa">
+                                    <div class="col-span-2 bg-white/5 rounded-lg p-3 space-y-1 text-xs">
+                                        <div class="flex justify-between"><span class="text-gray-400">Categoría:</span><span class="text-white" x-text="ocupacion.tarifa.categoria"></span></div>
+                                        <div class="flex justify-between"><span class="text-gray-400">Tipo:</span><span class="text-white" x-text="ocupacion.tarifa.tipo_tiempo"></span></div>
+                                        <div class="flex justify-between"><span class="text-gray-400">Horario:</span><span class="text-white" x-text="(ocupacion.tarifa.hora_inicio || '08:00') + ' - ' + (ocupacion.tarifa.hora_termino || '08:00')"></span></div>
+                                    </div>
                                 </template>
                                 <template x-if="ocupacion.horas_beneficio > 0">
                                     <div><span class="text-gray-400">Beneficio:</span> <span class="text-green-400 ml-1" x-text="ocupacion.horas_beneficio + ' horas'"></span></div>
                                 </template>
                             </div>
                         </div>
+
+                        {{-- Promociones Aplicables --}}
+                        <template x-if="!ocupacion.promocion && promocionesAplicables && promocionesAplicables.length > 0">
+                            <template x-for="p in promocionesAplicables" :key="p.id">
+                                <div class="bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-xl p-4 border border-[#D4AF37]/20">
+                                    <div class="flex items-start justify-between">
+                                        <div>
+                                            <p class="text-[#D4AF37] font-semibold text-sm" x-text="'🎉 ' + p.titulo"></p>
+                                            <p class="text-green-400 text-xs mt-1" x-text="'Beneficio: ' + p.horas_beneficio + ' horas'"></p>
+                                            <template x-if="p.productos && p.productos.length > 0">
+                                                <p class="text-gray-400 text-[10px] mt-1" x-text="'Incluye ' + p.productos.length + ' producto(s)'"></p>
+                                            </template>
+                                        </div>
+                                        <button @click="tomarPromocion(p)" class="bg-green-600 hover:bg-green-500 text-white font-bold px-5 py-2 rounded-xl transition-all text-xs">
+                                            Tomar
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+
+                        {{-- Promoción activa --}}
+                        <template x-if="ocupacion.promocion">
+                            <div class="bg-gradient-to-r from-green-500/10 to-transparent rounded-xl p-4 border border-green-500/20">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="text-green-400 font-semibold text-sm">Promoción activa</p>
+                                        <p class="text-white text-xs mt-1" x-text="ocupacion.promocion.titulo"></p>
+                                        <p class="text-green-400 text-xs mt-1" x-text="'Beneficio: ' + ocupacion.horas_beneficio + ' horas'"></p>
+                                    </div>
+                                    <span class="text-green-400 text-[10px] bg-green-500/20 px-2 py-1 rounded-full">Activa</span>
+                                </div>
+                            </div>
+                        </template>
+
                         <div class="flex space-x-3">
                             <button @click="finalizarOcupacion()" class="bg-red-600 hover:bg-red-500 text-white font-semibold px-6 py-3 rounded-xl transition-all text-sm flex-1">
                                 Finalizar Ocupación
@@ -112,27 +187,64 @@
                 </template>
                 <template x-if="ocupacion">
                     <div class="space-y-6">
+                        {{-- Vehículo / Patente --}}
+                        <div class="bg-white/5 rounded-xl p-4 border border-white/5 space-y-4">
+                            <h4 class="text-white font-medium">Vehículo</h4>
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="vehiculo" value="1" x-model="ocupacionVehiculo" @change="actualizarVehiculo()" class="text-[#D4AF37] focus:ring-[#D4AF37] bg-white/5 border-white/10">
+                                    <span class="text-gray-300 text-sm">Vehículo</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="vehiculo" value="0" x-model="ocupacionVehiculo" @change="actualizarVehiculo()" class="text-[#D4AF37] focus:ring-[#D4AF37] bg-white/5 border-white/10">
+                                    <span class="text-gray-300 text-sm">Peatón</span>
+                                </label>
+                            </div>
+                            <template x-if="ocupacionVehiculo == 1">
+                                <div>
+                                    <label class="block text-gray-400 text-xs mb-1">Patente</label>
+                                    <input type="text" x-model="ocupacionPatente" @input="ocupacionPatente = ocupacionPatente.toUpperCase(); actualizarVehiculo()" maxlength="10" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm uppercase" placeholder="AAAA00">
+                                </div>
+                            </template>
+                        </div>
+
                         <form x-ref="clienteForm" @submit.prevent="registrarCliente()" class="bg-white/5 rounded-xl p-4 border border-white/5 space-y-4">
                             <h4 class="text-white font-medium">Registrar Cliente</h4>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-gray-400 text-xs mb-1">Tipo Documento</label>
-                                    <select name="tipo_documento" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm">
+                                    <select name="tipo_documento" @change="if($event.target.value !== 'RUT') { rutValido = null; }" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm">
                                         <option value="RUT">RUT</option>
                                         <option value="Pasaporte">Pasaporte</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-gray-400 text-xs mb-1">N° Documento</label>
-                                    <input type="text" name="numero_documento" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm">
+                                    <div class="relative">
+                                        <input type="text" name="numero_documento" required
+                                               x-model="clienteDocumento"
+                                               @input="clienteDocumento = clienteDocumento.toUpperCase(); validarRutInput()"
+                                               :class="{'border-green-500': rutValido === true, 'border-red-500': rutValido === false, 'border-white/10': rutValido === null}"
+                                               class="w-full bg-white/5 border rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm uppercase pr-8">
+                                        <template x-if="rutValido === true">
+                                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-green-400">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            </span>
+                                        </template>
+                                        <template x-if="rutValido === false">
+                                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-red-400">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </span>
+                                        </template>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-gray-400 text-xs mb-1">Nombres</label>
-                                    <input type="text" name="nombres" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm">
+                                    <input type="text" name="nombres" required x-model="clienteNombres" @input="clienteNombres = clienteNombres.toUpperCase()" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm uppercase">
                                 </div>
                                 <div>
                                     <label class="block text-gray-400 text-xs mb-1">Apellidos</label>
-                                    <input type="text" name="apellidos" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm">
+                                    <input type="text" name="apellidos" required x-model="clienteApellidos" @input="clienteApellidos = clienteApellidos.toUpperCase()" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm uppercase">
                                 </div>
                                 <div>
                                     <label class="block text-gray-400 text-xs mb-1">Nacionalidad</label>
@@ -140,7 +252,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-gray-400 text-xs mb-1">Fecha Nacimiento</label>
-                                    <input type="date" name="fecha_nacimiento" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm">
+                                    <input type="date" name="fecha_nacimiento" x-model="fechaNacimiento" @change="validarEdad()" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] text-sm">
                                 </div>
                             </div>
                             <button type="submit" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-6 py-3 rounded-xl transition-all text-sm">Registrar</button>
@@ -174,27 +286,28 @@
                 </template>
                 <template x-if="ocupacion">
                     <div class="space-y-6">
-                        <div>
-                            <h4 class="text-white font-medium mb-3">Agregar Consumo</h4>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" x-data="{ cargando: false }" x-init="if (productos.length === 0) { fetch('/admin/dashboard/productos').then(r => r.json()).then(d => productos = d); }">
-                                <template x-for="p in productos.filter(pr => pr.categoria === 'Producto')" :key="p.id">
-                                    <div class="bg-white/5 rounded-xl p-3 border border-white/5 hover:border-[#D4AF37]/30 transition-all text-center cursor-pointer" @click="agregarConsumo(p.id)">
-                                        <div class="w-full h-20 bg-white/10 rounded-lg mb-2 flex items-center justify-center overflow-hidden">
-                                            <template x-if="p.imagen">
-                                                <img :src="'/storage/' + p.imagen" class="w-full h-full object-cover">
-                                            </template>
-                                            <template x-if="!p.imagen">
-                                                <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
-                                            </template>
-                                        </div>
-                                        <p class="text-white text-xs font-medium" x-text="p.nombre"></p>
-                                        <p class="text-[#D4AF37] text-xs font-bold" x-text="formatCurrency(p.precio)"></p>
-                                    </div>
+                        <div class="flex space-x-2">
+                            <button @click="abrirSelectorConsumos()" class="flex-1 bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-5 py-3 rounded-xl transition-all text-sm">
+                                + Agregar Consumo
+                            </button>
+                            <button @click="abrirSelectorCortesias()" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm">
+                                + Agregar Cortesía
+                            </button>
+                            <template x-if="ocupacion.promocion && ocupacion.promocion.productos && ocupacion.promocion.productos.length > 0">
+                                <button @click="agregarPromoProductos(ocupacion.promocion)" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm">
+                                    + Agregar Promoción
+                                </button>
+                            </template>
+                            <template x-if="!ocupacion.promocion">
+                                <template x-for="p in promocionesAplicables" :key="'promo-'+p.id">
+                                    <template x-if="p.productos && p.productos.length > 0">
+                                        <button @click="agregarPromoProductos(p)"
+                                                class="w-full bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm"
+                                                x-text="'+ Agregar ' + p.titulo">
+                                        </button>
+                                    </template>
                                 </template>
-                                <template x-if="productos.filter(pr => pr.categoria === 'Producto').length === 0">
-                                    <p class="col-span-full text-gray-500 text-sm text-center py-4">No hay productos disponibles.</p>
-                                </template>
-                            </div>
+                            </template>
                         </div>
 
                         {{-- Consumos registrados --}}
@@ -206,12 +319,26 @@
                                         <div class="px-4 py-3 flex items-center justify-between">
                                             <div class="flex items-center space-x-3">
                                                 <span class="text-xs" :class="c.origen === 'Promocion' ? 'text-green-400' : 'text-white'"
-                                                      x-text="(c.producto?.nombre || 'Producto') + (c.cantidad > 1 ? ' x' + c.cantidad : '')"></span>
+                                                      x-text="c.producto?.nombre || 'Producto'"></span>
                                                 <template x-if="c.origen === 'Promocion'">
                                                     <span class="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Promo</span>
                                                 </template>
+                                                <template x-if="c.origen !== 'Promocion'">
+                                                    <div class="flex items-center space-x-1">
+                                                        <button @click="actualizarCantidadConsumo(c.id, c.cantidad - 1)" class="w-6 h-6 rounded-md bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center text-xs font-bold">−</button>
+                                                        <span class="text-[#D4AF37] text-xs font-bold min-w-[16px] text-center" x-text="c.cantidad"></span>
+                                                        <button @click="actualizarCantidadConsumo(c.id, c.cantidad + 1)" class="w-6 h-6 rounded-md bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center text-xs font-bold">+</button>
+                                                    </div>
+                                                </template>
                                             </div>
-                                            <span class="text-[#D4AF37] text-sm font-mono" x-text="c.total === 0 ? 'Gratis' : formatCurrency(c.total)"></span>
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-[#D4AF37] text-sm font-mono" x-text="c.total === 0 ? 'Gratis' : formatCurrency(c.total)"></span>
+                                                <template x-if="c.origen !== 'Promocion'">
+                                                    <button @click="eliminarConsumoItem(c.id)" class="text-red-400 hover:text-red-300 transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    </button>
+                                                </template>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
@@ -253,7 +380,9 @@
                             </div>
                             <div class="flex justify-between items-center py-2" :class="saldoPendiente() > 0 ? 'text-red-400' : 'text-green-400'">
                                 <span class="text-sm">Saldo Pendiente</span>
-                                <span class="font-bold" x-text="formatCurrency(saldoPendiente())"></span>
+                                <span class="font-bold cursor-pointer hover:text-[#D4AF37] transition-colors"
+                                      @click="$refs.pagoMonto.value = saldoPendiente()"
+                                      x-text="formatCurrency(saldoPendiente())"></span>
                             </div>
                         </div>
 

@@ -10,6 +10,8 @@ use App\Http\Controllers\PromocionController;
 use App\Http\Controllers\PromocionProductoController;
 use App\Http\Controllers\FeriadoController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\IngresoController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\OcupacionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -55,7 +57,17 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('promocion-productos', PromocionProductoController::class)->parameters(['promocion-productos' => 'promocionProducto']);
 
     // Products
+    Route::get('productos-json', [ProductoController::class, 'data'])->name('productos.data');
+    Route::post('productos/{producto}/toggle', [ProductoController::class, 'toggle'])->name('productos.toggle');
     Route::resource('productos', ProductoController::class)->parameters(['productos' => 'producto']);
+
+    // Stock ingresos
+    Route::post('ingresos', [IngresoController::class, 'store'])->name('ingresos.store');
+
+    // Categories (AJAX)
+    Route::get('categorias', [CategoriaController::class, 'index'])->name('categorias.index');
+    Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
+    Route::put('categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update');
 
     // Occupations
     Route::resource('ocupaciones', OcupacionController::class)->parameters(['ocupaciones' => 'ocupacion'])->only(['index', 'show', 'destroy']);
@@ -71,17 +83,25 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('feriados/importar', [FeriadoController::class, 'importar'])->name('feriados.importar');
 
     // Dashboard AJAX
+    Route::get('dashboard/calcular-tarifa', [DashboardController::class, 'calcularTarifa'])->name('dashboard.calcular-tarifa');
     Route::get('dashboard/habitacion/{habitacion}', [DashboardController::class, 'datosHabitacion'])->name('dashboard.habitacion');
     Route::post('dashboard/habitacion/{habitacion}/cambiar-estado', [DashboardController::class, 'cambiarEstado'])->name('dashboard.cambiar-estado');
     Route::post('dashboard/habitacion/{habitacion}/iniciar-ocupacion', [DashboardController::class, 'iniciarOcupacion'])->name('dashboard.iniciar-ocupacion');
     Route::get('dashboard/ocupacion/{ocupacion}', [DashboardController::class, 'datosOcupacion'])->name('dashboard.ocupacion');
     Route::post('dashboard/ocupacion/{ocupacion}/cliente', [DashboardController::class, 'registrarCliente'])->name('dashboard.registrar-cliente');
     Route::post('dashboard/ocupacion/{ocupacion}/consumo', [DashboardController::class, 'agregarConsumo'])->name('dashboard.agregar-consumo');
+    Route::post('dashboard/ocupacion/{ocupacion}/consumos-batch', [DashboardController::class, 'agregarConsumosBatch'])->name('dashboard.agregar-consumos-batch');
+    Route::post('dashboard/ocupacion/{ocupacion}/cortesia', [DashboardController::class, 'agregarCortesia'])->name('dashboard.agregar-cortesia');
+    Route::put('dashboard/consumo/{consumo}', [DashboardController::class, 'actualizarConsumo'])->name('dashboard.actualizar-consumo');
+    Route::delete('dashboard/consumo/{consumo}', [DashboardController::class, 'eliminarConsumo'])->name('dashboard.eliminar-consumo');
     Route::post('dashboard/ocupacion/{ocupacion}/pago', [DashboardController::class, 'registrarPago'])->name('dashboard.registrar-pago');
     Route::post('dashboard/ocupacion/{ocupacion}/finalizar', [DashboardController::class, 'finalizarOcupacion'])->name('dashboard.finalizar-ocupacion');
+    Route::post('dashboard/ocupacion/{ocupacion}/vehiculo', [DashboardController::class, 'actualizarVehiculo'])->name('dashboard.actualizar-vehiculo');
     Route::post('dashboard/ocupacion/{ocupacion}/observacion', [DashboardController::class, 'agregarObservacion'])->name('dashboard.agregar-observacion');
     Route::get('dashboard/productos', [DashboardController::class, 'productos'])->name('dashboard.productos');
     Route::get('dashboard/promociones', [DashboardController::class, 'promociones'])->name('dashboard.promociones');
+    Route::post('dashboard/ocupacion/{ocupacion}/tomar-promocion/{promocion}', [DashboardController::class, 'tomarPromocion'])->name('dashboard.tomar-promocion');
+    Route::post('dashboard/ocupacion/{ocupacion}/productos-promocion', [DashboardController::class, 'agregarProductosPromocion'])->name('dashboard.productos-promocion');
 
     // Profile
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('perfil');

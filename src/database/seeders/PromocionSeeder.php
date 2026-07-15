@@ -18,6 +18,9 @@ class PromocionSeeder extends Seeder
             'fecha_fin' => now()->addYear(),
             'activo' => true,
             'orden' => 1,
+            'desde' => 'Domingo',
+            'hasta' => 'Jueves',
+            'valor' => 0,
             'reglas' => [
                 'dias' => ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves'],
                 'tipo_tiempo' => '8h',

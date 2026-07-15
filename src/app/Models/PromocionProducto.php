@@ -8,7 +8,6 @@ class PromocionProducto extends Model
     protected $table = 'promocion_producto';
 
     protected $fillable = [
-        'nombre',
         'promocion_id',
         'producto_id',
         'cantidad',

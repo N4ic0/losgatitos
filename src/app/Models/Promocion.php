@@ -17,7 +17,11 @@ class Promocion extends Model
         'fecha_inicio',
         'fecha_fin',
         'activo',
-        'orden',
+        'desde',
+        'hasta',
+        'valor',
+        'horas_beneficio',
+        'tarifas',
     ];
 
     protected function casts(): array
@@ -26,7 +30,9 @@ class Promocion extends Model
             'fecha_inicio' => 'date',
             'fecha_fin' => 'date',
             'activo' => 'boolean',
-            'reglas' => 'json',
+            'valor' => 'integer',
+            'horas_beneficio' => 'integer',
+            'tarifas' => 'json',
         ];
     }
 

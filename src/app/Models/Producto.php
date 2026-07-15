@@ -13,17 +13,31 @@ class Producto extends Model
         'nombre',
         'descripcion',
         'precio',
+        'factor',
+        'stock_actual',
+        'stock_minimo',
+        'stock_maximo',
         'imagen',
         'categoria',
         'activo',
+        'cortesia',
     ];
 
     protected function casts(): array
     {
         return [
             'activo' => 'boolean',
+            'cortesia' => 'boolean',
             'precio' => 'integer',
+            'stock_actual' => 'decimal:3',
+            'stock_minimo' => 'decimal:3',
+            'stock_maximo' => 'decimal:3',
         ];
+    }
+
+    public function ingresos()
+    {
+        return $this->hasMany(Ingreso::class);
     }
 
     public function scopeActivos($query)

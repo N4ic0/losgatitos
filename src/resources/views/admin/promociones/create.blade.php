@@ -25,8 +25,34 @@
                 <input type="date" name="fecha_fin" value="{{ old('fecha_fin') }}" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
             </div>
             <div>
-                <label class="block text-gray-300 text-sm font-medium mb-2">Orden</label>
-                <input type="number" name="orden" value="{{ old('orden', 0) }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
+                <label class="block text-gray-300 text-sm font-medium mb-2">Hora Inicio</label>
+                <input type="time" name="desde" value="{{ old('desde') }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
+            </div>
+            <div>
+                <label class="block text-gray-300 text-sm font-medium mb-2">Hora Término</label>
+                <input type="time" name="hasta" value="{{ old('hasta') }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
+            </div>
+            <div>
+                <label class="block text-gray-300 text-sm font-medium mb-2">Valor</label>
+                <input type="number" name="valor" value="{{ old('valor', 0) }}" min="0" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
+            </div>
+            <div>
+                <label class="block text-gray-300 text-sm font-medium mb-2">Horas Beneficio</label>
+                <input type="number" name="horas_beneficio" value="{{ old('horas_beneficio', 0) }}" min="0" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
+            </div>
+            <div>
+                <label class="block text-gray-300 text-sm font-medium mb-2">Aplica a Tarifas</label>
+                <div class="grid grid-cols-2 gap-2">
+                    @foreach(['D-J','Viernes','Sábado','Víspera'] as $tarifa)
+                    @foreach(['3h','8h'] as $tipo)
+                    @php $val = $tarifa.'_'.$tipo; @endphp
+                    <label class="flex items-center space-x-3 bg-white/5 rounded-xl px-4 py-3 cursor-pointer hover:bg-white/10 transition-colors">
+                        <input type="checkbox" name="tarifas[]" value="{{ $val }}" {{ in_array($val, old('tarifas', [])) ? 'checked' : '' }} class="w-4 h-4 rounded bg-white/5 border-white/10 text-[#D4AF37] focus:ring-[#D4AF37]">
+                        <span class="text-gray-300 text-sm">{{ $tarifa }} ({{ $tipo }})</span>
+                    </label>
+                    @endforeach
+                    @endforeach
+                </div>
             </div>
             <div>
                 <label class="block text-gray-300 text-sm font-medium mb-2">Imagen</label>

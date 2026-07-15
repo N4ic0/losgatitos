@@ -7,11 +7,7 @@
     <h1 class="text-2xl font-bold text-white mb-6">Editar Paquete</h1>
     <form action="{{ route('admin.promocion-productos.update', $promocionProducto) }}" method="POST" class="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/5 space-y-6">
         @csrf @method('PUT')
-        <div>
-            <label class="block text-gray-300 text-sm font-medium mb-2">Nombre del Paquete <span class="text-gray-500">(ej: Desayuno, Cumpleaños)</span></label>
-            <input type="text" name="nombre" value="{{ old('nombre', $promocionProducto->nombre) }}" placeholder="Ej: Desayuno Especial" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
                 <label class="block text-gray-300 text-sm font-medium mb-2">Promoción</label>
                 <select name="promocion_id" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none">

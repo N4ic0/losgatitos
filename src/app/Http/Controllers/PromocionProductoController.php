@@ -15,7 +15,7 @@ class PromocionProductoController extends Controller
 
     public function index()
     {
-        $items = PromocionProducto::with('promocion', 'producto')->orderBy('nombre')->orderBy('promocion_id')->get();
+        $items = PromocionProducto::with('promocion', 'producto')->orderBy('promocion_id')->get();
         return view('admin.promocion-productos.index', compact('items'));
     }
 
@@ -29,7 +29,6 @@ class PromocionProductoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nombre' => 'nullable|string|max:255',
             'promocion_id' => 'required|exists:promociones,id',
             'producto_id' => 'required|exists:productos,id',
             'cantidad' => 'required|integer|min:1',
@@ -53,7 +52,6 @@ class PromocionProductoController extends Controller
         $antiguo = $promocionProducto->toArray();
 
         $data = $request->validate([
-            'nombre' => 'nullable|string|max:255',
             'promocion_id' => 'required|exists:promociones,id',
             'producto_id' => 'required|exists:productos,id',
             'cantidad' => 'required|integer|min:1',

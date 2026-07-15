@@ -51,6 +51,8 @@
                     <th class="text-left px-6 py-4">Fin</th>
                     <th class="text-left px-6 py-4">Tarifa</th>
                     <th class="text-left px-6 py-4">Clientes</th>
+                    <th class="text-left px-6 py-4">Vehículo</th>
+                    <th class="text-left px-6 py-4">Patente</th>
                     <th class="text-left px-6 py-4">Total</th>
                     <th class="text-left px-6 py-4">Estado</th>
                     <th class="text-right px-6 py-4">Acciones</th>
@@ -64,6 +66,12 @@
                     <td class="px-6 py-4 text-gray-300">{{ $ocupacion->fecha_fin?->format('d/m/Y H:i') ?? '-' }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ $ocupacion->tarifa?->tipo_tiempo ?? '-' }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ $ocupacion->clientes->count() }}</td>
+                    <td class="px-6 py-4">
+                        <span class="text-xs px-3 py-1 rounded-full font-medium {{ $ocupacion->vehiculo ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-500/20 text-gray-400' }}">
+                            {{ $ocupacion->vehiculo ? 'Vehículo' : 'Peatón' }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-300 font-mono uppercase">{{ $ocupacion->patente ?? '-' }}</td>
                     <td class="px-6 py-4 text-gray-300">${{ number_format($ocupacion->total, 0, '', '.') }}</td>
                     <td class="px-6 py-4">
                         <span class="text-xs px-3 py-1 rounded-full font-medium {{ $ocupacion->fecha_fin ? 'bg-gray-500/20 text-gray-400' : 'bg-green-500/20 text-green-400' }}">

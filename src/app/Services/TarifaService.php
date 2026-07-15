@@ -60,14 +60,16 @@ class TarifaService
             'total' => $total,
             'promocion' => $promocionActiva,
             'dia_semana' => $diaSemana,
+            'tarifa_id' => $tarifa?->id,
         ];
     }
 
     private function getDiaSemana(Carbon $fecha): string
     {
-        $esFeriado = Feriado::where('fecha', $fecha->format('Y-m-d'))->exists();
+        $manana = $fecha->copy()->addDay()->startOfDay();
+        $esVispera = Feriado::where('fecha', $manana->format('Y-m-d'))->exists();
         
-        if ($esFeriado) {
+        if ($esVispera) {
             return 'vispera';
         }
         

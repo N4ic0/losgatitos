@@ -6,6 +6,7 @@
 <div class="space-y-8" x-data="dashboardManager()">
     {{-- Stats --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        
         <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5">
             <p class="text-gray-400 text-sm uppercase tracking-wider">Disponibles</p>
             <p class="text-3xl font-bold text-green-400 mt-2">{{ $disponibles }}</p>
@@ -14,10 +15,10 @@
             <p class="text-gray-400 text-sm uppercase tracking-wider">Ocupadas</p>
             <p class="text-3xl font-bold text-red-400 mt-2">{{ $ocupadas }}</p>
         </div>
-        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5">
+        <a href="{{ route('admin.reservas.create') }}" class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 hover:border-[#D4AF37]/30 transition-all duration-200 block">
             <p class="text-gray-400 text-sm uppercase tracking-wider">Reservadas</p>
             <p class="text-3xl font-bold text-yellow-400 mt-2">{{ $reservadas }}</p>
-        </div>
+        </a>
         <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5">
             <p class="text-gray-400 text-sm uppercase tracking-wider">Limpieza</p>
             <p class="text-3xl font-bold text-blue-400 mt-2">{{ $limpieza }}</p>
@@ -26,7 +27,7 @@
 
     {{-- Room Grid --}}
     <div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem;">
             @foreach($habitaciones as $habitacion)
             <div @click="abrirModal({{ $habitacion->id }})"
                  class="cursor-pointer bg-white/5 backdrop-blur-xl rounded-2xl p-5 border border-white/5 hover:border-[#D4AF37]/30 hover:bg-white/[0.07] transition-all duration-300">
@@ -43,85 +44,22 @@
                 </div>
                 <p class="text-gray-500 text-xs mb-2">{{ $habitacion->categoria }}</p>
 
-                {{-- Timer for any state --}}
-                @if($habitacion->ultimoEstado)
+                {{-- Timer for any state except Disponible --}}
+                @if($habitacion->ultimoEstado && $habitacion->estado !== 'Disponible')
                 <div class="timer-{{ $habitacion->id }} text-[#D4AF37] text-xs font-mono"
-                     data-inicio="{{ $habitacion->ultimoEstado->fecha_inicio->format('Y-m-d H:i:s') }}">
+                     data-inicio="{{ $habitacion->ultimoEstado->fecha_inicio->timestamp }}">
                     <span class="inline-block tiempo-valor">00:00:00</span>
-                    <span class="text-gray-500 text-[10px] ml-1">transcurrido</span>
+                    
                 </div>
                 @endif
 
-                @if($habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva)
-                    @php
-                        $oc = $habitacion->ocupacionActiva;
-                        $tieneConsumos = $oc->consumos->where('origen', 'Consumo')->count() > 0;
-                        $saldoPendiente = ($oc->precio_base + $oc->total_consumos) - $oc->pagos->sum('monto');
-                    @endphp
-                    <div class="mt-2 space-y-1">
-                        <p class="text-gray-400 text-[10px]">
-                            ${{ number_format($oc->precio_base, 0, '', '.') }}
-                            @if($oc->promocion)
-                            <span class="text-[#D4AF37] ml-1">({{ $oc->promocion->titulo }})</span>
-                            @endif
-                        </p>
-                        @if($tieneConsumos)
-                        <div class="flex items-center text-[10px] text-orange-400">
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
-                            Consumos: ${{ number_format($oc->total_consumos, 0, '', '.') }}
-                        </div>
-                        @endif
-                        @if($saldoPendiente > 0)
-                        <div class="flex items-center text-[10px] text-red-400">
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
-                            Pago pendiente: ${{ number_format($saldoPendiente, 0, '', '.') }}
-                        </div>
-                        @endif
-                    </div>
+                @if($habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa)
+                    <p class="text-gray-400 text-[10px] mt-1">{{ $habitacion->ocupacionActiva->tarifa->tipo_tiempo }}</p>
                 @elseif($habitacion->estado === 'Reservada' && $habitacion->reservaActiva)
                     <p class="text-[#D4AF37] text-xs mt-2">{{ \Carbon\Carbon::parse($habitacion->reservaActiva->hora)->format('H:i') }} hrs</p>
                 @endif
             </div>
             @endforeach
-        </div>
-    </div>
-
-    {{-- Quick actions + Today's reservations --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-            <h2 class="text-xl font-bold text-white mb-4">Acciones Rápidas</h2>
-            <div class="grid grid-cols-2 gap-3">
-                <a href="{{ route('admin.reservas.create') }}" class="bg-white/5 hover:bg-white/10 rounded-2xl p-4 border border-white/5 text-center transition-all">
-                    <svg class="w-6 h-6 text-[#D4AF37] mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                    <span class="text-white text-sm">Crear Reserva</span>
-                </a>
-                <a href="{{ route('admin.habitaciones.index') }}" class="bg-white/5 hover:bg-white/10 rounded-2xl p-4 border border-white/5 text-center transition-all">
-                    <svg class="w-6 h-6 text-[#D4AF37] mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    <span class="text-white text-sm">Gestionar Habitaciones</span>
-                </a>
-            </div>
-        </div>
-
-        <div>
-            <h2 class="text-xl font-bold text-white mb-4">Reservas de Hoy</h2>
-            <div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/5 divide-y divide-white/5">
-                @forelse($reservasHoy as $reserva)
-                <div class="p-4 flex items-center justify-between">
-                    <div>
-                        <p class="text-white font-medium">{{ $reserva->nombre ?? 'Sin nombre' }}</p>
-                        <p class="text-gray-400 text-sm">{{ $reserva->rut }} - Hab. {{ $reserva->habitacion?->numero ?? 'Sin asignar' }}</p>
-                    </div>
-                    <span class="text-xs px-3 py-1 rounded-full font-medium
-                        @if($reserva->estado === 'Reservada') bg-yellow-500/20 text-yellow-400
-                        @elseif($reserva->estado === 'Ingresada') bg-green-500/20 text-green-400
-                        @else bg-gray-500/20 text-gray-400 @endif">
-                        {{ $reserva->estado }}
-                    </span>
-                </div>
-                @empty
-                <p class="p-6 text-gray-500 text-sm text-center">No hay reservas para hoy.</p>
-                @endforelse
-            </div>
         </div>
     </div>
 
@@ -142,6 +80,19 @@ function dashboardManager() {
         activeTab: 'estado',
         productos: [],
         promociones: [],
+        tipoTiempo: '8h',
+        tarifaInfo: null,
+        personasAdicionales: 0,
+        ocupacionVehiculo: 1,
+        ocupacionPatente: '',
+        fechaNacimiento: '',
+        clienteNombres: '',
+        clienteApellidos: '',
+        clienteDocumento: '',
+        rutValido: null,
+        consumoSelectorOpen: false,
+        categoriaFiltro: null,
+        promocionesAplicables: [],
 
         async init() {
             this.iniciarTimers();
@@ -153,9 +104,19 @@ function dashboardManager() {
             } catch(e) { console.error(e); }
         },
 
+        async calcularTarifaPreview() {
+            if (!this.habitacion) return;
+            try {
+                const res = await fetch('/admin/dashboard/calcular-tarifa?categoria=' + this.habitacion.categoria + '&tipo_tiempo=' + this.tipoTiempo);
+                if (!res.ok) { this.tarifaInfo = null; return; }
+                this.tarifaInfo = await res.json();
+            } catch(e) { this.tarifaInfo = null; }
+        },
+
         iniciarTimers() {
             document.querySelectorAll('[data-inicio]').forEach(el => {
-                const inicio = new Date(el.dataset.inicio).getTime();
+                const inicio = parseInt(el.dataset.inicio) * 1000;
+                if (isNaN(inicio)) return;
                 const span = el.querySelector('.tiempo-valor');
                 setInterval(() => {
                     const diff = Math.max(0, Date.now() - inicio);
@@ -172,6 +133,9 @@ function dashboardManager() {
             this.loading = true;
             this.modalOpen = true;
             this.activeTab = 'estado';
+            this.tipoTiempo = '8h';
+            this.tarifaInfo = null;
+            this.personasAdicionales = 0;
             try {
                 const res = await fetch('/admin/dashboard/habitacion/' + id);
                 this.habitacion = await res.json();
@@ -180,7 +144,11 @@ function dashboardManager() {
                     const res2 = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id);
                     const data = await res2.json();
                     this.ocupacion = data.ocupacion;
+                    this.promocionesAplicables = data.promociones_aplicables || [];
+                    this.ocupacionVehiculo = this.ocupacion.vehiculo ? 1 : 0;
+                    this.ocupacionPatente = this.ocupacion.patente || '';
                 }
+                await this.calcularTarifaPreview();
                 this.$nextTick(() => this.iniciarTimers());
             } catch(e) { console.error(e); }
             this.loading = false;
@@ -190,6 +158,8 @@ function dashboardManager() {
             this.modalOpen = false;
             this.habitacion = null;
             this.ocupacion = null;
+            this.tarifaInfo = null;
+            location.reload();
         },
 
         async cambiarEstado(estado) {
@@ -212,19 +182,18 @@ function dashboardManager() {
         },
 
         async iniciarOcupacion() {
-            const promocionId = this.$refs.promocionSelect?.value || null;
             try {
                 const res = await fetch('/admin/dashboard/habitacion/' + this.habitacion.id + '/iniciar-ocupacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ promocion_id: promocionId }),
+                    body: JSON.stringify({ tipo_tiempo: this.tipoTiempo, personas_adicionales: this.personasAdicionales }),
                 });
                 const data = await res.json();
                 if (data.success) {
                     this.habitacion.estado = 'Ocupada';
                     this.ocupacion = data.ocupacion;
-                    this.activeTab = 'clientes';
-                    Swal.fire({ icon: 'success', title: 'Ocupación iniciada', timer: 1500, showConfirmButton: false });
+                    this.activeTab = 'ocupacion';
+                    Swal.fire({ icon: 'success', title: 'Ocupación iniciada (' + this.tipoTiempo + ')', timer: 1500, showConfirmButton: false });
                 }
             } catch(e) { console.error(e); }
         },
@@ -246,7 +215,86 @@ function dashboardManager() {
             } catch(e) { console.error(e); }
         },
 
+        async tomarPromocion(promocion) {
+            try {
+                const res = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/tomar-promocion/' + promocion.id, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.ocupacion = data.ocupacion;
+                    this.promocionesAplicables = data.promociones_aplicables || [];
+                    Swal.fire({ icon: 'success', title: 'Promoción aplicada: ' + promocion.titulo, timer: 2000, showConfirmButton: false });
+                }
+            } catch(e) { console.error(e); }
+        },
+
+        async agregarPromoProductos(promocion) {
+            const promocionId = promocion?.id || this.ocupacion?.promocion?.id;
+            if (!promocionId) return;
+            try {
+                const res = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/productos-promocion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({ promocion_id: promocionId }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.ocupacion = data.ocupacion;
+                    this.promocionesAplicables = data.promociones_aplicables || [];
+                    Swal.fire({ icon: 'success', title: 'Productos de promoción agregados', timer: 2000, showConfirmButton: false });
+                }
+            } catch(e) { console.error(e); }
+        },
+
+        validarEdad() {
+            if (!this.fechaNacimiento) return;
+            const hoy = new Date();
+            const nac = new Date(this.fechaNacimiento);
+            let edad = hoy.getFullYear() - nac.getFullYear();
+            const m = hoy.getMonth() - nac.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+            if (edad < 18) {
+                const nombre = (this.clienteNombres + ' ' + this.clienteApellidos).trim() || 'Persona';
+                Swal.fire({ icon: 'warning', title: nombre + ' es menor de edad (' + edad + ' años)', confirmButtonColor: '#D4AF37' });
+            }
+        },
+
+        validarRutInput() {
+            const rut = this.clienteDocumento;
+            if (!rut || rut.length < 2) { this.rutValido = null; return; }
+            this.rutValido = this.validarRutCompleto(rut);
+        },
+
+        validarRutCompleto(rut) {
+            if (!rut) return false;
+            const limpio = rut.replace(/[^0-9kK-]/g, '').replace(/-/g, '');
+            if (limpio.length < 2) return false;
+            const cuerpo = limpio.slice(0, -1);
+            const dv = limpio.slice(-1).toUpperCase();
+            if (!/^\d+$/.test(cuerpo)) return false;
+            let suma = 0;
+            let multiplo = 2;
+            for (let i = cuerpo.length - 1; i >= 0; i--) {
+                suma += parseInt(cuerpo[i]) * multiplo;
+                multiplo = multiplo === 7 ? 2 : multiplo + 1;
+            }
+            const resto = suma % 11;
+            const dvCalculado = 11 - resto;
+            let dvEsperado;
+            if (dvCalculado === 11) dvEsperado = '0';
+            else if (dvCalculado === 10) dvEsperado = 'K';
+            else dvEsperado = dvCalculado.toString();
+            return dv === dvEsperado;
+        },
+
         async registrarCliente() {
+            const tipoDoc = this.$refs.clienteForm.querySelector('[name="tipo_documento"]').value;
+            if (tipoDoc === 'RUT' && this.rutValido !== true) {
+                Swal.fire({ icon: 'error', title: 'RUT inválido', text: 'Verifique el RUT ingresado', confirmButtonColor: '#D4AF37' });
+                return;
+            }
             const form = this.$refs.clienteForm;
             const data = new FormData(form);
             try {
@@ -257,6 +305,8 @@ function dashboardManager() {
                 });
                 const json = await res.json();
                 if (json.success) {
+                    this.clienteDocumento = '';
+                    this.rutValido = null;
                     form.reset();
                     await this.recargarOcupacion();
                     Swal.fire({ icon: 'success', title: 'Cliente registrado', timer: 1500, showConfirmButton: false });
@@ -264,17 +314,311 @@ function dashboardManager() {
             } catch(e) { console.error(e); }
         },
 
-        async agregarConsumo(productoId) {
+        async abrirSelectorConsumos() {
+            if (this.productos.length === 0) {
+                try {
+                    const res = await fetch('/admin/dashboard/productos');
+                    this.productos = await res.json();
+                } catch(e) { return; }
+            }
+            const categorias = [...new Set(this.productos.map(p => p.categoria))];
+            let catActual = null;
+            const selected = {};
+            const self = this;
+
+            const mapProd = (id) => self.productos.find(p => p.id === id);
+
+            const render = (cat) => {
+                const filtrados = cat ? self.productos.filter(p => p.categoria === cat) : self.productos;
+                const totalSel = Object.entries(selected).reduce((s, [id, qty]) => s + (mapProd(parseInt(id))?.precio || 0) * qty, 0);
+                const hasSel = Object.keys(selected).length > 0;
+                return `
+                    <div class="cat-filter-bar" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:5px;">
+                        <button class="cat-btn ${!cat ? 'active' : ''}" data-cat="" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:500;border:none;cursor:pointer;transition:all 0.2s;${!cat ? 'background:#D4AF37;color:#000;' : 'background:rgba(255,255,255,0.1);color:#d1d5db;'}">Todas</button>
+                        ${categorias.map(c => `<button class="cat-btn ${cat === c ? 'active' : ''}" data-cat="${c}" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:500;border:none;cursor:pointer;transition:all 0.2s;${cat === c ? 'background:#D4AF37;color:#000;' : 'background:rgba(255,255,255,0.1);color:#d1d5db;'}">${c}</button>`).join('')}
+                    </div>
+                    <div class="prod-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:${hasSel ? '10px' : '0'};">
+                        ${filtrados.map(p => {
+                            const qty = selected[p.id] || 0;
+                            const sel = qty > 0;
+                            return `<div class="prod-item" data-id="${p.id}" style="cursor:pointer;background:${sel ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.05)'};border-radius:10px;border:1px solid ${sel ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.05)'};overflow:hidden;transition:all 0.2s;position:relative;">
+                                ${p.imagen
+                                    ? `<img src="/storage/${p.imagen}" style="width:100%;height:70px;object-fit:cover;display:block;">`
+                                    : `<div style="height:70px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;"><svg width="24" height="24" fill="none" stroke="#6b7280" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg></div>`
+                                }
+                                ${sel ? `<span style="position:absolute;top:4px;right:4px;background:#D4AF37;color:#000;font-size:10px;font-weight:bold;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${qty}</span>` : ''}
+                                <div style="padding:6px;">
+                                    <p style="color:#fff;font-size:11px;font-weight:500;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre}</p>
+                                    <p style="color:#D4AF37;font-size:11px;font-weight:bold;margin:2px 0 0 0;">${self.formatCurrency(p.precio)}</p>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    ${hasSel ? `
+                    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;">
+                        <p style="color:rgba(255,255,255,0.6);font-size:11px;font-weight:500;margin:0 0 8px 0;">Productos seleccionados</p>
+                        ${Object.entries(selected).map(([id, qty]) => {
+                            const p = mapProd(parseInt(id));
+                            if (!p) return '';
+                            return `<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);border-radius:8px;padding:6px 10px;margin-bottom:4px;">
+                                <span style="color:#fff;font-size:12px;flex:1;">${p.nombre}</span>
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <button class="qty-btn" data-id="${id}" data-op="minus" style="width:24px;height:24px;border-radius:6px;border:none;cursor:pointer;background:rgba(255,255,255,0.1);color:#fff;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:center;">−</button>
+                                    <span style="color:#D4AF37;font-size:13px;font-weight:bold;min-width:20px;text-align:center;">${qty}</span>
+                                    <button class="qty-btn" data-id="${id}" data-op="plus" style="width:24px;height:24px;border-radius:6px;border:none;cursor:pointer;background:rgba(255,255,255,0.1);color:#fff;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:center;">+</button>
+                                    <span style="color:#D4AF37;font-size:12px;font-weight:bold;min-width:60px;text-align:right;">${self.formatCurrency((p.precio || 0) * qty)}</span>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);">
+                            <span style="color:#fff;font-size:14px;font-weight:bold;">Total Consumos</span>
+                            <span style="color:#D4AF37;font-size:16px;font-weight:bold;">${self.formatCurrency(totalSel)}</span>
+                        </div>
+                        <button class="confirm-consumos-btn" style="width:100%;margin-top:10px;padding:10px;border-radius:10px;border:none;cursor:pointer;background:#D4AF37;color:#000;font-size:13px;font-weight:bold;">Confirmar Consumos</button>
+                    </div>` : ''}
+                `;
+            };
+
+            const refresh = () => {
+                const htmlContainer = Swal.getHtmlContainer();
+                if (htmlContainer) htmlContainer.innerHTML = render(catActual);
+            };
+
+            Swal.fire({
+                title: 'Agregar Consumo (' + self.productos.length + ' prod.)',
+                html: render(catActual),
+                showConfirmButton: false,
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar',
+                cancelButtonColor: '#6b7280',
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    popup.addEventListener('click', async (e) => {
+                        const btn = e.target.closest('.cat-btn');
+                        if (btn) {
+                            catActual = btn.dataset.cat || null;
+                            refresh();
+                            return;
+                        }
+                        const item = e.target.closest('.prod-item');
+                        if (item) {
+                            const id = parseInt(item.dataset.id);
+                            selected[id] = (selected[id] || 0) + 1;
+                            refresh();
+                            return;
+                        }
+                        const qtyBtn = e.target.closest('.qty-btn');
+                        if (qtyBtn) {
+                            const id = qtyBtn.dataset.id;
+                            if (qtyBtn.dataset.op === 'plus') {
+                                selected[id] = (selected[id] || 0) + 1;
+                            } else {
+                                selected[id]--;
+                                if (selected[id] <= 0) delete selected[id];
+                            }
+                            refresh();
+                            return;
+                        }
+                        const confirmBtn = e.target.closest('.confirm-consumos-btn');
+                        if (confirmBtn) {
+                            const entries = Object.entries(selected);
+                            Swal.close();
+                            await self.agregarConsumosFinalizar(entries, false);
+                        }
+                    });
+                },
+                customClass: {
+                    popup: 'rounded-2xl border border-white/10 shadow-2xl',
+                    title: 'text-white font-bold text-lg',
+                    htmlContainer: 'w-full',
+                    cancelButton: 'font-semibold px-6 py-3 rounded-xl text-sm',
+                },
+                background: '#1a1a2e',
+                color: '#e5e7eb',
+            });
+        },
+
+        async abrirSelectorCortesias() {
+            if (this.productos.length === 0) {
+                try {
+                    const res = await fetch('/admin/dashboard/productos');
+                    this.productos = await res.json();
+                } catch(e) { return; }
+            }
+            const cortesias = this.productos.filter(p => p.cortesia);
+            if (cortesias.length === 0) {
+                Swal.fire({ icon: 'info', title: 'No hay productos de cortesía disponibles.', confirmButtonColor: '#D4AF37' });
+                return;
+            }
+            const categorias = [...new Set(cortesias.map(p => p.categoria))];
+            let catActual = null;
+            const selected = {};
+            const self = this;
+
+            const mapProd = (id) => cortesias.find(p => p.id === id);
+
+            const render = (cat) => {
+                const filtrados = cat ? cortesias.filter(p => p.categoria === cat) : cortesias;
+                const hasSel = Object.keys(selected).length > 0;
+                return `
+                    <div class="cat-filter-bar" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:5px;">
+                        <button class="cat-btn ${!cat ? 'active' : ''}" data-cat="" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:500;border:none;cursor:pointer;transition:all 0.2s;${!cat ? 'background:#D4AF37;color:#000;' : 'background:rgba(255,255,255,0.1);color:#d1d5db;'}">Todas</button>
+                        ${categorias.map(c => `<button class="cat-btn ${cat === c ? 'active' : ''}" data-cat="${c}" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:500;border:none;cursor:pointer;transition:all 0.2s;${cat === c ? 'background:#D4AF37;color:#000;' : 'background:rgba(255,255,255,0.1);color:#d1d5db;'}">${c}</button>`).join('')}
+                    </div>
+                    <div class="prod-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:${hasSel ? '10px' : '0'};">
+                        ${filtrados.map(p => {
+                            const qty = selected[p.id] || 0;
+                            const sel = qty > 0;
+                            return `<div class="prod-item" data-id="${p.id}" style="cursor:pointer;background:${sel ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.05)'};border-radius:10px;border:1px solid ${sel ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.05)'};overflow:hidden;transition:all 0.2s;position:relative;">
+                                ${p.imagen
+                                    ? `<img src="/storage/${p.imagen}" style="width:100%;height:70px;object-fit:cover;display:block;">`
+                                    : `<div style="height:70px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;"><svg width="24" height="24" fill="none" stroke="#6b7280" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg></div>`
+                                }
+                                ${sel ? `<span style="position:absolute;top:4px;right:4px;background:#D4AF37;color:#000;font-size:10px;font-weight:bold;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${qty}</span>` : ''}
+                                <div style="padding:6px;">
+                                    <p style="color:#fff;font-size:11px;font-weight:500;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre}</p>
+                                    <p style="color:#10b981;font-size:11px;font-weight:bold;margin:2px 0 0 0;">Gratis</p>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    ${hasSel ? `
+                    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;">
+                        <p style="color:rgba(255,255,255,0.6);font-size:11px;font-weight:500;margin:0 0 8px 0;">Productos seleccionados</p>
+                        ${Object.entries(selected).map(([id, qty]) => {
+                            const p = mapProd(parseInt(id));
+                            if (!p) return '';
+                            return `<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);border-radius:8px;padding:6px 10px;margin-bottom:4px;">
+                                <span style="color:#fff;font-size:12px;flex:1;">${p.nombre}</span>
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <button class="qty-btn" data-id="${id}" data-op="minus" style="width:24px;height:24px;border-radius:6px;border:none;cursor:pointer;background:rgba(255,255,255,0.1);color:#fff;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:center;">−</button>
+                                    <span style="color:#D4AF37;font-size:13px;font-weight:bold;min-width:20px;text-align:center;">${qty}</span>
+                                    <button class="qty-btn" data-id="${id}" data-op="plus" style="width:24px;height:24px;border-radius:6px;border:none;cursor:pointer;background:rgba(255,255,255,0.1);color:#fff;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:center;">+</button>
+                                    <span style="color:#10b981;font-size:12px;font-weight:bold;min-width:60px;text-align:right;">Gratis</span>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);">
+                            <span style="color:#fff;font-size:14px;font-weight:bold;">Total Cortesía</span>
+                            <span style="color:#10b981;font-size:16px;font-weight:bold;">$0</span>
+                        </div>
+                        <button class="confirm-cortesias-btn" style="width:100%;margin-top:10px;padding:10px;border-radius:10px;border:none;cursor:pointer;background:#10b981;color:#fff;font-size:13px;font-weight:bold;">Confirmar Cortesía</button>
+                    </div>` : ''}
+                `;
+            };
+
+            const refresh = () => {
+                const htmlContainer = Swal.getHtmlContainer();
+                if (htmlContainer) htmlContainer.innerHTML = render(catActual);
+            };
+
+            Swal.fire({
+                title: 'Agregar Cortesía',
+                html: render(catActual),
+                showConfirmButton: false,
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar',
+                cancelButtonColor: '#6b7280',
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    popup.addEventListener('click', async (e) => {
+                        const btn = e.target.closest('.cat-btn');
+                        if (btn) {
+                            catActual = btn.dataset.cat || null;
+                            refresh();
+                            return;
+                        }
+                        const item = e.target.closest('.prod-item');
+                        if (item) {
+                            const id = parseInt(item.dataset.id);
+                            selected[id] = (selected[id] || 0) + 1;
+                            refresh();
+                            return;
+                        }
+                        const qtyBtn = e.target.closest('.qty-btn');
+                        if (qtyBtn) {
+                            const id = qtyBtn.dataset.id;
+                            if (qtyBtn.dataset.op === 'plus') {
+                                selected[id] = (selected[id] || 0) + 1;
+                            } else {
+                                selected[id]--;
+                                if (selected[id] <= 0) delete selected[id];
+                            }
+                            refresh();
+                            return;
+                        }
+                        const confirmBtn = e.target.closest('.confirm-cortesias-btn');
+                        if (confirmBtn) {
+                            const entries = Object.entries(selected);
+                            Swal.close();
+                            await self.agregarConsumosFinalizar(entries, true);
+                        }
+                    });
+                },
+                customClass: {
+                    popup: 'rounded-2xl border border-white/10 shadow-2xl',
+                    title: 'text-white font-bold text-lg',
+                    htmlContainer: 'w-full',
+                    cancelButton: 'font-semibold px-6 py-3 rounded-xl text-sm',
+                },
+                background: '#1a1a2e',
+                color: '#e5e7eb',
+            });
+        },
+
+        async agregarConsumosFinalizar(entries, cortesia = false) {
+            const url = cortesia
+                ? '/admin/dashboard/ocupacion/' + this.ocupacion.id + '/cortesia'
+                : '/admin/dashboard/ocupacion/' + this.ocupacion.id + '/consumo';
+            const headers = { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' };
             try {
-                const res = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/consumo', {
-                    method: 'POST',
+                await Promise.all(entries.map(([id, qty]) =>
+                    fetch(url, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ producto_id: parseInt(id), cantidad: qty }),
+                    }).then(r => r.json())
+                ));
+            } catch(e) { console.error(e); }
+            await this.recargarOcupacion();
+        },
+
+        async actualizarCantidadConsumo(consumoId, nuevaCantidad) {
+            if (nuevaCantidad < 1) {
+                await this.eliminarConsumoItem(consumoId);
+                return;
+            }
+            try {
+                const res = await fetch('/admin/dashboard/consumo/' + consumoId, {
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ producto_id: productoId, cantidad: 1 }),
+                    body: JSON.stringify({ cantidad: nuevaCantidad }),
                 });
                 const json = await res.json();
                 if (json.success) {
                     await this.recargarOcupacion();
-                    Swal.fire({ icon: 'success', title: 'Consumo agregado', timer: 1000, showConfirmButton: false });
+                }
+            } catch(e) { console.error(e); }
+        },
+
+        async eliminarConsumoItem(consumoId) {
+            try {
+                const confirm = await Swal.fire({
+                    title: '¿Eliminar consumo?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#D4AF37',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                });
+                if (!confirm.isConfirmed) return;
+                const res = await fetch('/admin/dashboard/consumo/' + consumoId, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                });
+                const json = await res.json();
+                if (json.success) {
+                    await this.recargarOcupacion();
                 }
             } catch(e) { console.error(e); }
         },
@@ -293,13 +637,7 @@ function dashboardManager() {
                 if (json.success) {
                     this.$refs.pagoMonto.value = '';
                     await this.recargarOcupacion();
-                    if (json.saldo_restante <= 0) {
-                        this.habitacion.estado = 'Limpieza';
-                        this.ocupacion = null;
-                        Swal.fire({ icon: 'success', title: 'Pago completado. Habitación enviada a limpieza.', timer: 2000, showConfirmButton: false });
-                    } else {
-                        Swal.fire({ icon: 'success', title: 'Pago registrado', timer: 1500, showConfirmButton: false });
-                    }
+                    Swal.fire({ icon: 'success', title: 'Pago registrado', timer: 1500, showConfirmButton: false });
                 }
             } catch(e) { console.error(e); }
         },
@@ -326,6 +664,23 @@ function dashboardManager() {
             const res = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id);
             const data = await res.json();
             this.ocupacion = data.ocupacion;
+            this.ocupacionVehiculo = this.ocupacion.vehiculo ? 1 : 0;
+            this.ocupacionPatente = this.ocupacion.patente || '';
+            this.promocionesAplicables = data.promociones_aplicables || [];
+        },
+
+        async actualizarVehiculo() {
+            if (!this.ocupacion) return;
+            try {
+                await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/vehiculo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({
+                        vehiculo: this.ocupacionVehiculo == 1,
+                        patente: this.ocupacionPatente || null,
+                    }),
+                });
+            } catch(e) { console.error(e); }
         },
 
         estadoColor(estado) {

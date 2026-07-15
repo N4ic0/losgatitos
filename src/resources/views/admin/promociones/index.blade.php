@@ -14,9 +14,11 @@
             <thead>
                 <tr class="border-b border-white/5 text-gray-400 uppercase text-xs tracking-wider">
                     <th class="text-left px-6 py-4">Título</th>
+                    <th class="text-left px-6 py-4">Horario</th>
+                    <th class="text-left px-6 py-4">Valor / Hrs Beneficio</th>
+                    <th class="text-left px-6 py-4">Tarifas</th>
                     <th class="text-left px-6 py-4">Inicio</th>
                     <th class="text-left px-6 py-4">Fin</th>
-                    <th class="text-left px-6 py-4">Orden</th>
                     <th class="text-left px-6 py-4">Estado</th>
                     <th class="text-right px-6 py-4">Acciones</th>
                 </tr>
@@ -25,9 +27,16 @@
                 @foreach($promociones as $promocion)
                 <tr class="hover:bg-white/5 transition-colors">
                     <td class="px-6 py-4 text-white font-medium">{{ $promocion->titulo }}</td>
+                    <td class="px-6 py-4 text-gray-300">{{ $promocion->desde ? $promocion->desde.' - '.$promocion->hasta : '-' }}</td>
+                    <td class="px-6 py-4 text-gray-300">
+                        {{ $promocion->valor ? '$'.number_format($promocion->valor, 0, '', '.') : '-' }}
+                        @if($promocion->horas_beneficio)
+                            <span class="text-xs text-gray-400 ml-1">/ {{ $promocion->horas_beneficio }}h beneficio</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 text-gray-300">{{ $promocion->tarifas ? implode(', ', array_map(fn($t) => str_replace('_', ' ', $t), $promocion->tarifas)) : '-' }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ $promocion->fecha_inicio->format('d/m/Y') }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ $promocion->fecha_fin->format('d/m/Y') }}</td>
-                    <td class="px-6 py-4 text-gray-300">{{ $promocion->orden }}</td>
                     <td class="px-6 py-4">
                         <span class="text-xs px-3 py-1 rounded-full font-medium {{ $promocion->activo ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400' }}">
                             {{ $promocion->activo ? 'Activa' : 'Inactiva' }}

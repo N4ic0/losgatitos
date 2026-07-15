@@ -13,7 +13,6 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-white/5 text-gray-400 uppercase text-xs tracking-wider">
-                    <th class="text-left px-6 py-4">Nombre</th>
                     <th class="text-left px-6 py-4">Promoción</th>
                     <th class="text-left px-6 py-4">Producto</th>
                     <th class="text-left px-6 py-4">Cantidad</th>
@@ -23,7 +22,6 @@
             <tbody class="divide-y divide-white/5">
                 @foreach($items as $item)
                 <tr class="hover:bg-white/5 transition-colors">
-                    <td class="px-6 py-4 text-white font-medium">{{ $item->nombre ?? '-' }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ $item->promocion?->titulo ?? '-' }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ $item->producto?->nombre ?? '-' }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ $item->cantidad }}</td>

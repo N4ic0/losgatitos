@@ -19,6 +19,8 @@ class Ocupacion extends Model
         'fecha_fin',
         'promocion_id',
         'horas_beneficio',
+        'vehiculo',
+        'patente',
     ];
 
     protected function casts(): array
@@ -28,6 +30,7 @@ class Ocupacion extends Model
             'fecha_fin' => 'datetime',
             'precio_base' => 'integer',
             'horas_beneficio' => 'integer',
+            'vehiculo' => 'boolean',
         ];
     }
 

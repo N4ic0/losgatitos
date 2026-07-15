@@ -1,9 +1,13 @@
+import 'flowbite';
 import Alpine from 'alpinejs';
 import Swiper from 'swiper';
 import AOS from 'aos';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Swal from 'sweetalert2';
+
+import { TabulatorFull as Tabulator } from 'tabulator-tables';
+window.Tabulator = Tabulator;
 
 const DarkSwal = Swal.mixin({
     background: '#1a1a2e',
@@ -71,3 +75,4 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'aos/dist/aos.css';
+import 'tabulator-tables/dist/css/tabulator.min.css';

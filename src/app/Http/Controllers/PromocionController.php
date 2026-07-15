@@ -15,7 +15,7 @@ class PromocionController extends Controller
 
     public function index()
     {
-        $promociones = Promocion::orderBy('orden')->get();
+        $promociones = Promocion::orderBy('created_at', 'desc')->get();
         return view('admin.promociones.index', compact('promociones'));
     }
 
