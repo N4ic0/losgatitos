@@ -20,11 +20,11 @@
                         <span class="tiempo-valor">00:00:00</span>
                     </span>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <button type="button" class="btn-close btn-close-white" onclick="dashboard.cerrarModal()" aria-label="Cerrar"></button>
             </div>
 
             {{-- Tabs --}}
-            <ul id="modal-tabs" class="d-none nav nav-tabs px-4 pt-3 border-0" style="border-bottom: 1px solid rgba(255,255,255,0.05); gap: 0; overflow-x: auto; flex-wrap: nowrap;" role="tablist">
+            <ul id="modal-tabs" class="nav nav-tabs px-4 pt-3 border-0" style="border-bottom: 1px solid rgba(255,255,255,0.05);" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active custom-tab-link" id="tab-estado-btn" data-bs-toggle="tab" data-bs-target="#tab-estado" type="button" role="tab" aria-controls="tab-estado" aria-selected="true">Estado</button>
                 </li>
@@ -120,6 +120,22 @@
                                 <span class="text-green-400" style="font-size: 0.625rem; background: rgba(22,163,74,0.2); padding: 0.25rem 0.5rem; border-radius: 999px; white-space: nowrap;">Activa</span>
                             </div>
                         </div>
+                        
+                        <div id="ocupacion-personas-section" class="mt-3" style="background: rgba(255,255,255,0.05); border-radius: 0.75rem; padding: 1rem; border: 1px solid rgba(255,255,255,0.05);">
+                            <h4 class="text-white font-medium mb-3">Personas Adicionales</h4>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="text-gray-300 text-sm">Cantidad de personas extra</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" onclick="dashboard.cambiarPersonasOcupacion(-1)" class="btn-persona-btn" style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.125rem;">−</button>
+                                    <span id="ocupacion-personas-count" class="text-[#D4AF37] fw-bold fs-5" style="width: 2rem; text-align: center;">0</span>
+                                    <button type="button" onclick="dashboard.cambiarPersonasOcupacion(1)" class="btn-persona-btn" style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.125rem;">+</button>
+                                </div>
+                            </div>
+                            <div id="ocupacion-personas-extra-cost" class="d-none mt-2 pt-2" style="border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; font-size: 0.75rem;">
+                                <span class="text-gray-400">Costo adicional (50% c/u):</span>
+                                <span id="ocupacion-personas-extra-total" class="text-[#D4AF37] font-bold"></span>
+                            </div>
+                        </div>
 
                         <div class="d-flex gap-3 mt-3">
                             <button onclick="dashboard.finalizarOcupacion()" class="flex-1" style="background: #dc2626; color: #fff; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; transition: all 0.2s; font-size: 0.875rem;">
@@ -156,7 +172,8 @@
                             <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
                                 <div>
                                     <label class="text-gray-400 text-xs d-block mb-1">Tipo Documento</label>
-                                    <select name="tipo_documento" onchange="dashboard.onTipoDocumentoChange(this.value)" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.75rem 1rem; color: #fff; outline: none; font-size: 0.875rem;">
+                                    <select name="tipo_documento" required onchange="dashboard.onTipoDocumentoChange(this.value)" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.75rem 1rem; color: #fff; outline: none; font-size: 0.875rem;">
+                                        <option value="">Seleccione</option>
                                         <option value="RUT">RUT</option>
                                         <option value="Pasaporte">Pasaporte</option>
                                     </select>
@@ -181,11 +198,11 @@
                                 </div>
                                 <div>
                                     <label class="text-gray-400 text-xs d-block mb-1">Nacionalidad</label>
-                                    <input type="text" name="nacionalidad" value="Chilena" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.75rem 1rem; color: #fff; outline: none; font-size: 0.875rem;">
+                                    <input type="text" name="nacionalidad" value="Chilena" required style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.75rem 1rem; color: #fff; outline: none; font-size: 0.875rem;">
                                 </div>
                                 <div>
                                     <label class="text-gray-400 text-xs d-block mb-1">Fecha Nacimiento</label>
-                                    <input type="date" name="fecha_nacimiento" onchange="dashboard.onClienteNacimientoChange(this.value)" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.75rem 1rem; color: #fff; outline: none; font-size: 0.875rem;">
+                                    <input type="date" name="fecha_nacimiento" required onchange="dashboard.onClienteNacimientoChange(this.value)" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.75rem 1rem; color: #fff; outline: none; font-size: 0.875rem;">
                                 </div>
                             </div>
                             <button type="submit" class="mt-3" style="background: #D4AF37; color: #000; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; font-size: 0.875rem;">Registrar</button>
@@ -297,33 +314,79 @@
 </div>
 
 <style>
-.nav-link.custom-tab-link {
-    color: #9ca3af;
-    border-bottom: 2px solid transparent;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    background: none;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-    white-space: nowrap;
-    transition: color 0.2s, border-color 0.2s;
-    border-radius: 0;
-    margin: 0;
+#roomModal .tab-content {
+    max-height: 65vh;
+    overflow-y: auto;
 }
-.nav-link.custom-tab-link:hover {
-    color: #e5e7eb;
-    isolation: auto;
+#roomModal .tab-pane {
+    overflow-y: auto;
 }
-.nav-link.custom-tab-link.active {
-    color: #D4AF37;
-    border-bottom-color: #D4AF37;
-    background: none;
+@media (max-width: 768px) {
+    #roomModal .tab-content {
+        max-height: none;
+        flex: 1;
+        overflow-y: auto;
+    }
 }
-.nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
-    border-color: transparent;
-    isolation: auto;
+select, input, textarea, button {
+    font-family: inherit;
+}
+select {
+    background-color: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.75rem 1rem !important;
+    color: #fff !important;
+    outline: none !important;
+    font-size: 0.875rem !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23D4AF37' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 12px !important;
+    padding-right: 2.5rem !important;
+    cursor: pointer !important;
+}
+select option {
+    background-color: #1a1a2e !important;
+    color: #fff !important;
+    padding: 0.5rem !important;
+}
+select:focus {
+    border-color: #D4AF37 !important;
+    box-shadow: 0 0 0 2px rgba(212,175,55,0.2) !important;
+}
+select:hover {
+    border-color: rgba(255,255,255,0.2) !important;
+}
+#roomModal .nav-tabs {
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+#roomModal .nav-link.custom-tab-link {
+    color: #6b7280 !important;
+    border: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    background: transparent !important;
+    white-space: nowrap !important;
+    transition: color 0.2s, border-color 0.2s !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+#roomModal .nav-link.custom-tab-link:hover {
+    color: #e5e7eb !important;
+}
+#roomModal .nav-link.custom-tab-link.active {
+    color: #D4AF37 !important;
+    border-bottom-color: #D4AF37 !important;
+    background: transparent !important;
 }
 .btn-close {
     filter: brightness(0) invert(1);
@@ -335,5 +398,93 @@
 .form-check-input:checked {
     background-color: #D4AF37;
     border-color: #D4AF37;
+}
+
+@media (max-width: 768px) {
+    #roomModal .modal-dialog {
+        max-width: 100% !important;
+        margin: 0;
+        height: 100%;
+    }
+    #roomModal .modal-content {
+        border-radius: 0 !important;
+        height: 100%;
+    }
+    #roomModal .nav-tabs {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    #roomModal .nav-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    #roomModal .nav-link.custom-tab-link {
+        padding: 0.75rem 0.85rem !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap !important;
+        flex-shrink: 0;
+    }
+    #roomModal .tab-content {
+        padding: 1rem !important;
+    }
+    #estado-btns {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    #roomModal .d-grid[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+    #cliente-form .d-grid[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+    #roomModal .prod-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    #roomModal .cat-filter-bar {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+    }
+    #roomModal .cat-filter-bar .cat-btn {
+        flex-shrink: 0;
+    }
+    #consumos-content .d-flex.gap-2 {
+        flex-direction: column !important;
+    }
+    #consumos-content .d-flex.gap-2 button {
+        width: 100% !important;
+    }
+    #cobro-content .d-flex.gap-3 {
+        flex-direction: column !important;
+    }
+    #cobro-content .d-flex.gap-3 select {
+        width: 100% !important;
+    }
+    #cobro-content .d-flex.gap-3 input {
+        width: 100% !important;
+    }
+    #modal-header .d-flex {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .modal-dialog.modal-dialog-scrollable {
+        max-height: 100%;
+    }
+    #modal-hab-numero {
+        font-size: 1.1rem;
+    }
+    #ocupacion-content .d-grid[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+    .tipo-tiempo-btn {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.8rem !important;
+    }
+    #clientes-personas-section .d-flex.align-items-center.justify-content-between {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    #cobro-content select {
+        width: 100% !important;
+    }
 }
 </style>

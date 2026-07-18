@@ -17,7 +17,8 @@ class ProductoController extends Controller
 
     public function index()
     {
-        return view('admin.productos.index');
+        $categorias = $this->obtenerCategorias();
+        return view('admin.productos.index', compact('categorias'));
     }
 
     public function catalogo()
@@ -65,6 +66,9 @@ class ProductoController extends Controller
         }
         $producto = Producto::create($data);
         $this->auditoriaService->registrar('crear', 'productos', $producto->id, null, $producto->toArray());
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Producto creado exitosamente.']);
+        }
         return redirect()->route('admin.productos.index')->with('success', 'Producto creado exitosamente.');
     }
 
@@ -96,6 +100,9 @@ class ProductoController extends Controller
         }
         $producto->update($data);
         $this->auditoriaService->registrar('modificar', 'productos', $producto->id, $antiguo, $producto->toArray());
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Producto actualizado exitosamente.']);
+        }
         return redirect()->route('admin.productos.index')->with('success', 'Producto actualizado exitosamente.');
     }
 
@@ -104,6 +111,11 @@ class ProductoController extends Controller
         $this->auditoriaService->registrar('eliminar', 'productos', $producto->id, $producto->toArray(), null);
         $producto->delete();
         return redirect()->route('admin.productos.index')->with('success', 'Producto eliminado.');
+    }
+
+    public function getJson(Producto $producto)
+    {
+        return response()->json($producto);
     }
 
     public function toggle(Request $request, Producto $producto)

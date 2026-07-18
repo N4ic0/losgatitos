@@ -48,10 +48,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('buscar-por-rut', [ReservaController::class, 'buscarPorRUT'])->name('reservas.buscar-rut');
 
     // Rates
+    Route::get('tarifas-json', [TarifaController::class, 'data'])->name('tarifas.data');
+    Route::get('tarifas/{tarifa}/data', [TarifaController::class, 'getJson'])->name('tarifas.getJson');
+    Route::post('tarifas/{tarifa}/toggle', [TarifaController::class, 'toggle'])->name('tarifas.toggle');
     Route::resource('tarifas', TarifaController::class)->only(['index', 'edit', 'update']);
 
     // Promotions
-    Route::resource('promociones', PromocionController::class)->parameters(['promociones' => 'promocion']);
+    Route::get('promociones-json', [PromocionController::class, 'data'])->name('promociones.data');
+    Route::get('promociones/{promocion}/data', [PromocionController::class, 'getJson'])->name('promociones.getJson');
+    Route::resource('promociones', PromocionController::class)->parameters(['promociones' => 'promocion'])->except(['create', 'edit']);
 
     // Product combos (promocion_producto)
     Route::resource('promocion-productos', PromocionProductoController::class)->parameters(['promocion-productos' => 'promocionProducto']);
@@ -60,6 +65,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('productos-json', [ProductoController::class, 'data'])->name('productos.data');
     Route::post('productos/{producto}/toggle', [ProductoController::class, 'toggle'])->name('productos.toggle');
     Route::get('productos/catalogo', [ProductoController::class, 'catalogo'])->name('productos.catalogo');
+    Route::get('productos/{producto}/data', [ProductoController::class, 'getJson'])->name('productos.getJson');
     Route::resource('productos', ProductoController::class)->parameters(['productos' => 'producto']);
 
     // Stock ingresos
@@ -98,6 +104,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('dashboard/ocupacion/{ocupacion}/pago', [DashboardController::class, 'registrarPago'])->name('dashboard.registrar-pago');
     Route::post('dashboard/ocupacion/{ocupacion}/finalizar', [DashboardController::class, 'finalizarOcupacion'])->name('dashboard.finalizar-ocupacion');
     Route::post('dashboard/ocupacion/{ocupacion}/vehiculo', [DashboardController::class, 'actualizarVehiculo'])->name('dashboard.actualizar-vehiculo');
+    Route::post('dashboard/ocupacion/{ocupacion}/personas-adicionales', [DashboardController::class, 'actualizarPersonasAdicionales'])->name('dashboard.actualizar-personas-adicionales');
     Route::post('dashboard/ocupacion/{ocupacion}/observacion', [DashboardController::class, 'agregarObservacion'])->name('dashboard.agregar-observacion');
     Route::get('dashboard/productos', [DashboardController::class, 'productos'])->name('dashboard.productos');
     Route::get('dashboard/promociones', [DashboardController::class, 'promociones'])->name('dashboard.promociones');

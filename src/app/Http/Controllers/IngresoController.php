@@ -34,6 +34,14 @@ class IngresoController extends Controller
 
         $this->auditoriaService->registrar('ingreso_stock', 'ingresos', $ingreso->id, null, $ingreso->toArray());
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Ingreso registrado. Stock actualizado a ' . $producto->stock_actual . '.',
+                'stock_actual' => (float) $producto->stock_actual,
+            ]);
+        }
+
         return redirect()->route('admin.productos.index')->with('success', 'Ingreso registrado. Stock actualizado a ' . $producto->stock_actual . '.');
     }
 }

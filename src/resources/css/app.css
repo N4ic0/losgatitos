@@ -34,10 +34,6 @@
         @apply bg-[#D4AF37]/5 backdrop-blur-xl border border-[#D4AF37]/20;
     }
 
-    .btn-gold {
-        @apply bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-bold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg shadow-[#D4AF37]/25 hover:shadow-[#D4AF37]/40;
-    }
-
     .btn-ghost {
         @apply bg-white/5 hover:bg-white/10 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 border border-white/10;
     }
@@ -97,112 +93,143 @@ table.dataTable.row-border tbody th, table.dataTable.row-border tbody td, table.
     border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-.dataTables_wrapper .dataTables_filter input {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+/* DT2.x - dt-container replaces dataTables_wrapper */
+div.dt-container div.dt-search input {
+    background: #1a1a2e !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 0.5rem !important;
     color: #e5e7eb !important;
     padding: 6px 12px !important;
 }
-
-.dataTables_wrapper .dataTables_filter input:focus {
+div.dt-container div.dt-search input:focus {
     border-color: #D4AF37 !important;
     outline: none !important;
     box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2) !important;
 }
-
-.dataTables_wrapper .dataTables_filter label {
+div.dt-container div.dt-search label {
     color: #9ca3af !important;
 }
 
-.dataTables_wrapper .dataTables_length label {
-    color: #9ca3af !important;
-}
-
-.dataTables_wrapper .dataTables_length select {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+div.dt-container div.dt-length select {
+    background: #1a1a2e !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 0.5rem !important;
     color: #e5e7eb !important;
     padding: 4px 8px !important;
 }
+div.dt-container div.dt-length select option {
+    background: #1a1a2e !important;
+    color: #e5e7eb !important;
+}
+div.dt-container div.dt-length label {
+    color: #9ca3af !important;
+}
 
-.dataTables_wrapper .dataTables_info {
+div.dt-container div.dt-info {
     color: #9ca3af !important;
     padding-top: 12px !important;
 }
 
-.dataTables_wrapper .dataTables_paginate {
+div.dt-container div.dt-paging {
     padding-top: 12px !important;
+    text-align: center;
 }
-
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+div.dt-container div.dt-paging ul.pagination {
+    justify-content: center;
+}
+div.dt-container div.dt-paging .pagination .page-item .page-link {
+    background: #1a1a2e !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 0.5rem !important;
     color: #d1d5db !important;
     padding: 4px 12px !important;
     margin: 0 2px !important;
 }
-
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+div.dt-container div.dt-paging .pagination .page-item.active .page-link {
     background: #D4AF37 !important;
-    color: #000 !important;
     border-color: #D4AF37 !important;
+    color: #000 !important;
 }
-
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+div.dt-container div.dt-paging .pagination .page-item .page-link:hover {
     background: rgba(212, 175, 55, 0.2) !important;
-    color: #D4AF37 !important;
     border-color: rgba(212, 175, 55, 0.3) !important;
+    color: #D4AF37 !important;
 }
-
-.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+div.dt-container div.dt-paging .pagination .page-item.disabled .page-link {
     opacity: 0.3 !important;
     cursor: not-allowed !important;
 }
-
-.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
-    background: transparent !important;
+div.dt-container div.dt-paging .pagination .page-item.disabled .page-link:hover {
+    background: #1a1a2e !important;
     color: #d1d5db !important;
 }
 
-.dataTables_wrapper .dataTables_processing {
-    background: rgba(17, 17, 37, 0.9) !important;
-    color: #D4AF37 !important;
-    border: 1px solid rgba(212, 175, 55, 0.3) !important;
-    border-radius: 1rem !important;
-}
-
-div.dataTables_wrapper div.dataTables_paginate {
-    text-align: center;
-}
-
-div.dataTables_scrollBody::-webkit-scrollbar {
+div.dt-scroll-body::-webkit-scrollbar {
     width: 6px !important;
     height: 6px !important;
 }
-
-div.dataTables_scrollBody::-webkit-scrollbar-track {
+div.dt-scroll-body::-webkit-scrollbar-track {
     background: #0a0a0a !important;
 }
-
-div.dataTables_scrollBody::-webkit-scrollbar-thumb {
+div.dt-scroll-body::-webkit-scrollbar-thumb {
     background: #D4AF37 !important;
     border-radius: 3px !important;
 }
-
-div.dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+div.dt-scroll-body::-webkit-scrollbar-thumb:hover {
     background: #C49A2C !important;
 }
 
-table.dataTable thead .sorting:before,
-table.dataTable thead .sorting:after,
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_asc:after,
-table.dataTable thead .sorting_desc:before,
-table.dataTable thead .sorting_desc:after {
-    color: #D4AF37 !important;
+/* DT responsive control (dt-control) - visible arrow */
+table.dataTable tbody td.dt-control:before {
+    border-left-color: #22c55e !important;
+}
+:root[data-bs-theme="dark"] table.dataTable td.dt-control:before {
+    border-left-color: #4ade80 !important;
+}
+table.dataTable tbody tr.dt-hasChild td.dt-control:before {
+    border-top-color: #22c55e !important;
+    border-left-color: transparent !important;
+}
+
+/* Bootstrap dark theme overrides */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+[data-bs-theme="dark"] .form-check-input {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+[data-bs-theme="dark"] .form-check-input:checked {
+    background-color: #D4AF37;
+    border-color: #D4AF37;
+}
+[data-bs-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-footer {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-gold {
+    background-color: #D4AF37 !important;
+    border-color: #D4AF37 !important;
+    color: #000 !important;
+    font-weight: 700;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.25);
+    transition: all 0.3s ease-in-out;
+}
+.btn-gold:hover {
+    background-color: #C49A2C !important;
+    border-color: #C49A2C !important;
+    color: #000 !important;
+    box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.4);
 }
 
 @layer utilities {

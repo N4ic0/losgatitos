@@ -15,6 +15,7 @@ class Ocupacion extends Model
         'habitacion_id',
         'tarifa_id',
         'precio_base',
+        'personas_adicionales',
         'fecha_inicio',
         'fecha_fin',
         'promocion_id',
@@ -29,6 +30,7 @@ class Ocupacion extends Model
             'fecha_inicio' => 'datetime',
             'fecha_fin' => 'datetime',
             'precio_base' => 'integer',
+            'personas_adicionales' => 'integer',
             'horas_beneficio' => 'integer',
             'vehiculo' => 'boolean',
         ];

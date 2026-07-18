@@ -81,6 +81,7 @@ class OcupacionService
             'habitacion_id' => $habitacion->id,
             'tarifa_id' => $tarifaId,
             'precio_base' => $precioBase,
+            'personas_adicionales' => $personasAdicionales,
             'fecha_inicio' => now(),
             'promocion_id' => null,
             'horas_beneficio' => 0,
@@ -89,6 +90,24 @@ class OcupacionService
         $this->cambiarEstado($habitacion, 'Ocupada', $ocupacion->id);
 
         $this->auditoriaService->registrar('iniciar_ocupacion', 'ocupaciones', $ocupacion->id, null, $ocupacion->toArray());
+
+        return $ocupacion->fresh();
+    }
+
+    public function actualizarPersonasAdicionales(Ocupacion $ocupacion, int $cantidad): Ocupacion
+    {
+        $precios = $this->tarifaService->calcularPrecio(
+            $ocupacion->habitacion->categoria,
+            $ocupacion->fecha_inicio->format('Y-m-d'),
+            $ocupacion->tarifa?->tipo_tiempo ?? '8h'
+        );
+
+        $precioBase = ($precios['precio_base'] ?? 0) + (int)round(($precios['precio_base'] ?? 0) * 0.5 * $cantidad);
+
+        $ocupacion->update([
+            'personas_adicionales' => $cantidad,
+            'precio_base' => $precioBase,
+        ]);
 
         return $ocupacion->fresh();
     }
@@ -330,6 +349,10 @@ class OcupacionService
         $totalPagado = $ocupacion->pagos()->sum('monto');
         $total = $ocupacion->precio_base + $totalConsumos;
 
+        $tieneCortesia = $ocupacion->consumos->contains(function ($consumo) {
+            return $consumo->producto && $consumo->producto->cortesia;
+        });
+
         $hoy = now();
         $manana = $hoy->copy()->addDay()->startOfDay();
         $esVispera = Feriado::whereDate('fecha', $manana)->exists();
@@ -380,6 +403,7 @@ class OcupacionService
             'regla' => $regla,
             'tipo_tiempo' => $tipoTiempo,
             'promociones_aplicables' => $promocionesAplicables,
+            'tiene_cortesia' => $tieneCortesia,
         ];
     }
 }

@@ -56,7 +56,7 @@ class DashboardController extends Controller
 
         $ocupacion = $this->ocupacionService->iniciarOcupacion($habitacion, $request->tipo_tiempo, $request->integer('personas_adicionales', 0));
 
-        return response()->json(['success' => true, 'ocupacion' => $ocupacion->load('clientes', 'consumos.producto', 'pagos')]);
+        return response()->json(['success' => true, 'ocupacion' => $ocupacion->load('clientes', 'consumos.producto', 'pagos', 'tarifa')]);
     }
 
     public function calcularTarifa(Request $request)
@@ -233,6 +233,20 @@ class DashboardController extends Controller
         ]);
 
         return response()->json(['success' => true]);
+    }
+
+    public function actualizarPersonasAdicionales(Request $request, Ocupacion $ocupacion)
+    {
+        $request->validate([
+            'cantidad' => 'required|integer|min:0|max:10',
+        ]);
+
+        $ocupacion = $this->ocupacionService->actualizarPersonasAdicionales($ocupacion, $request->integer('cantidad'));
+
+        return response()->json([
+            'success' => true,
+            'ocupacion' => $ocupacion->load('consumos.producto', 'pagos', 'clientes', 'promocion.productos', 'tarifa'),
+        ]);
     }
 
     public function agregarObservacion(Request $request, Ocupacion $ocupacion)

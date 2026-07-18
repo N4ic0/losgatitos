@@ -50,6 +50,6 @@ class Promocion extends Model
 
     public function productos()
     {
-        return $this->belongsToMany(Producto::class, 'promocion_producto')->withPivot('cantidad');
+        return $this->belongsToMany(Producto::class, 'promocion_producto')->withPivot(['cantidad', 'valor_promocion']);
     }
 }

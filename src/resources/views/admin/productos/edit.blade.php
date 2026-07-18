@@ -80,21 +80,21 @@
     </form>
 
     {{-- Modal Gestionar Categorías --}}
-    <div class="modal fade" id="categoriasModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="categoriasModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
         <div class="modal-dialog modal-dialog-centered modal-md">
-            <div class="modal-content bg-[#1a1a1a] rounded-2xl p-6 border border-white/10 shadow-2xl">
-                <div class="modal-header border-0 pb-0">
-                    <h3 class="text-xl font-bold text-white">Gestionar Categorías</h3>
+            <div class="modal-content bg-black border border-white/10 shadow-2xl">
+                <div class="modal-header border-white/10">
+                    <h5 class="modal-title text-white font-bold">Gestionar Categorías</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="categoriasLista" class="space-y-3 mb-6"></div>
+                    <div id="categoriasLista" class="space-y-3 mb-4"></div>
 
                     <div class="border-t border-white/10 pt-4">
-                        <label class="block text-gray-300 text-sm font-medium mb-2">Nueva Categoría</label>
-                        <div class="flex space-x-3">
-                            <input type="text" id="nuevaCategoriaInput" placeholder="Nombre" class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#D4AF37] outline-none text-sm">
-                            <button type="button" id="btnAgregarCategoria" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-4 py-3 rounded-xl transition-all text-sm">Agregar</button>
+                        <label class="block text-gray-400 text-sm font-medium mb-2">Nueva Categoría</label>
+                        <div class="flex gap-3">
+                            <input type="text" id="nuevaCategoriaInput" placeholder="Nombre" class="form-control form-control-lg bg-white/5 border-white/10 text-white">
+                            <button type="button" id="btnAgregarCategoria" class="btn btn-gold px-4 flex-shrink-0">Agregar</button>
                         </div>
                     </div>
                 </div>

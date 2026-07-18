@@ -27,6 +27,8 @@ class StorePromocionRequest extends FormRequest
             'tarifas.*' => 'string|in:D-J_3h,D-J_8h,Viernes_3h,Viernes_8h,Sábado_3h,Sábado_8h,Víspera_3h,Víspera_8h',
             'productos' => 'nullable|array',
             'productos.*' => 'exists:productos,id',
+            'valores_promocion' => 'nullable|array',
+            'valores_promocion.*' => 'nullable|integer|min:0',
             'cantidades' => 'nullable|array',
             'cantidades.*' => 'integer|min:1',
         ];

@@ -7,19 +7,19 @@
     {{-- Stats --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5">
+        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 d-flex flex-column justify-content-center align-items-center">
             <p class="text-gray-400 text-sm uppercase tracking-wider">Disponibles</p>
             <p class="text-3xl font-bold text-green-400 mt-2">{{ $disponibles }}</p>
         </div>
-        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5">
+        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 d-flex flex-column justify-content-center align-items-center">
             <p class="text-gray-400 text-sm uppercase tracking-wider">Ocupadas</p>
             <p class="text-3xl font-bold text-red-400 mt-2">{{ $ocupadas }}</p>
         </div>
-        <a href="{{ route('admin.reservas.create') }}" class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 hover:border-[#D4AF37]/30 transition-all duration-200 block">
+        <a href="{{ route('admin.reservas.create') }}" class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 hover:border-[#D4AF37]/30 transition-all duration-200 block d-flex flex-column justify-content-center align-items-center">
             <p class="text-gray-400 text-sm uppercase tracking-wider">Reservadas</p>
             <p class="text-3xl font-bold text-yellow-400 mt-2">{{ $reservadas }}</p>
         </a>
-        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5">
+        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 d-flex flex-column justify-content-center align-items-center">
             <p class="text-gray-400 text-sm uppercase tracking-wider">Limpieza</p>
             <p class="text-3xl font-bold text-blue-400 mt-2">{{ $limpieza }}</p>
         </div>
@@ -30,10 +30,10 @@
         <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem;">
             @foreach($habitaciones as $habitacion)
             <div onclick="dashboard.abrirModal({{ $habitacion->id }})"
-                 class="cursor-pointer bg-white/5 backdrop-blur-xl rounded-2xl p-5 border border-white/5 hover:border-[#D4AF37]/30 hover:bg-white/[0.07] transition-all duration-300">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-white font-bold text-lg">{{ $habitacion->numero }}</span>
-                    <span class="text-xs px-2 py-1 rounded-full font-medium
+                 class="cursor-pointer bg-white/5 backdrop-blur-xl rounded-xl px-3 py-2.5 border border-white/5 hover:border-[#D4AF37]/30 hover:bg-white/[0.07] transition-all duration-300 flex flex-col" style="min-height: 5rem;">
+                <div class="flex items-center justify-between">
+                    <span class="text-white font-bold text-sm">{{ $habitacion->numero }}</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium
                         @if($habitacion->estado === 'Disponible') bg-green-500/20 text-green-400
                         @elseif($habitacion->estado === 'Ocupada') bg-red-500/20 text-red-400
                         @elseif($habitacion->estado === 'Reservada') bg-yellow-500/20 text-yellow-400
@@ -42,21 +42,21 @@
                         {{ $habitacion->estado }}
                     </span>
                 </div>
-                <p class="text-gray-500 text-xs mb-2">{{ $habitacion->categoria }}</p>
+                <p class="text-gray-400 text-[10px] leading-tight mt-0.5">{{ $habitacion->categoria }}</p>
 
-                @if($habitacion->ultimoEstado && $habitacion->estado !== 'Disponible')
-                <div class="timer-{{ $habitacion->id }} text-[#D4AF37] text-xs font-mono"
-                     data-inicio="{{ $habitacion->ultimoEstado->fecha_inicio->timestamp }}">
-                    <span class="inline-block tiempo-valor">00:00:00</span>
-                    
+                <div class="flex items-center gap-1.5 mt-auto pt-1">
+                    @if($habitacion->ultimoEstado && $habitacion->estado !== 'Disponible')
+                    <span class="timer-{{ $habitacion->id }} text-[#D4AF37] text-[10px] font-mono"
+                          data-inicio="{{ $habitacion->ultimoEstado->fecha_inicio->timestamp }}">
+                        <span class="tiempo-valor">00:00:00</span>
+                    </span>
+                    @endif
+                    @if($habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa)
+                        <span class="text-gray-300 text-[9px] font-medium bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded">{{ $habitacion->ocupacionActiva->tarifa->tipo_tiempo }}</span>
+                    @elseif($habitacion->estado === 'Reservada' && $habitacion->reservaActiva)
+                        <span class="text-[#D4AF37] text-[10px] font-medium bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded">{{ \Carbon\Carbon::parse($habitacion->reservaActiva->hora)->format('H:i') }} hrs</span>
+                    @endif
                 </div>
-                @endif
-
-                @if($habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa)
-                    <p class="text-gray-400 text-[10px] mt-1">{{ $habitacion->ocupacionActiva->tarifa->tipo_tiempo }}</p>
-                @elseif($habitacion->estado === 'Reservada' && $habitacion->reservaActiva)
-                    <p class="text-[#D4AF37] text-xs mt-2">{{ \Carbon\Carbon::parse($habitacion->reservaActiva->hora)->format('H:i') }} hrs</p>
-                @endif
             </div>
             @endforeach
         </div>
@@ -92,6 +92,8 @@ class DashboardManager {
         this.consumoSelectorOpen = false;
         this.categoriaFiltro = null;
         this.promocionesAplicables = [];
+        this.cortesiaAdded = false;
+        this._tieneCortesiaBackend = false;
 
         this.modalInstance = null;
         this.init();
@@ -99,8 +101,6 @@ class DashboardManager {
 
     async init() {
         this.iniciarTimers();
-        this.modalInstance = new bootstrap.Modal(document.getElementById('roomModal'), { backdrop: 'static', keyboard: true });
-        document.getElementById('roomModal').addEventListener('hidden.bs.modal', () => this._onModalHidden());
         try {
             const res = await fetch('/admin/dashboard/promociones');
             this.promociones = await res.json();
@@ -142,13 +142,32 @@ class DashboardManager {
         });
     }
 
+    _initModal() {
+        if (!this.modalInstance) {
+            const el = document.getElementById('roomModal');
+            if (el) {
+                this.modalInstance = new bootstrap.Modal(el, { backdrop: 'static', keyboard: false });
+                el.addEventListener('hidden.bs.modal', () => this._onModalHidden());
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        this.cerrarModal();
+                    }
+                });
+            }
+        }
+    }
+
     async abrirModal(id) {
+        this._initModal();
         this.habitacionId = id;
         this.loading = true;
         this.activeTab = 'estado';
         this.tipoTiempo = '8h';
         this.tarifaInfo = null;
         this.personasAdicionales = 0;
+        this.cortesiaAdded = false;
+        this._tieneCortesiaBackend = false;
 
         this._showLoading();
         this.modalInstance.show();
@@ -164,19 +183,61 @@ class DashboardManager {
                 this.promocionesAplicables = data.promociones_aplicables || [];
                 this.ocupacionVehiculo = this.ocupacion.vehiculo ? 1 : 0;
                 this.ocupacionPatente = this.ocupacion.patente || '';
+                this._tieneCortesiaBackend = data.tiene_cortesia || false;
             }
-            await this.calcularTarifaPreview();
-            this._renderAll();
-            this._hideLoading();
-            requestAnimationFrame(() => this.iniciarTimers());
+        await this.calcularTarifaPreview();
+        this._renderAll();
+        this._hideLoading();
+        requestAnimationFrame(() => this.iniciarTimers());
+        if (this.ocupacion) {
+            const ocupacionTab = bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-ocupacion-btn'));
+            ocupacionTab.show();
+        } else {
             const estadoTab = bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-estado-btn'));
             estadoTab.show();
+        }
         } catch(e) { console.error(e); this._hideLoading(); }
         this.loading = false;
     }
 
     cerrarModal() {
-        this.modalInstance.hide();
+        if (!this.ocupacion) {
+            if (this.modalInstance) this.modalInstance.hide();
+            return;
+        }
+        const hasClientes = this.ocupacion.clientes && this.ocupacion.clientes.length > 0;
+        if (!hasClientes) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Falto agregar clientes',
+                text: 'Debe registrar al menos un cliente antes de cerrar.',
+                confirmButtonColor: '#D4AF37',
+                confirmButtonText: 'Entendido',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const tab = bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-clientes-btn'));
+                    tab.show();
+                }
+            });
+            return;
+        }
+        const tieneCortesia = this.cortesiaAdded || this._tieneCortesiaBackend;
+        if (!tieneCortesia) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No agrego consumo cortesia',
+                text: 'Debe agregar al menos un ítem de cortesía antes de cerrar.',
+                confirmButtonColor: '#D4AF37',
+                confirmButtonText: 'Ir a Consumos',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const tab = bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-consumos-btn'));
+                    tab.show();
+                }
+            });
+            return;
+        }
+        if (this.modalInstance) this.modalInstance.hide();
     }
 
     _showLoading() {
@@ -202,16 +263,13 @@ class DashboardManager {
 
     _renderHeader() {
         const header = document.getElementById('modal-header');
-        const tabsRow = document.getElementById('modal-tabs');
         if (!this.habitacion) {
             header.classList.add('d-none');
             header.classList.remove('d-flex', 'align-items-center', 'justify-content-between');
-            tabsRow.classList.add('d-none');
             return;
         }
         header.classList.remove('d-none');
         header.classList.add('d-flex', 'align-items-center', 'justify-content-between');
-        tabsRow.classList.remove('d-none');
 
         document.getElementById('modal-hab-numero').textContent = 'Hab. ' + this.habitacion.numero;
         document.getElementById('modal-hab-categoria').textContent = this.habitacion.categoria || '';
@@ -278,6 +336,14 @@ class DashboardManager {
 
     _renderPersonasAdicionales() {
         document.getElementById('personas-count').textContent = this.personasAdicionales;
+        const clientesPersonasCount = document.getElementById('clientes-personas-count');
+        if (clientesPersonasCount) {
+            clientesPersonasCount.textContent = this.personasAdicionales;
+        }
+        const ocupacionPersonasCount = document.getElementById('ocupacion-personas-count');
+        if (ocupacionPersonasCount) {
+            ocupacionPersonasCount.textContent = this.ocupacion?.personas_adicionales ?? this.personasAdicionales;
+        }
         const extraContainer = document.getElementById('personas-extra');
         if (this.personasAdicionales > 0 && this.tarifaInfo) {
             extraContainer.classList.remove('d-none');
@@ -290,9 +356,9 @@ class DashboardManager {
         document.querySelectorAll('.tipo-tiempo-btn').forEach(btn => {
             const tt = btn.dataset.tipoTiempo;
             if (tt === this.tipoTiempo) {
-                btn.className = 'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]';
+                btn.className = 'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border bg-[#D4AF37]/30 border-[#D4AF37]/60 text-[#D4AF37] shadow-lg shadow-[#D4AF37]/20';
             } else {
-                btn.className = 'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border bg-white/5 border-white/10 text-gray-300 hover:bg-white/10';
+                btn.className = 'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20';
             }
         });
     }
@@ -329,6 +395,29 @@ class DashboardManager {
         this._renderPersonasAdicionales();
     }
 
+    async cambiarPersonasOcupacion(delta) {
+        if (!this.ocupacion) return;
+        const actual = this.ocupacion.personas_adicionales ?? this.personasAdicionales;
+        const nueva = Math.max(0, actual + delta);
+        if (nueva === actual) return;
+        try {
+            const res = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/personas-adicionales', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ cantidad: nueva }),
+            });
+            if (!res.ok) { console.error('Error al actualizar personas adicionales'); return; }
+            const data = await res.json();
+            if (data.success) {
+                this.ocupacion = data.ocupacion;
+                this.personasAdicionales = nueva;
+                this._renderOcupacionTab();
+                this._renderCobroTab();
+                this._renderPersonasAdicionales();
+            }
+        } catch(e) { console.error(e); }
+    }
+
     async iniciarOcupacion() {
         try {
             const res = await fetch('/admin/dashboard/habitacion/' + this.habitacion.id + '/iniciar-ocupacion', {
@@ -343,6 +432,9 @@ class DashboardManager {
                 this._renderHeader();
                 this._renderEstadoTab();
                 this._renderOcupacionTab();
+                this._renderClientesTab();
+                this._renderConsumosTab();
+                this._renderCobroTab();
                 const tab = bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-ocupacion-btn'));
                 tab.show();
                 Swal.fire({ icon: 'success', title: 'Ocupación iniciada (' + this.tipoTiempo + ')', timer: 1500, showConfirmButton: false });
@@ -498,8 +590,37 @@ class DashboardManager {
     async registrarCliente() {
         const form = document.getElementById('cliente-form');
         const tipoDoc = form.querySelector('[name="tipo_documento"]').value;
+        if (!tipoDoc) {
+            Swal.fire({ icon: 'error', title: 'Seleccione tipo de documento', confirmButtonColor: '#D4AF37' });
+            return;
+        }
+        const numDoc = form.querySelector('[name="numero_documento"]').value.trim();
+        if (!numDoc) {
+            Swal.fire({ icon: 'error', title: 'Ingrese número de documento', confirmButtonColor: '#D4AF37' });
+            return;
+        }
         if (tipoDoc === 'RUT' && this.rutValido !== true) {
             Swal.fire({ icon: 'error', title: 'RUT inválido', text: 'Verifique el RUT ingresado', confirmButtonColor: '#D4AF37' });
+            return;
+        }
+        const nombres = form.querySelector('[name="nombres"]').value.trim();
+        if (!nombres) {
+            Swal.fire({ icon: 'error', title: 'Ingrese nombres', confirmButtonColor: '#D4AF37' });
+            return;
+        }
+        const apellidos = form.querySelector('[name="apellidos"]').value.trim();
+        if (!apellidos) {
+            Swal.fire({ icon: 'error', title: 'Ingrese apellidos', confirmButtonColor: '#D4AF37' });
+            return;
+        }
+        const nacionalidad = form.querySelector('[name="nacionalidad"]').value.trim();
+        if (!nacionalidad) {
+            Swal.fire({ icon: 'error', title: 'Ingrese nacionalidad', confirmButtonColor: '#D4AF37' });
+            return;
+        }
+        const fechaNac = form.querySelector('[name="fecha_nacimiento"]').value;
+        if (!fechaNac) {
+            Swal.fire({ icon: 'error', title: 'Ingrese fecha de nacimiento', confirmButtonColor: '#D4AF37' });
             return;
         }
         const data = new FormData(form);
@@ -785,6 +906,7 @@ class DashboardManager {
                     body: JSON.stringify({ producto_id: parseInt(id), cantidad: qty }),
                 }).then(r => r.json())
             ));
+            if (cortesia) this.cortesiaAdded = true;
         } catch(e) { console.error(e); }
         await this.recargarOcupacion();
     }
@@ -881,6 +1003,7 @@ class DashboardManager {
         this.ocupacionVehiculo = this.ocupacion.vehiculo ? 1 : 0;
         this.ocupacionPatente = this.ocupacion.patente || '';
         this.promocionesAplicables = data.promociones_aplicables || [];
+        this._tieneCortesiaBackend = data.tiene_cortesia || false;
         this._renderAll();
     }
 
@@ -923,6 +1046,25 @@ class DashboardManager {
 
         document.getElementById('ocupacion-inicio').textContent = new Date(this.ocupacion.fecha_inicio).toLocaleString('es-CL');
         document.getElementById('ocupacion-precio-base').textContent = this.formatCurrency(this.ocupacion.precio_base);
+
+        const personasSection = document.getElementById('ocupacion-personas-section');
+        const personasCount = document.getElementById('ocupacion-personas-count');
+        const personasExtraCost = document.getElementById('ocupacion-personas-extra-cost');
+        const personasExtraTotal = document.getElementById('ocupacion-personas-extra-total');
+        if (personasSection && this.ocupacion.tarifa) {
+            personasSection.classList.remove('d-none');
+            const pa = this.ocupacion.personas_adicionales || 0;
+            if (personasCount) personasCount.textContent = pa;
+            if (pa > 0 && personasExtraCost) {
+                personasExtraCost.classList.remove('d-none');
+                const extraTotal = Math.round((this.ocupacion.precio_base / (1 + 0.5 * pa)) * 0.5 * pa);
+                if (personasExtraTotal) personasExtraTotal.textContent = this.formatCurrency(extraTotal);
+            } else {
+                if (personasExtraCost) personasExtraCost.classList.add('d-none');
+            }
+        } else if (personasSection) {
+            personasSection.classList.add('d-none');
+        }
 
         const tarifaInfo = document.getElementById('ocupacion-tarifa-info');
         if (this.ocupacion.tarifa) {
@@ -994,6 +1136,11 @@ class DashboardManager {
             document.getElementById('ocupacion-patente').value = this.ocupacionPatente || '';
         } else {
             patenteSection.classList.add('d-none');
+        }
+
+        const clientesPersonasCount = document.getElementById('clientes-personas-count');
+        if (clientesPersonasCount) {
+            clientesPersonasCount.textContent = this.personasAdicionales;
         }
 
         const clientesList = document.getElementById('clientes-list');
@@ -1239,6 +1386,6 @@ class DashboardManager {
     }
 }
 
-const dashboard = new DashboardManager();
+window.dashboard = new DashboardManager();
 </script>
 @endpush

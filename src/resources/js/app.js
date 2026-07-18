@@ -1,5 +1,6 @@
 import 'flowbite';
-import 'bootstrap';
+import { Modal, Dropdown, Collapse, Offcanvas, Tab, Alert, Carousel } from 'bootstrap';
+window.bootstrap = { Modal, Dropdown, Collapse, Offcanvas, Tab, Alert, Carousel };
 import $ from 'jquery';
 window.$ = window.jQuery = $;
 
@@ -10,6 +11,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Swal from 'sweetalert2';
 
 import 'datatables.net-bs5';
+import 'datatables.net-responsive-bs5';
 
 const DarkSwal = Swal.mixin({
     background: '#1a1a2e',
@@ -74,5 +76,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'aos/dist/aos.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+import 'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css';
