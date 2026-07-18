@@ -14,8 +14,18 @@ class FeriadoController extends Controller
 
     public function index()
     {
+        return view('admin.feriados.index');
+    }
+
+    public function data()
+    {
         $feriados = Feriado::orderBy('fecha', 'desc')->get();
-        return view('admin.feriados.index', compact('feriados'));
+        return response()->json($feriados->map(fn($f) => [
+            'id' => $f->id,
+            'fecha' => $f->fecha->format('d/m/Y'),
+            'fecha_raw' => $f->fecha->format('Y-m-d'),
+            'descripcion' => $f->descripcion,
+        ]));
     }
 
     public function store(Request $request)
@@ -27,6 +37,14 @@ class FeriadoController extends Controller
 
         $feriado = Feriado::create($request->all());
         $this->auditoriaService->registrar('crear', 'feriados', $feriado->id, null, $feriado->toArray());
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Feriado registrado.', 'feriado' => [
+                'id' => $feriado->id,
+                'fecha' => $feriado->fecha->format('d/m/Y'),
+                'fecha_raw' => $feriado->fecha->format('Y-m-d'),
+                'descripcion' => $feriado->descripcion,
+            ]]);
+        }
         return redirect()->route('admin.feriados.index')->with('success', 'Feriado registrado.');
     }
 
@@ -34,6 +52,9 @@ class FeriadoController extends Controller
     {
         $this->auditoriaService->registrar('eliminar', 'feriados', $feriado->id, $feriado->toArray(), null);
         $feriado->delete();
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Feriado eliminado.']);
+        }
         return redirect()->route('admin.feriados.index')->with('success', 'Feriado eliminado.');
     }
 

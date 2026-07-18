@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Habitacion;
 use App\Http\Requests\StoreHabitacionRequest;
 use App\Services\AuditoriaService;
+use Illuminate\Http\Request;
 
 class HabitacionController extends Controller
 {
@@ -13,8 +14,24 @@ class HabitacionController extends Controller
 
     public function index()
     {
+        return view('admin.habitaciones.index');
+    }
+
+    public function data()
+    {
         $habitaciones = Habitacion::orderBy('numero')->get();
-        return view('admin.habitaciones.index', compact('habitaciones'));
+        return response()->json($habitaciones->map(fn($h) => [
+            'id' => $h->id,
+            'numero' => $h->numero,
+            'categoria' => $h->categoria,
+            'estado' => $h->estado,
+            'observaciones' => $h->observaciones ?? '-',
+        ]));
+    }
+
+    public function getJson(Habitacion $habitacion)
+    {
+        return response()->json($habitacion);
     }
 
     public function create()
@@ -26,6 +43,9 @@ class HabitacionController extends Controller
     {
         $habitacion = Habitacion::create($request->validated());
         $this->auditoriaService->registrar('crear', 'habitaciones', $habitacion->id, null, $habitacion->toArray());
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Habitación creada exitosamente.']);
+        }
         return redirect()->route('admin.habitaciones.index')->with('success', 'Habitación creada exitosamente.');
     }
 
@@ -39,6 +59,9 @@ class HabitacionController extends Controller
         $antiguo = $habitacion->toArray();
         $habitacion->update($request->validated());
         $this->auditoriaService->registrar('modificar', 'habitaciones', $habitacion->id, $antiguo, $habitacion->toArray());
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Habitación actualizada exitosamente.']);
+        }
         return redirect()->route('admin.habitaciones.index')->with('success', 'Habitación actualizada exitosamente.');
     }
 
@@ -46,6 +69,9 @@ class HabitacionController extends Controller
     {
         $this->auditoriaService->registrar('eliminar', 'habitaciones', $habitacion->id, $habitacion->toArray(), null);
         $habitacion->delete();
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Habitación eliminada exitosamente.']);
+        }
         return redirect()->route('admin.habitaciones.index')->with('success', 'Habitación eliminada exitosamente.');
     }
 }

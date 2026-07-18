@@ -2,97 +2,157 @@
 
 @section('title', 'Ocupaciones')
 
+@push('styles')
+<style>
+.btn-xs { padding: 0.15rem 0.4rem; font-size: 0.7rem; line-height: 1.2; border-radius: 0.25rem; }
+.btn-outline-warning { color: #D4AF37; border-color: #D4AF37; }
+.btn-outline-warning:hover { color: #000; background-color: #D4AF37; border-color: #D4AF37; }
+.btn-outline-info { color: #3b82f6; border-color: #3b82f6; }
+.btn-outline-info:hover { color: #fff; background-color: #3b82f6; border-color: #3b82f6; }
+.btn-outline-danger { color: #ef4444; border-color: #ef4444; }
+.btn-outline-danger:hover { color: #fff; background-color: #ef4444; border-color: #ef4444; }
+table.dataTable { color: #fff; }
+table.dataTable td, table.dataTable th { border-color: rgba(255,255,255,0.1); }
+table.dataTable thead th { background: rgba(255,255,255,0.05); color: #D4AF37; }
+table.dataTable tbody tr:hover { background: rgba(212,175,55,0.05); }
+table.dataTable tbody td { padding: 0.75rem 0.5rem; }
+div.dt-container div.dt-search input {
+    padding: 0.5rem 1rem;
+    outline: none;
+}
+div.dt-container div.dt-search label,
+div.dt-container div.dt-length label { color: #9ca3af; }
+div.dt-container div.dt-info { color: #9ca3af; }
+</style>
+@endpush
+
 @section('content')
+<div class="space-y-6">
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-white">Ocupaciones</h1>
 </div>
 
-<div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/5 p-4 mb-6">
-    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div>
-            <label class="block text-gray-400 text-xs font-medium mb-1">Habitación</label>
-            <select name="habitacion_id" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#D4AF37] outline-none">
-                <option value="" class="bg-gray-900">Todas</option>
-                @foreach($habitaciones as $h)
-                <option value="{{ $h->id }}" {{ request('habitacion_id') == $h->id ? 'selected' : '' }} class="bg-gray-900">{{ $h->numero }} - {{ $h->categoria }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label class="block text-gray-400 text-xs font-medium mb-1">Estado</label>
-            <select name="estado" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#D4AF37] outline-none">
-                <option value="" class="bg-gray-900">Todas</option>
-                <option value="activa" {{ request('estado') === 'activa' ? 'selected' : '' }} class="bg-gray-900">Activas</option>
-                <option value="finalizada" {{ request('estado') === 'finalizada' ? 'selected' : '' }} class="bg-gray-900">Finalizadas</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-gray-400 text-xs font-medium mb-1">Desde</label>
-            <input type="date" name="fecha_desde" value="{{ request('fecha_desde') }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#D4AF37] outline-none">
-        </div>
-        <div>
-            <label class="block text-gray-400 text-xs font-medium mb-1">Hasta</label>
-            <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#D4AF37] outline-none">
-        </div>
-        <div class="flex items-end space-x-2 lg:col-span-4">
-            <button type="submit" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-5 py-2.5 rounded-xl transition-all text-sm">Filtrar</button>
-            <a href="{{ route('admin.ocupaciones.index') }}" class="px-5 py-2.5 text-gray-400 hover:text-white transition-colors text-sm">Limpiar</a>
-        </div>
-    </form>
+<div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/5 p-4">
+    <table id="ocupaciones-table" class="display responsive nowrap w-full" style="width:100%">
+        <thead>
+            <tr>
+                <th>Habitación</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Tarifa</th>
+                <th>Clientes</th>
+                <th>Vehículo</th>
+                <th>Patente</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
 </div>
-
-<div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/5 overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="border-b border-white/5 text-gray-400 uppercase text-xs tracking-wider">
-                    <th class="text-left px-6 py-4">Habitación</th>
-                    <th class="text-left px-6 py-4">Inicio</th>
-                    <th class="text-left px-6 py-4">Fin</th>
-                    <th class="text-left px-6 py-4">Tarifa</th>
-                    <th class="text-left px-6 py-4">Clientes</th>
-                    <th class="text-left px-6 py-4">Vehículo</th>
-                    <th class="text-left px-6 py-4">Patente</th>
-                    <th class="text-left px-6 py-4">Total</th>
-                    <th class="text-left px-6 py-4">Estado</th>
-                    <th class="text-right px-6 py-4">Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-white/5">
-                @foreach($ocupaciones as $ocupacion)
-                <tr class="hover:bg-white/5 transition-colors">
-                    <td class="px-6 py-4 text-white font-medium">{{ $ocupacion->habitacion->numero ?? '-' }}</td>
-                    <td class="px-6 py-4 text-gray-300">{{ $ocupacion->fecha_inicio->format('d/m/Y H:i') }}</td>
-                    <td class="px-6 py-4 text-gray-300">{{ $ocupacion->fecha_fin?->format('d/m/Y H:i') ?? '-' }}</td>
-                    <td class="px-6 py-4 text-gray-300">{{ $ocupacion->tarifa?->tipo_tiempo ?? '-' }}</td>
-                    <td class="px-6 py-4 text-gray-300">{{ $ocupacion->clientes->count() }}</td>
-                    <td class="px-6 py-4">
-                        <span class="text-xs px-3 py-1 rounded-full font-medium {{ $ocupacion->vehiculo ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-500/20 text-gray-400' }}">
-                            {{ $ocupacion->vehiculo ? 'Vehículo' : 'Peatón' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-gray-300 font-mono uppercase">{{ $ocupacion->patente ?? '-' }}</td>
-                    <td class="px-6 py-4 text-gray-300">${{ number_format($ocupacion->total, 0, '', '.') }}</td>
-                    <td class="px-6 py-4">
-                        <span class="text-xs px-3 py-1 rounded-full font-medium {{ $ocupacion->fecha_fin ? 'bg-gray-500/20 text-gray-400' : 'bg-green-500/20 text-green-400' }}">
-                            {{ $ocupacion->fecha_fin ? 'Finalizada' : 'Activa' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-right space-x-2">
-                        <a href="{{ route('admin.ocupaciones.show', $ocupacion) }}" class="text-[#D4AF37] hover:text-white transition-colors text-sm font-medium">Ver</a>
-                        <form action="{{ route('admin.ocupaciones.destroy', $ocupacion) }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar esta ocupación?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-red-400 hover:text-red-300 transition-colors text-sm font-medium">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div class="mt-6">
-    {{ $ocupaciones->links() }}
 </div>
 @endsection
+
+@push('scripts')
+<script>
+const OcupacionesManager = {
+    table: null,
+
+    init: function() {
+        this.initDataTable();
+        this.bindEvents();
+    },
+
+    initDataTable: function() {
+        var self = this;
+        this.table = $('#ocupaciones-table').DataTable({
+            processing: true,
+            serverSide: false,
+            ajax: { url: '/admin/ocupaciones-json', dataSrc: function(json) { return json; } },
+            responsive: true,
+            autoWidth: false,
+            order: [],
+            columns: [
+                { data: 'habitacion' },
+                { data: 'fecha_inicio' },
+                { data: 'fecha_fin' },
+                { data: 'tarifa' },
+                { data: 'clientes', className: 'text-center' },
+                { data: 'vehiculo',
+                    render: function(data) {
+                        var cls = data ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-500/20 text-gray-400';
+                        return '<span class="inline-block text-xs px-3 py-1 rounded-full font-medium ' + cls + '">' + (data ? 'Vehículo' : 'Peatón') + '</span>';
+                    }
+                },
+                { data: 'patente', className: 'font-mono uppercase' },
+                { data: 'total' },
+                { data: 'activa',
+                    render: function(data) {
+                        var cls = data ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400';
+                        return '<span class="inline-block text-xs px-3 py-1 rounded-full font-medium ' + cls + '">' + (data ? 'Activa' : 'Finalizada') + '</span>';
+                    }
+                },
+                { data: null,
+                    render: function(row) {
+                        return '<a href="/admin/ocupaciones/' + row.id + '" class="btn btn-xs btn-outline-info me-1" title="Ver"><i class="fas fa-eye"></i></a>' +
+                               '<button class="accion-eliminar btn btn-xs btn-outline-danger" data-id="' + row.id + '" title="Eliminar"><i class="fas fa-trash-alt"></i></button>';
+                    },
+                    orderable: false
+                }
+            ],
+            language: {
+                decimal: ',',
+                thousands: '.',
+                lengthMenu: 'Mostrar _MENU_ registros',
+                zeroRecords: 'No se encontraron resultados',
+                info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+                infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+                infoFiltered: '(filtrado de _MAX_ registros totales)',
+                infoThousands: '.',
+                loadingRecords: 'Cargando...',
+                processing: 'Procesando...',
+                search: 'Buscar:',
+                paginate: {
+                    first: 'Primero',
+                    last: 'Último',
+                    next: 'Siguiente',
+                    previous: 'Anterior'
+                },
+            }
+        });
+    },
+
+    bindEvents: function() {
+        var self = this;
+
+        $(document).on('click', '.accion-eliminar', function() {
+            var id = parseInt($(this).data('id'));
+            Swal.fire({
+                title: '¿Eliminar ocupación?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+            }).then(function(result) {
+                if (!result.isConfirmed) return;
+                fetch('/admin/ocupaciones/' + id, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: new URLSearchParams({ _method: 'DELETE' }),
+                }).then(function() {
+                    self.table.ajax.reload();
+                    Swal.fire({ icon: 'success', title: 'Ocupación eliminada', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+                }).catch(function() { location.reload(); });
+            });
+        });
+    },
+};
+
+document.addEventListener('DOMContentLoaded', function() { OcupacionesManager.init(); });
+</script>
+@endpush

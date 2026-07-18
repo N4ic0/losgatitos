@@ -96,12 +96,12 @@
                     </div>
                     <span class="label-dash hidden text-sm whitespace-nowrap">Productos</span>
                 </a>
-                <a href="{{ route('admin.promocion-productos.index') }}" class="nav-link-dash flex items-center h-10 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200 {{ request()->routeIs('admin.promocion-productos.*') ? 'bg-white/5 text-[#D4AF37]' : '' }}" title="Paquetes">
+                <!-- <a href="{{ route('admin.promocion-productos.index') }}" class="nav-link-dash flex items-center h-10 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200 {{ request()->routeIs('admin.promocion-productos.*') ? 'bg-white/5 text-[#D4AF37]' : '' }}" title="Paquetes">
                     <div class="icon-wrap-dash flex items-center justify-center w-10 shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                     </div>
                     <span class="label-dash hidden text-sm whitespace-nowrap">Paquetes</span>
-                </a>
+                </a> -->
                 <a href="{{ route('admin.ocupaciones.index') }}" class="nav-link-dash flex items-center h-10 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200 {{ request()->routeIs('admin.ocupaciones.*') ? 'bg-white/5 text-[#D4AF37]' : '' }}" title="Ocupaciones">
                     <div class="icon-wrap-dash flex items-center justify-center w-10 shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>

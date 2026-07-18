@@ -37,6 +37,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
     // Rooms
+    Route::get('habitaciones-json', [HabitacionController::class, 'data'])->name('habitaciones.data');
+    Route::get('habitaciones/{habitacion}/data', [HabitacionController::class, 'getJson'])->name('habitaciones.getJson');
     Route::resource('habitaciones', HabitacionController::class)->parameters(['habitaciones' => 'habitacion'])->except(['show']);
 
     // Reservations
@@ -77,15 +79,19 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update');
 
     // Occupations
+    Route::get('ocupaciones-json', [OcupacionController::class, 'data'])->name('ocupaciones.data');
     Route::resource('ocupaciones', OcupacionController::class)->parameters(['ocupaciones' => 'ocupacion'])->only(['index', 'show', 'destroy']);
 
     // Roles
     Route::resource('roles', RoleController::class)->parameters(['roles' => 'role']);
 
     // Users
+    Route::get('usuarios-json', [UserController::class, 'data'])->name('usuarios.data');
+    Route::get('usuarios/{user}/data', [UserController::class, 'getJson'])->name('usuarios.getJson');
     Route::resource('usuarios', UserController::class)->parameters(['usuarios' => 'user']);
 
     // Holidays
+    Route::get('feriados-json', [FeriadoController::class, 'data'])->name('feriados.data');
     Route::resource('feriados', FeriadoController::class)->only(['index', 'store', 'destroy']);
     Route::post('feriados/importar', [FeriadoController::class, 'importar'])->name('feriados.importar');
 

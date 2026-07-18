@@ -3,8 +3,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Ocupacion;
 use App\Models\Habitacion;
-use App\Models\Tarifa;
-use App\Models\Promocion;
 use App\Services\AuditoriaService;
 use Illuminate\Http\Request;
 
@@ -14,34 +12,29 @@ class OcupacionController extends Controller
         private AuditoriaService $auditoriaService
     ) {}
 
-    public function index(Request $request)
+    public function index()
     {
-        $query = Ocupacion::with('habitacion', 'tarifa', 'promocion', 'clientes');
+        return view('admin.ocupaciones.index');
+    }
 
-        if ($request->filled('habitacion_id')) {
-            $query->where('habitacion_id', $request->habitacion_id);
-        }
+    public function data()
+    {
+        $ocupaciones = Ocupacion::with('habitacion', 'tarifa', 'promocion', 'clientes')
+            ->orderBy('fecha_inicio', 'desc')
+            ->get();
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha_inicio', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha_inicio', '<=', $request->fecha_hasta);
-        }
-
-        if ($request->filled('estado')) {
-            if ($request->estado === 'activa') {
-                $query->whereNull('fecha_fin');
-            } elseif ($request->estado === 'finalizada') {
-                $query->whereNotNull('fecha_fin');
-            }
-        }
-
-        $ocupaciones = $query->orderBy('fecha_inicio', 'desc')->paginate(20);
-        $habitaciones = Habitacion::orderBy('numero')->get();
-
-        return view('admin.ocupaciones.index', compact('ocupaciones', 'habitaciones'));
+        return response()->json($ocupaciones->map(fn($o) => [
+            'id' => $o->id,
+            'habitacion' => $o->habitacion?->numero ?? '-',
+            'fecha_inicio' => $o->fecha_inicio->format('d/m/Y H:i'),
+            'fecha_fin' => $o->fecha_fin?->format('d/m/Y H:i') ?? '-',
+            'tarifa' => $o->tarifa?->tipo_tiempo ?? '-',
+            'clientes' => $o->clientes->count(),
+            'vehiculo' => $o->vehiculo,
+            'patente' => $o->patente ?? '-',
+            'total' => '$' . number_format($o->total, 0, '', '.'),
+            'activa' => $o->fecha_fin === null,
+        ]));
     }
 
     public function show(Ocupacion $ocupacion)
@@ -54,6 +47,9 @@ class OcupacionController extends Controller
     {
         $this->auditoriaService->registrar('eliminar', 'ocupaciones', $ocupacion->id, $ocupacion->toArray(), null);
         $ocupacion->delete();
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Ocupación eliminada.']);
+        }
         return redirect()->route('admin.ocupaciones.index')->with('success', 'Ocupación eliminada.');
     }
 }

@@ -90,8 +90,7 @@ table.dataTable tbody tr.dt-hasChild { background: rgba(212,175,55,0.05); }
 </div>
 
 <div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/5 p-4">
-    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-        <table id="promociones-table" class="display responsive w-full" style="width:100%; min-width: 700px;">
+        <table id="promociones-table" class="display responsive w-full" style="width:100%;">
             <thead>
                 <tr>
                     <th>Título</th>
@@ -108,7 +107,6 @@ table.dataTable tbody tr.dt-hasChild { background: rgba(212,175,55,0.05); }
             <tbody>
             </tbody>
         </table>
-    </div>
 </div>
 
 {{-- Modal Promoción --}}
