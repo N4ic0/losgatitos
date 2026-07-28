@@ -58,8 +58,7 @@ jobs:
             set net:reconnect-interval-base 15
             set mirror:parallel-transfer-count 10
             set mirror:use-pget-n 10
-            set mirror:fail-retry yes
-            open -u \"\$FTP_USER\",\"\$FTP_PASS\" \$FTP_HOST
+            open -u \"$FTP_USER\",\"$FTP_PASS\" $FTP_HOST
             mirror -R \
               --exclude public_html/ \
               --verbose \
