@@ -16,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup PHP (8.3 = server version)
+      - name: Setup PHP (8.4 para build, server parcheado para 8.3)
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.4
           extensions: mbstring, pdo_mysql, intl
 
       - name: Setup Node
