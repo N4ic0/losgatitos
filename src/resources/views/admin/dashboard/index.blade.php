@@ -7,51 +7,51 @@
     {{-- Stats --}}
     <div class="container-fluid px-0">
         {{-- Fila 1: 3 cards --}}
-        <div class="row row-cols-1 row-cols-sm-3 g-2 g-lg-3 mb-3">
+        <div class="row row-cols-1 row-cols-sm-3 g-2 g-lg-3 mb-2">
             <div class="col">
-                <div class="backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2);">
+                <div class="backdrop-blur-xl rounded-2xl p-2 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(255,255,255,0.15);">
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Disponibles</span>
-                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-emerald-400" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); transition: transform .3s;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <div class="w-7 h-7 rounded-xl d-flex align-items-center justify-content-center text-emerald-400" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                     </div>
-                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
-                        <span class="text-2xl lg:text-3xl fw-bolder text-emerald-400" style="letter-spacing: -0.025em;" data-stat="disponibles">{{ $disponibles }}</span>
+                    <div class="mt-1 d-flex align-items-baseline justify-content-between">
+                        <span class="text-xl lg:text-2xl fw-bolder text-emerald-400" style="letter-spacing: -0.025em;" data-stat="disponibles">{{ $disponibles }}</span>
                         <span class="small text-emerald-400/80 fw-medium px-2 py-0.5 rounded-pill" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25);">Listas</span>
                     </div>
                 </div>
             </div>
             <div class="col">
-                <div class="backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.2);">
+                <div class="backdrop-blur-xl rounded-2xl p-2 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(255,255,255,0.15);">
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Ocupadas</span>
-                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-rose-400" style="background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); transition: transform .3s;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <div class="w-7 h-7 rounded-xl d-flex align-items-center justify-content-center text-rose-400" style="background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                         </div>
                     </div>
-                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
-                        <span class="text-2xl lg:text-3xl fw-bolder text-rose-400" style="letter-spacing: -0.025em;" data-stat="ocupadas">{{ $ocupadas }}</span>
+                    <div class="mt-1 d-flex align-items-baseline justify-content-between">
+                        <span class="text-xl lg:text-2xl fw-bolder text-rose-400" style="letter-spacing: -0.025em;" data-stat="ocupadas">{{ $ocupadas }}</span>
                         <span class="small fw-medium px-2 py-0.5 rounded-pill" style="background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); color: rgba(244, 63, 94, 0.8);">En uso</span>
                     </div>
                 </div>
             </div>
             <div class="col">
-                <a href="{{ route('admin.reservas.create') }}" class="text-decoration-none backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group d-block" style="transition: all .3s; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2);">
+                <a href="{{ route('admin.reservas.create') }}" class="text-decoration-none backdrop-blur-xl rounded-2xl p-2 h-100 d-flex flex-column justify-content-between group d-block" style="transition: all .3s; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(255,255,255,0.15);">
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Reservadas</span>
-                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-amber-400" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); transition: transform .3s;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <div class="w-7 h-7 rounded-xl d-flex align-items-center justify-content-center text-amber-400" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
                     </div>
-                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
-                        <span class="text-2xl lg:text-3xl fw-bolder text-amber-400" style="letter-spacing: -0.025em;" data-stat="reservadas">{{ $reservadas }}</span>
+                    <div class="mt-1 d-flex align-items-baseline justify-content-between">
+                        <span class="text-xl lg:text-2xl fw-bolder text-amber-400" style="letter-spacing: -0.025em;" data-stat="reservadas">{{ $reservadas }}</span>
                         <span class="small fw-medium px-2 py-0.5 rounded-pill d-flex align-items-center gap-1" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); color: rgba(245, 158, 11, 0.8);">
                             <span>+ Crear</span>
                         </span>
@@ -63,33 +63,33 @@
         {{-- Fila 2: 2 cards centradas --}}
         <div class="row row-cols-1 row-cols-sm-2 g-2 g-lg-3 justify-content-center" style="max-width: 66.666%; margin: 0 auto;">
             <div class="col">
-                <div class="backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(14, 165, 233, 0.2);">
+                <div class="backdrop-blur-xl rounded-2xl p-2 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(255,255,255,0.15);">
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Limpieza</span>
-                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-sky-400" style="background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.25); transition: transform .3s;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <div class="w-7 h-7 rounded-xl d-flex align-items-center justify-content-center text-sky-400" style="background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4m10 0h4m-2-2v4m-5 12l-7-7 7-7 7 7-7 7z" />
                             </svg>
                         </div>
                     </div>
-                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
-                        <span class="text-2xl lg:text-3xl fw-bolder text-sky-400" style="letter-spacing: -0.025em;" data-stat="limpieza">{{ $limpieza }}</span>
+                    <div class="mt-1 d-flex align-items-baseline justify-content-between">
+                        <span class="text-xl lg:text-2xl fw-bolder text-sky-400" style="letter-spacing: -0.025em;" data-stat="limpieza">{{ $limpieza }}</span>
                         <span class="small fw-medium px-2 py-0.5 rounded-pill" style="background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.25); color: rgba(14, 165, 233, 0.8);">Aseo</span>
                     </div>
                 </div>
             </div>
             <div class="col">
-                <div class="backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group llegando-card {{ $transitos > 0 ? 'flash-card' : '' }}" style="transition: all .3s; cursor: default; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(249, 115, 22, 0.2);">
+                <div class="backdrop-blur-xl rounded-2xl p-2 h-100 d-flex flex-column justify-content-between group llegando-card {{ $transitos > 0 ? 'flash-card' : '' }}" style="transition: all .3s; cursor: default; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(255,255,255,0.15);">
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Llegando</span>
-                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-orange-400" style="background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.25); transition: transform .3s;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <div class="w-7 h-7 rounded-xl d-flex align-items-center justify-content-center text-orange-400" style="background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
                     </div>
-                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
-                        <span class="text-2xl lg:text-3xl fw-bolder text-orange-400" style="letter-spacing: -0.025em;" data-stat="transitos">{{ $transitos }}</span>
+                    <div class="mt-1 d-flex align-items-baseline justify-content-between">
+                        <span class="text-xl lg:text-2xl fw-bolder text-orange-400" style="letter-spacing: -0.025em;" data-stat="transitos">{{ $transitos }}</span>
                         <span class="small fw-medium px-2 py-0.5 rounded-pill" style="background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.25); color: rgba(249, 115, 22, 0.8);">Tránsito</span>
                     </div>
                 </div>
