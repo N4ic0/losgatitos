@@ -366,29 +366,22 @@ def flujo_sin_reserva():
 
 def loop_principal():
     print("=" * 50)
-    print("Kiosco Los Gatitos - Modo automático")
+    print("Kiosco Los Gatitos - Una ejecución por ciclo")
     print("Presioná el botón físico para activar")
     print("=" * 50)
 
-    while True:
-        try:
-            if not api_ping():
-                hablar("El sistema no está disponible. Contacta al administrador.")
-                time.sleep(30)
-                continue
+    try:
+        if not api_ping():
+            hablar("El sistema no está disponible. Contacta al administrador.")
+            return
 
-            esperar_boton()
-            flujo_bienvenida()
-            hablar("Gracias por tu visita. Que tengas una excelente estadía.")
-            print("[LOOP] Cliente atendido. Volviendo a esperar botón...\n")
-            time.sleep(2)
+        esperar_boton()
+        flujo_bienvenida()
+        hablar("Gracias por tu visita. Que tengas una excelente estadía.")
+        print("[LOOP] Cliente atendido. El programa ha finalizado.")
 
-        except KeyboardInterrupt:
-            print("\n[LOOP] Saliendo...")
-            break
-        except Exception as e:
-            print(f"[ERROR] {e}")
-            time.sleep(5)
+    except Exception as e:
+        print(f"[ERROR] {e}")
 
 
 if __name__ == "__main__":
