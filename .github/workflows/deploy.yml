@@ -53,7 +53,9 @@ jobs:
 
           lftp -c "
             set ftp:passive-mode off
-            set ftp:ssl-allow no
+            set ftp:ssl-allow yes
+            set ftp:ssl-force yes
+            set ftp:ssl-protect-data yes
             set net:timeout 300
             set net:max-retries 5
             set net:reconnect-interval-base 15
