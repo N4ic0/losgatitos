@@ -30,7 +30,7 @@ jobs:
           cache-dependency-path: src/package-lock.json
 
       - name: Install PHP dependencies
-        run: cd src && composer install --no-dev --optimize-autoloader
+        run: cd src && composer install --no-dev --optimize-autoloader --ignore-platform-req=php
 
       - name: Install Node dependencies & build assets
         run: cd src && npm ci && npm run build
