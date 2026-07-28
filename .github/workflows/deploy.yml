@@ -16,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup PHP
+      - name: Setup PHP (8.3 = server version)
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: 8.3
           extensions: mbstring, pdo_mysql, intl
 
       - name: Setup Node
@@ -35,6 +35,11 @@ jobs:
       - name: Install Node dependencies & build assets
         run: cd src && npm ci && npm run build
 
+      - name: Prepare files for FTP
+        run: |
+          cd src
+          cp public_html/.htaccess ./
+
       - name: Deploy via FTP
         env:
           FTP_USER: ${{ secrets.FTP_USER }}
@@ -48,24 +53,16 @@ jobs:
           lftp -c "
             set ftp:passive-mode off
             set ftp:ssl-allow no
-            set net:timeout 120
-            set net:max-retries 3
-            set net:reconnect-interval-base 10
-            set mirror:parallel-transfer-count 5
-            set mirror:use-pget-n 5
+            set net:timeout 300
+            set net:max-retries 5
+            set net:reconnect-interval-base 15
+            set mirror:parallel-transfer-count 10
+            set mirror:use-pget-n 10
+            set mirror:fail-retry yes
             open -u \"\$FTP_USER\",\"\$FTP_PASS\" \$FTP_HOST
             mirror -R \
-              --exclude .env \
-              --exclude .env.example \
-              --exclude .gitignore \
-              --exclude node_modules/ \
-              --exclude tests/ \
-              --exclude docker-compose.yml \
-              --exclude docker-compose.opencode.yml \
-              --exclude Dockerfile \
-              --exclude phpunit.xml \
-              --exclude README.md \
-              --delete \
+              --exclude public_html/ \
+              --verbose \
               . /
             quit
           "
