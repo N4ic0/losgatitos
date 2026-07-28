@@ -40,6 +40,21 @@ jobs:
           cd src
           cp public_html/.htaccess ./
 
+      - name: Debug FTP credentials
+        env:
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+        run: |
+          echo "User length: ${#FTP_USER}"
+          echo "Pass length: ${#FTP_PASS}"
+          echo "Host: $FTP_HOST"
+          echo "---"
+          sudo apt-get install -y -qq curl 2>/dev/null
+          echo "=== curl FTP test (plain) ==="
+          curl -v --connect-timeout 15 -u "$FTP_USER:$FTP_PASS" ftp://$FTP_HOST/ 2>&1 | head -30
+          echo "=== done ==="
+
       - name: Deploy via FTP
         env:
           FTP_USER: ${{ secrets.FTP_USER }}
@@ -50,15 +65,17 @@ jobs:
 
           cd src
 
-          lftp -c "
-            set ftp:passive-mode off
-            set ftp:ssl-allow no
-            set net:timeout 300
-            set net:max-retries 5
-            set net:reconnect-interval-base 15
-            set mirror:parallel-transfer-count 10
-            set mirror:use-pget-n 10
-            open -u $FTP_USER,$FTP_PASS $FTP_HOST
-            mirror -R --exclude public_html/ --verbose . /
-            quit
-          "
+          {
+            echo "set ftp:passive-mode off"
+            echo "set ftp:ssl-allow no"
+            echo "set net:timeout 300"
+            echo "set net:max-retries 5"
+            echo "set net:reconnect-interval-base 15"
+            echo "set mirror:parallel-transfer-count 10"
+            echo "set mirror:use-pget-n 10"
+            echo "open -u $FTP_USER,$FTP_PASS $FTP_HOST"
+            echo "mirror -R --exclude public_html/ --verbose . /"
+            echo "quit"
+          } > /tmp/lftp.cmd
+
+          lftp -f /tmp/lftp.cmd
