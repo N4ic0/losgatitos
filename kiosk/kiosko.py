@@ -47,6 +47,25 @@ audio_queue = queue.Queue()
 
 # ─── AUDIO ────────────────────────────────────────────────────────────
 
+PALABRAS_CUSTOM = ["suite", "suit", "si", "no", "si tengo", "no tengo",
+                   "correcto", "incorrecto", "equis"]
+
+
+def normalizar(texto):
+    """Corrige errores comunes del reconocimiento de voz."""
+    remplazos = {
+        "soy": "suite", "sui": "suite", "suid": "suite",
+        "suiche": "suite", "suit": "suite",
+        "si ten go": "si tengo", "si ten": "si tengo",
+        "no ten go": "no tengo", "no ten": "no tengo",
+        "equis": "x", "k": "k",
+        "correcta": "correcto", "cocierto": "correcto",
+    }
+    for mal, bien in remplazos.items():
+        texto = texto.replace(mal, bien)
+    return texto
+
+
 def iniciar_vosk():
     global modelo_voz, recognizer
     if not os.path.exists(VOSK_MODEL):
@@ -54,6 +73,8 @@ def iniciar_vosk():
         return False
     modelo_voz = vosk.Model(VOSK_MODEL)
     recognizer = vosk.KaldiRecognizer(modelo_voz, SAMPLE_RATE)
+    for palabra in PALABRAS_CUSTOM:
+        recognizer.SetWords(True)
     print("[VOSK] Modelo cargado")
     return True
 
@@ -65,7 +86,7 @@ def callback_audio(indata, frames, time_info, status):
 
 
 def escuchar(tiempo=LISTEN_SECONDS) -> str:
-    """Escucha y transcribe. Retorna texto en minúsculas."""
+    """Escucha y transcribe. Retorna texto normalizado en minúsculas."""
     if not recognizer:
         return ""
     with sd.RawInputStream(samplerate=SAMPLE_RATE, blocksize=8000,
@@ -80,12 +101,15 @@ def escuchar(tiempo=LISTEN_SECONDS) -> str:
     result = json.loads(recognizer.FinalResult())
     texto = result.get("text", "").strip().lower()
     if texto:
+        texto = normalizar(texto)
         print(f"[TRANSCRIPCION] {texto}")
     return texto
 
 
 def hablar(texto):
     """Sintetiza voz con Piper TTS."""
+    texto = texto.replace(" suite ", " suit ").replace(" suites ", " suits ")
+    texto = texto.replace("Suite", "Suit").replace("Suites", "Suits")
     if not os.path.exists(PIPER_MODEL):
         print(f"[TTS] {texto}")
         return
