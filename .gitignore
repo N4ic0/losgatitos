@@ -13,6 +13,9 @@
 /src/storage/app/public/promociones/*
 !/src/storage/app/public/promociones/.gitkeep
 
+.env.produccion
+deploy-produccion.ps1
+
 .DS_Store
 Thumbs.db
 *.swp
