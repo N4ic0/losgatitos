@@ -14,8 +14,12 @@ import queue
 from pathlib import Path
 
 import requests
-import RPi.GPIO as GPIO
 import sounddevice as sd
+try:
+    import RPi.GPIO as GPIO
+    GPIO_OK = True
+except ImportError:
+    GPIO_OK = False
 import numpy as np
 import vosk
 import wave
@@ -126,6 +130,9 @@ def hablar(texto):
 # ─── GPIO ─────────────────────────────────────────────────────────────
 
 def setup_gpio():
+    if not GPIO_OK:
+        print("[GPIO] RPi.GPIO no disponible - modo sin GPIO")
+        return
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(LED_PIN, GPIO.OUT)
@@ -407,6 +414,9 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if args.test_button:
+        if not GPIO_OK:
+            print("RPi.GPIO no disponible")
+            sys.exit(1)
         setup_gpio()
         print("Presioná el botón...")
         GPIO.wait_for_edge(BUTTON_PIN, GPIO.FALLING)
@@ -432,5 +442,6 @@ if __name__ == "__main__":
     try:
         loop_principal()
     finally:
-        GPIO.cleanup()
-        print("[GPIO] Limpiado")
+        if GPIO_OK:
+            GPIO.cleanup()
+            print("[GPIO] Limpiado")
