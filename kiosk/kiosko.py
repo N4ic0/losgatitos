@@ -326,26 +326,40 @@ def flujo_sin_reserva():
     suites = disp.get("suites", [])
     deptos = disp.get("departamentos", [])
 
-    mensaje = ""
-    if suites:
-        desde = min(s["tarifa"] for s in suites)
-        mensaje += f"Tenemos {len(suites)} suites disponibles desde {desde} pesos. "
-    else:
-        mensaje += "No tenemos suites disponibles. "
-
-    if deptos:
-        desde = min(d["tarifa"] for d in deptos)
-        mensaje += f"Y {len(deptos)} departamentos desde {desde} pesos. "
-    else:
-        mensaje += "Tampoco tenemos departamentos disponibles."
-
     if not suites and not deptos:
         hablar("Lo siento, no hay habitaciones disponibles en este momento.")
         return
 
-    mensaje += " Por favor, acércate a recepción para continuar."
-    hablar(mensaje)
-    print(f"[FLUJO] Disp: {len(suites)} suites, {len(deptos)} deptos")
+    if suites and deptos:
+        desde_s = min(s["tarifa"] for s in suites)
+        desde_d = min(d["tarifa"] for d in deptos)
+        hablar(f"Hay {len(deptos)} departamentos desde {desde_d} pesos. "
+               f"Y {len(suites)} suites desde {desde_s} pesos. "
+               "Decí 1 para departamento o 2 para suite.")
+        print("[FLUJO] Esperando opción (1=depto, 2=suite)...")
+        texto = escuchar(4)
+        if "1" in texto or "uno" in texto or "departamento" in texto:
+            seleccion = deptos
+            tipo = "departamento"
+        elif "2" in texto or "dos" in texto or "suite" in texto or "suit" in texto:
+            seleccion = suites
+            tipo = "suite"
+        else:
+            hablar("No entendí. Presiona el botón para empezar de nuevo.")
+            return
+    elif suites:
+        seleccion = suites
+        tipo = "suite"
+        hablar(f"Tenemos {len(suites)} suites disponibles desde "
+               f"{min(s['tarifa'] for s in suites)} pesos.")
+    else:
+        seleccion = deptos
+        tipo = "departamento"
+        hablar(f"Tenemos {len(deptos)} departamentos disponibles desde "
+               f"{min(d['tarifa'] for d in deptos)} pesos.")
+
+    hablar(f"Elegiste {tipo}. Acércate a recepción para continuar.")
+    print(f"[FLUJO] Selección: {tipo}, {len(seleccion)} disponibles")
 
 
 # ─── MAIN LOOP ────────────────────────────────────────────────────────
