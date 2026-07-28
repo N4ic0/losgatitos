@@ -389,6 +389,8 @@ if __name__ == "__main__":
     parser.add_argument("--test-voz", action="store_true", help="Prueba de micrófono")
     parser.add_argument("--test-ping", action="store_true", help="Prueba de conexión API")
     parser.add_argument("--test-button", action="store_true", help="Prueba de botón")
+    parser.add_argument("--no-button", action="store_true", help="Sin botón físico (modo SSH / solo voz)")
+    parser.add_argument("--test-rut", type=str, help="Simula RUT para probar (sin micrófono)")
     args = parser.parse_args()
 
     if args.test_voz:
@@ -411,6 +413,18 @@ if __name__ == "__main__":
         print("Botón detectado!")
         GPIO.cleanup()
         sys.exit(0)
+
+    if args.no_button:
+        print("[MODO] Sin botón - solo voz, ideal para SSH")
+        iniciar_vosk()
+        try:
+            if not api_ping():
+                print("[ERROR] Sistema no disponible")
+                sys.exit(1)
+            flujo_bienvenida()
+            print("[OK] Cliente atendido. Listo.")
+        finally:
+            sys.exit(0)
 
     setup_gpio()
     iniciar_vosk()
