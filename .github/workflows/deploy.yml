@@ -59,7 +59,7 @@ jobs:
             set net:reconnect-interval-base 15
             set mirror:parallel-transfer-count 10
             set mirror:use-pget-n 10
-            open -u $FTP_USER, $FTP_HOST
+            open -u $FTP_USER $FTP_HOST
             mirror -R --exclude public_html/ --verbose . /
             quit
           "
