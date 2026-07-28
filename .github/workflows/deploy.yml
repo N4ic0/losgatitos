@@ -1,7 +1,7 @@
-name: Deploy a Produccion
+name: CI
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,37 +35,9 @@ jobs:
       - name: Install Node dependencies & build assets
         run: cd src && npm ci && npm run build
 
-      - name: Deploy via FTP (lftp active mode)
-        env:
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_HOST: ${{ secrets.FTP_HOST }}
+      - name: Verify build output
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq lftp 2>/dev/null
-
-          cd src
-
-          lftp -c "
-            set ftp:passive-mode off
-            set ftp:ssl-allow no
-            set net:timeout 120
-            set net:max-retries 3
-            set net:reconnect-interval-base 10
-            set mirror:parallel-transfer-count 5
-            set mirror:use-pget-n 5
-            open -u \"$FTP_USER\",\"$FTP_PASS\" $FTP_HOST
-            mirror -R \
-              --exclude .env \
-              --exclude .env.example \
-              --exclude .gitignore \
-              --exclude node_modules/ \
-              --exclude tests/ \
-              --exclude docker-compose.yml \
-              --exclude docker-compose.opencode.yml \
-              --exclude Dockerfile \
-              --exclude phpunit.xml \
-              --exclude README.md \
-              --delete \
-              . /
-            quit
-          "
+          echo "Build files:"
+          ls -la src/public/build/
+          echo "Manifest:"
+          cat src/public/build/manifest.json | head -5
