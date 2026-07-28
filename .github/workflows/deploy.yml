@@ -31,25 +31,35 @@ jobs:
       - name: Install Node dependencies & build assets
         run: cd src && npm ci && npm run build
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: src/
-          server-dir: /
-          dangerous-insecure-force-active: true
-          exclude: |
-            .env
-            .env.example
-            .gitignore
-            node_modules/
-            storage/logs/.gitignore
-            storage/framework/cache/data/.gitignore
-            tests/
-            docker-compose.yml
-            docker-compose.opencode.yml
-            Dockerfile
-            phpunit.xml
-            README.md
+      - name: Deploy via FTP (lftp active mode)
+        env:
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp 2>/dev/null
+
+          cd src
+
+          lftp -c "
+            set ftp:passive-mode off
+            set ftp:ssl-allow no
+            set net:timeout 120
+            set net:max-retries 3
+            set net:reconnect-interval-base 10
+            open -u \"$FTP_USER\",\"$FTP_PASS\" $FTP_HOST
+            mirror -R -v \
+              --exclude .env \
+              --exclude .env.example \
+              --exclude .gitignore \
+              --exclude node_modules/ \
+              --exclude tests/ \
+              --exclude docker-compose.yml \
+              --exclude docker-compose.opencode.yml \
+              --exclude Dockerfile \
+              --exclude phpunit.xml \
+              --exclude README.md \
+              --delete \
+              . /
+            quit
+          "
