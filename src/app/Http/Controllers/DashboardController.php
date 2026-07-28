@@ -32,7 +32,7 @@ class DashboardController extends Controller
 
     public function cambiarEstado(Request $request, Habitacion $habitacion)
     {
-        $request->validate(['estado' => 'required|in:Disponible,Reservada,Ocupada,Limpieza,Mantenimiento']);
+        $request->validate(['estado' => 'required|in:Disponible,Reservada,Ocupada,Limpieza,Mantenimiento,Transito']);
 
         if ($habitacion->estado === 'Ocupada' && $request->estado !== 'Disponible') {
             return response()->json(['error' => 'Debe finalizar la ocupación primero.'], 422);

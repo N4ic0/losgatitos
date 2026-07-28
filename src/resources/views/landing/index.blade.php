@@ -19,7 +19,7 @@
             Tu momento perfecto te espera. Disfruta de una experiencia única en un ambiente de lujo y privacidad.
         </p>
         <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="600" class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="{{ route('landing.reservar') }}" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-bold px-10 py-4 rounded-full transition-all duration-300 text-lg shadow-lg shadow-[#D4AF37]/30 hover:shadow-[#D4AF37]/50 hover:scale-105">Reservar Ahora</a>
+            {{-- <a href="{{ route('landing.reservar') }}" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-bold px-10 py-4 rounded-full transition-all duration-300 text-lg shadow-lg shadow-[#D4AF37]/30 hover:shadow-[#D4AF37]/50 hover:scale-105">Reservar Ahora</a> --}}
             <a href="{{ route('landing.habitaciones') }}" class="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-10 py-4 rounded-full transition-all duration-300 text-lg border border-white/20">Ver Habitaciones</a>
             <a href="{{ route('landing.promociones') }}" class="text-[#D4AF37] hover:text-white font-semibold px-6 py-4 transition-all duration-300 text-lg">Promociones →</a>
         </div>
@@ -30,14 +30,22 @@
             $deptoCount = $habitaciones->where('categoria', 'Departamento')->count();
             $totalDisponibles = $suiteCount + $deptoCount;
         @endphp
-        <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="800" class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">
-            <div class="bg-white/5 backdrop-blur-xl rounded-2xl px-8 py-5 border border-white/10 min-w-[200px] text-center">
-                <p class="text-[#D4AF37] text-3xl font-bold">{{ $suiteCount }}</p>
-                <p class="text-gray-400 text-sm mt-1">Suite Disponible{{ $suiteCount !== 1 ? 's' : '' }}</p>
+        <div id="availability-widget" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="800" class="mt-4 sm:mt-6 flex flex-row sm:flex-row items-center justify-center gap-3 sm:gap-3">
+            <div class="bg-white/5 backdrop-blur-xl rounded-lg sm:rounded-2xl px-4 sm:px-8 py-2 sm:py-5 border border-white/10 min-w-[100px] sm:min-w-[200px] text-center">
+                @if($suiteCount > 0)
+                <p class="text-[#D4AF37] text-3xl sm:text-6xl font-bold" id="suite-count">{{ $suiteCount }}</p>
+                @else
+                <i class="fas fa-times-circle text-red-500 text-xl sm:text-6xl" id="suite-count-icon"></i>
+                @endif
+                <p class="text-gray-400 text-[10px] sm:text-sm mt-0.5 sm:mt-1">Suite{{ $suiteCount !== 1 ? 's' : '' }} Disponible{{ $suiteCount !== 1 ? 's' : '' }}</p>
             </div>
-            <div class="bg-white/5 backdrop-blur-xl rounded-2xl px-8 py-5 border border-white/10 min-w-[200px] text-center">
-                <p class="text-[#D4AF37] text-3xl font-bold">{{ $deptoCount }}</p>
-                <p class="text-gray-400 text-sm mt-1">Departamento Disponible{{ $deptoCount !== 1 ? 's' : '' }}</p>
+            <div class="bg-white/5 backdrop-blur-xl rounded-lg sm:rounded-2xl px-4 sm:px-8 py-2 sm:py-5 border border-white/10 min-w-[100px] sm:min-w-[200px] text-center">
+                @if($deptoCount > 0)
+                <p class="text-[#D4AF37] text-3xl sm:text-6xl font-bold" id="depto-count">{{ $deptoCount }}</p>
+                @else
+                <i class="fas fa-times-circle text-rsed-500 text-xl sm:text-6xl" id="depto-count-icon"></i>
+                @endif
+                <p class="text-gray-400 text-[10px] sm:text-sm mt-0.5 sm:mt-1">Depto{{ $deptoCount !== 1 ? 's' : '' }} Disponible{{ $deptoCount !== 1 ? 's' : '' }}</p>
             </div>
         </div>
     </div>
@@ -57,35 +65,35 @@
             <p class="text-gray-400 mt-4 max-w-2xl mx-auto">Descubre nuestras suites y departamentos diseñados para brindarte la mejor experiencia.</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div data-aos="fade-right" class="group bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-[#D4AF37]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#D4AF37]/5">
-                <div class="w-16 h-16 bg-[#D4AF37]/10 rounded-2xl flex items-center justify-center mb-6">
-                    <svg class="w-8 h-8 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            <div data-aos="fade-right" class="group bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-white/10 hover:border-[#D4AF37]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#D4AF37]/5">
+                <div class="w-10 h-10 sm:w-16 sm:h-16 bg-[#D4AF37]/10 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-6">
+                    <svg class="w-5 h-5 sm:w-8 sm:h-8 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 </div>
-                <h3 class="text-2xl font-bold text-white mb-3">Suite</h3>
-                <p class="text-gray-400 mb-6">Ambiente íntimo y acogedor. Perfecta para parejas que buscan una experiencia inolvidable.</p>
-                <ul class="space-y-2 text-sm text-gray-400 mb-6">
-                    <li class="flex items-center"><svg class="w-4 h-4 text-[#D4AF37] mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Cama King Size</li>
-                    <li class="flex items-center"><svg class="w-4 h-4 text-[#D4AF37] mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Jacuzzi</li>
-                    <li class="flex items-center"><svg class="w-4 h-4 text-[#D4AF37] mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> TV LED 50"</li>
-                    <li class="flex items-center"><svg class="w-4 h-4 text-[#D4AF37] mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Aire Acondicionado</li>
+                <h3 class="text-base sm:text-2xl font-bold text-white mb-2 sm:mb-3">Suite</h3>
+                <p class="text-gray-400 text-xs sm:text-base mb-4 sm:mb-6">Ambiente íntimo y acogedor. Perfecta para parejas que buscan una experiencia inolvidable.</p>
+                <ul class="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-400 mb-4 sm:mb-6">
+                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Cama King Size</li>
+                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Jacuzzi</li>
+                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> TV LED 50"</li>
+                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Aire Acondicionado</li>
                 </ul>
-                <p class="text-2xl font-bold text-[#D4AF37]">Desde $44.200</p>
-                <p class="text-gray-500 text-sm mt-1">8 horas</p>
+                <p class="text-lg sm:text-2xl font-bold text-[#D4AF37]">Desde $44.200</p>
+                <p class="text-gray-500 text-xs sm:text-sm mt-1">8 horas</p>
             </div>
-            <div data-aos="fade-left" class="group bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-[#D4AF37]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#D4AF37]/5">
-                <div class="w-16 h-16 bg-[#D4AF37]/10 rounded-2xl flex items-center justify-center mb-6">
-                    <svg class="w-8 h-8 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <div data-aos="fade-left" class="group bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-white/10 hover:border-[#D4AF37]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#D4AF37]/5">
+                <div class="w-10 h-10 sm:w-16 sm:h-16 bg-[#D4AF37]/10 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-6">
+                    <svg class="w-5 h-5 sm:w-8 sm:h-8 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 </div>
-                <h3 class="text-2xl font-bold text-white mb-3">Departamento</h3>
-                <p class="text-gray-400 mb-6">Más espacio y comodidad. Ideal para quienes buscan una estadía prolongada con todas las facilidades.</p>
-                <ul class="space-y-2 text-sm text-gray-400 mb-6">
-                    <li class="flex items-center"><svg class="w-4 h-4 text-[#D4AF37] mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Sala de Estar</li>
-                    <li class="flex items-center"><svg class="w-4 h-4 text-[#D4AF37] mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Hidromasaje</li>
-                    <li class="flex items-center"><svg class="w-4 h-4 text-[#D4AF37] mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Mini Bar</li>
-                    <li class="flex items-center"><svg class="w-4 h-4 text-[#D4AF37] mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Wifi Premium</li>
+                <h3 class="text-base sm:text-2xl font-bold text-white mb-2 sm:mb-3">Departamento</h3>
+                <p class="text-gray-400 text-xs sm:text-base mb-4 sm:mb-6">Más espacio y comodidad. Ideal para quienes buscan una estadía prolongada con todas las facilidades.</p>
+                <ul class="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-400 mb-4 sm:mb-6">
+                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Sala de Estar</li>
+                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Hidromasaje</li>
+                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Mini Bar</li>
+                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Wifi Premium</li>
                 </ul>
-                <p class="text-2xl font-bold text-[#D4AF37]">Desde $49.200</p>
-                <p class="text-gray-500 text-sm mt-1">8 horas</p>
+                <p class="text-lg sm:text-2xl font-bold text-[#D4AF37]">Desde $49.200</p>
+                <p class="text-gray-500 text-xs sm:text-sm mt-1">8 horas</p>
             </div>
         </div>
     </div>
@@ -105,7 +113,7 @@
                 $servicios = [
                     ['icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => '24 Horas', 'desc' => 'Atención y check-in las 24 horas del día'],
                     ['icon' => 'M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3', 'title' => 'Estacionamiento', 'desc' => 'Estacionamiento privado y seguro'],
-                    ['icon' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'title' => 'TV & Streaming', 'desc' => 'TV LED con Netflix y Disney+'],
+                    ['icon' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'title' => 'TV & Smart TV', 'desc' => 'TV LED con Netflix y YouTube'],
                     ['icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', 'title' => 'WiFi Premium', 'desc' => 'Internet de alta velocidad gratuito'],
                 ];
             @endphp
@@ -230,7 +238,7 @@
                 <span class="text-[#D4AF37] uppercase tracking-[0.2em] text-xs font-semibold">Promoción Especial</span>
                 <h3 class="text-2xl font-bold text-white mt-3 mb-4">{{ $promocionActiva->titulo }}</h3>
                 <p class="text-gray-300 text-sm leading-relaxed mb-6">{{ $promocionActiva->descripcion }}</p>
-                <a href="{{ route('landing.reservar') }}" class="inline-block bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-bold px-8 py-3 rounded-full transition-all duration-300">Aprovechar Oferta</a>
+                {{-- <a href="{{ route('landing.reservar') }}" class="inline-block bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-bold px-8 py-3 rounded-full transition-all duration-300">Aprovechar Oferta</a> --}}
             </div>
         </div>
     </div>
@@ -255,4 +263,39 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 @endpush
 @endif
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function actualizarDisponibilidad() {
+        fetch('/disponibilidad')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                var suiteEl = document.getElementById('suite-count');
+                var suiteIcon = document.getElementById('suite-count-icon');
+                var deptoEl = document.getElementById('depto-count');
+                var deptoIcon = document.getElementById('depto-count-icon');
+
+                if (suiteEl) {
+                    suiteEl.textContent = data.suites;
+                    suiteEl.className = data.suites > 0 ? 'text-[#D4AF37] text-xl sm:text-3xl font-bold' : 'hidden';
+                }
+                if (suiteIcon) {
+                    suiteIcon.className = data.suites > 0 ? 'hidden' : 'fas fa-times-circle text-red-500 text-xl sm:text-4xl';
+                }
+                if (deptoEl) {
+                    deptoEl.textContent = data.departamentos;
+                    deptoEl.className = data.departamentos > 0 ? 'text-[#D4AF37] text-xl sm:text-3xl font-bold' : 'hidden';
+                }
+                if (deptoIcon) {
+                    deptoIcon.className = data.departamentos > 0 ? 'hidden' : 'fas fa-times-circle text-red-500 text-xl sm:text-4xl';
+                }
+            })
+            .catch(function(err) { console.error('Error al actualizar disponibilidad:', err); });
+    }
+
+    setInterval(actualizarDisponibilidad, 30000);
+});
+</script>
+@endpush
 @endsection

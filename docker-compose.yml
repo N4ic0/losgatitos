@@ -5,7 +5,7 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: laravel_app
     volumes:
-      - ./src:/var/www/html
+      - losgatitos_src:/var/www/html
     networks:
       - laravel
 
@@ -15,7 +15,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./src:/var/www/html
+      - losgatitos_src:/var/www/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
@@ -41,4 +41,7 @@ networks:
   laravel:
 
 volumes:
+  losgatitos_src:
+    name: losgatitos_src
   db_data:
+    name: losgatitos_db_data

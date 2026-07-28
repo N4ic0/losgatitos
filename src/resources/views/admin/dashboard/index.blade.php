@@ -5,23 +5,95 @@
 @section('content')
 <div class="space-y-8">
     {{-- Stats --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 d-flex flex-column justify-content-center align-items-center">
-            <p class="text-gray-400 text-sm uppercase tracking-wider">Disponibles</p>
-            <p class="text-3xl font-bold text-green-400 mt-2">{{ $disponibles }}</p>
+    <div class="container-fluid px-0">
+        {{-- Fila 1: 3 cards --}}
+        <div class="row row-cols-1 row-cols-sm-3 g-2 g-lg-3 mb-3">
+            <div class="col">
+                <div class="backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Disponibles</span>
+                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-emerald-400" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
+                        <span class="text-2xl lg:text-3xl fw-bolder text-emerald-400" style="letter-spacing: -0.025em;" data-stat="disponibles">{{ $disponibles }}</span>
+                        <span class="small text-emerald-400/80 fw-medium px-2 py-0.5 rounded-pill" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25);">Listas</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.2);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Ocupadas</span>
+                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-rose-400" style="background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
+                        <span class="text-2xl lg:text-3xl fw-bolder text-rose-400" style="letter-spacing: -0.025em;" data-stat="ocupadas">{{ $ocupadas }}</span>
+                        <span class="small fw-medium px-2 py-0.5 rounded-pill" style="background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.25); color: rgba(244, 63, 94, 0.8);">En uso</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <a href="{{ route('admin.reservas.create') }}" class="text-decoration-none backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group d-block" style="transition: all .3s; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Reservadas</span>
+                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-amber-400" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
+                        <span class="text-2xl lg:text-3xl fw-bolder text-amber-400" style="letter-spacing: -0.025em;" data-stat="reservadas">{{ $reservadas }}</span>
+                        <span class="small fw-medium px-2 py-0.5 rounded-pill d-flex align-items-center gap-1" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); color: rgba(245, 158, 11, 0.8);">
+                            <span>+ Crear</span>
+                        </span>
+                    </div>
+                </a>
+            </div>
         </div>
-        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 d-flex flex-column justify-content-center align-items-center">
-            <p class="text-gray-400 text-sm uppercase tracking-wider">Ocupadas</p>
-            <p class="text-3xl font-bold text-red-400 mt-2">{{ $ocupadas }}</p>
-        </div>
-        <a href="{{ route('admin.reservas.create') }}" class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 hover:border-[#D4AF37]/30 transition-all duration-200 block d-flex flex-column justify-content-center align-items-center">
-            <p class="text-gray-400 text-sm uppercase tracking-wider">Reservadas</p>
-            <p class="text-3xl font-bold text-yellow-400 mt-2">{{ $reservadas }}</p>
-        </a>
-        <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/5 d-flex flex-column justify-content-center align-items-center">
-            <p class="text-gray-400 text-sm uppercase tracking-wider">Limpieza</p>
-            <p class="text-3xl font-bold text-blue-400 mt-2">{{ $limpieza }}</p>
+
+        {{-- Fila 2: 2 cards centradas --}}
+        <div class="row row-cols-1 row-cols-sm-2 g-2 g-lg-3 justify-content-center" style="max-width: 66.666%; margin: 0 auto;">
+            <div class="col">
+                <div class="backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(14, 165, 233, 0.2);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Limpieza</span>
+                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-sky-400" style="background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4m10 0h4m-2-2v4m-5 12l-7-7 7-7 7 7-7 7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
+                        <span class="text-2xl lg:text-3xl fw-bolder text-sky-400" style="letter-spacing: -0.025em;" data-stat="limpieza">{{ $limpieza }}</span>
+                        <span class="small fw-medium px-2 py-0.5 rounded-pill" style="background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.25); color: rgba(14, 165, 233, 0.8);">Aseo</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="backdrop-blur-xl rounded-2xl p-3 p-lg-4 h-100 d-flex flex-column justify-content-between group llegando-card {{ $transitos > 0 ? 'flash-card' : '' }}" style="transition: all .3s; cursor: default; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(249, 115, 22, 0.2);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="text-gray-400 text-xs fw-semibold text-uppercase tracking-wider">Llegando</span>
+                        <div class="w-8 h-8 rounded-xl d-flex align-items-center justify-content-center text-orange-400" style="background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.25); transition: transform .3s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-2 d-flex align-items-baseline justify-content-between">
+                        <span class="text-2xl lg:text-3xl fw-bolder text-orange-400" style="letter-spacing: -0.025em;" data-stat="transitos">{{ $transitos }}</span>
+                        <span class="small fw-medium px-2 py-0.5 rounded-pill" style="background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.25); color: rgba(249, 115, 22, 0.8);">Tránsito</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -30,7 +102,11 @@
         <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem;">
             @foreach($habitaciones as $habitacion)
             <div onclick="dashboard.abrirModal({{ $habitacion->id }})"
-                 class="cursor-pointer bg-white/5 backdrop-blur-xl rounded-xl px-3 py-2.5 border border-white/5 hover:border-[#D4AF37]/30 hover:bg-white/[0.07] transition-all duration-300 flex flex-col" style="min-height: 5rem;">
+                 class="cursor-pointer rounded-xl px-3 py-2.5 border flex flex-col transition-all duration-300
+                    @if($habitacion->estado === 'Disponible') bg-white/5 backdrop-blur-xl border-white/5 hover:border-[#D4AF37]/30 hover:bg-white/[0.07]
+                    @elseif($habitacion->estado === 'Transito') bg-black border-orange-500/40 transito-cell
+                    @else bg-white/5 backdrop-blur-xl border-white/5 hover:border-[#D4AF37]/30 hover:bg-white/[0.07] @endif"
+                 style="min-height: 5rem;">
                 <div class="flex items-center justify-between">
                     <span class="text-white font-bold text-sm">{{ $habitacion->numero }}</span>
                     <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium
@@ -38,8 +114,9 @@
                         @elseif($habitacion->estado === 'Ocupada') bg-red-500/20 text-red-400
                         @elseif($habitacion->estado === 'Reservada') bg-yellow-500/20 text-yellow-400
                         @elseif($habitacion->estado === 'Limpieza') bg-blue-500/20 text-blue-400
+                        @elseif($habitacion->estado === 'Transito') bg-orange-500/20 text-orange-400 transito-badge
                         @else bg-gray-500/20 text-gray-400 @endif">
-                        {{ $habitacion->estado }}
+                        @if($habitacion->estado === 'Transito') LLEGANDO @else {{ $habitacion->estado }} @endif
                     </span>
                 </div>
                 <p class="text-gray-400 text-[10px] leading-tight mt-0.5">{{ $habitacion->categoria }}</p>
@@ -79,7 +156,7 @@ class DashboardManager {
         this.activeTab = 'estado';
         this.productos = [];
         this.promociones = [];
-        this.tipoTiempo = '8h';
+        this.tipoTiempo = '3h';
         this.tarifaInfo = null;
         this.personasAdicionales = 0;
         this.ocupacionVehiculo = 1;
@@ -90,6 +167,8 @@ class DashboardManager {
         this.clienteDocumento = '';
         this.rutValido = null;
         this.consumoSelectorOpen = false;
+        this.horasAdicionales = 0;
+        this.precioHoraAdicional = 5500;
         this.categoriaFiltro = null;
         this.promocionesAplicables = [];
         this.cortesiaAdded = false;
@@ -163,9 +242,11 @@ class DashboardManager {
         this.habitacionId = id;
         this.loading = true;
         this.activeTab = 'estado';
-        this.tipoTiempo = '8h';
+        this.tipoTiempo = '3h';
         this.tarifaInfo = null;
         this.personasAdicionales = 0;
+        this.horasAdicionales = 0;
+        this.precioHoraAdicional = 5500;
         this.cortesiaAdded = false;
         this._tieneCortesiaBackend = false;
 
@@ -277,7 +358,7 @@ class DashboardManager {
         const badge = document.getElementById('modal-hab-estado-badge');
         const color = this.estadoColor(this.habitacion.estado);
         badge.className = 'text-xs px-3 py-1 rounded-full font-medium bg-' + color + '-500/20 text-' + color + '-400';
-        badge.textContent = this.habitacion.estado;
+        badge.textContent = this.habitacion.estado === 'Transito' ? 'LLEGANDO' : this.habitacion.estado;
 
         const timerEl = document.getElementById('modal-timer');
         if (this.habitacion.ultimo_estado && this.habitacion.estado !== 'Disponible') {
@@ -291,18 +372,19 @@ class DashboardManager {
     }
 
     _renderEstadoTab() {
-        const estados = ['Disponible', 'Reservada', 'Ocupada', 'Limpieza'];
+        const estados = ['Disponible', 'Reservada', 'Ocupada', 'Transito', 'Limpieza'];
         const container = document.getElementById('estado-btns');
         if (!container) return;
         container.innerHTML = estados.map(est => {
             const isActive = this.habitacion && this.habitacion.estado === est;
+            const style = isActive
+                ? 'background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.5); color: #D4AF37; cursor: default; box-shadow: 0 0 20px rgba(212,175,55,0.15);'
+                : 'background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #9ca3af; cursor: pointer;';
             return '<button onclick="dashboard.cambiarEstado(\'' + est + '\')" ' +
-                   (isActive ? 'disabled ' : '') +
-                   'class="py-3 px-4 rounded-xl font-medium text-sm transition-all border ' +
-                   (isActive
-                       ? 'bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37] cursor-not-allowed'
-                       : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-[#D4AF37]/30') +
-                   '">' + est + '</button>';
+                   'style="' + style + '" ' +
+                   'class="py-3 px-4 rounded-xl font-medium text-sm transition-all border" ' +
+                   (isActive ? 'disabled' : '') + '>' +
+                   (est === 'Transito' ? 'LLEGANDO' : est) + '</button>';
         }).join('');
 
         const ocupacionSection = document.getElementById('estado-iniciar-ocupacion');
@@ -310,6 +392,13 @@ class DashboardManager {
             ocupacionSection.classList.remove('d-none');
         } else {
             ocupacionSection.classList.add('d-none');
+        }
+
+        const confirmSection = document.getElementById('estado-confirmar-llegada');
+        if (this.habitacion && this.habitacion.estado === 'Transito') {
+            confirmSection.classList.remove('d-none');
+        } else {
+            confirmSection.classList.add('d-none');
         }
 
         this._renderTarifaInfo();
@@ -356,9 +445,17 @@ class DashboardManager {
         document.querySelectorAll('.tipo-tiempo-btn').forEach(btn => {
             const tt = btn.dataset.tipoTiempo;
             if (tt === this.tipoTiempo) {
-                btn.className = 'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border bg-[#D4AF37]/30 border-[#D4AF37]/60 text-[#D4AF37] shadow-lg shadow-[#D4AF37]/20';
+                btn.style.cssText = 'background: rgba(212,175,55,0.3); border-color: rgba(212,175,55,0.6); color: #D4AF37; box-shadow: 0 0 20px rgba(212,175,55,0.2);';
             } else {
-                btn.className = 'flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20';
+                btn.style.cssText = 'background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #9ca3af;';
+            }
+        });
+        document.querySelectorAll('.tipo-tiempo-sm-btn').forEach(btn => {
+            const tt = btn.dataset.tipoTiempo;
+            if (tt === this.tipoTiempo) {
+                btn.style.cssText = 'background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.5); color: #D4AF37;';
+            } else {
+                btn.style.cssText = 'background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #9ca3af;';
             }
         });
     }
@@ -384,9 +481,16 @@ class DashboardManager {
         } catch(e) { console.error(e); }
     }
 
-    setTipoTiempo(tt) {
+    async setTipoTiempo(tt) {
         this.tipoTiempo = tt;
-        this.calcularTarifaPreview();
+        await this.calcularTarifaPreview();
+        if (this.ocupacion && this.tarifaInfo) {
+            this.ocupacion.precio_base = this.tarifaInfo.precio;
+            this.ocupacion.tarifa = this.ocupacion.tarifa || {};
+            this.ocupacion.tarifa.tipo_tiempo = tt;
+            this._renderOcupacionTab();
+            this._renderCobroTab();
+        }
         this._renderPersonasAdicionales();
     }
 
@@ -442,7 +546,28 @@ class DashboardManager {
         } catch(e) { console.error(e); }
     }
 
+    getPrecioHoraAdicional() {
+        const regla = this.tarifaInfo?.regla || '';
+        if (regla.includes('Viernes')) return 6000;
+        if (regla.includes('Sábado')) return 7000;
+        return 5500;
+    }
+
+    cambiarHorasAdicionales(delta) {
+        this.horasAdicionales = Math.max(0, this.horasAdicionales + delta);
+        this._renderCobroTab();
+    }
+
     async finalizarOcupacion() {
+        const pendiente = this.saldoPendiente();
+        if (pendiente > 0) {
+            const res = await Swal.fire({ icon: 'warning', title: 'Saldo pendiente de $' + (pendiente).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'), text: 'Debe saldar la cuenta antes de finalizar.', confirmButtonColor: '#D4AF37', confirmButtonText: 'Ir a Cobros', showCancelButton: true, cancelButtonText: 'Cancelar' });
+            if (res.isConfirmed) {
+                const tab = bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-cobro-btn'));
+                tab.show();
+            }
+            return;
+        }
         const confirm = await Swal.fire({ title: '¿Finalizar ocupación?', icon: 'question', showCancelButton: true, confirmButtonColor: '#D4AF37', confirmButtonText: 'Sí, finalizar' });
         if (!confirm.isConfirmed) return;
         try {
@@ -467,24 +592,28 @@ class DashboardManager {
         } catch(e) { console.error(e); }
     }
 
-    async tomarPromocion(promocion) {
+    async tomarPromocion(promocionId) {
+        const promo = (this.promocionesAplicables || []).find(p => p.id === promocionId);
+        if (!promo) return;
         try {
-            const res = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/tomar-promocion/' + promocion.id, {
+            const res = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/tomar-promocion/' + promocionId, {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
             });
             const data = await res.json();
             if (data.success) {
                 this.ocupacion = data.ocupacion;
+                this.ocupacion.productos_promocion_agregados = true;
                 this.promocionesAplicables = data.promociones_aplicables || [];
                 this._renderOcupacionTab();
-                Swal.fire({ icon: 'success', title: 'Promoción aplicada: ' + promocion.titulo, timer: 2000, showConfirmButton: false });
+                this._renderConsumosTab();
+                Swal.fire({ icon: 'success', title: 'Promoción aplicada: ' + promo.titulo, timer: 2000, showConfirmButton: false });
             }
         } catch(e) { console.error(e); }
     }
 
-    async agregarPromoProductos(promocion) {
-        const promocionId = promocion?.id || this.ocupacion?.promocion?.id;
+    async agregarPromoProductos(promocionId) {
+        if (!promocionId) promocionId = this.ocupacion?.promocion?.id;
         if (!promocionId) return;
         try {
             const res = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/productos-promocion', {
@@ -495,6 +624,7 @@ class DashboardManager {
             const data = await res.json();
             if (data.success) {
                 this.ocupacion = data.ocupacion;
+                this.ocupacion.productos_promocion_agregados = true;
                 this.promocionesAplicables = data.promociones_aplicables || [];
                 await this.recargarOcupacion();
             }
@@ -1113,6 +1243,7 @@ class DashboardManager {
         } else {
             promoActiva.classList.add('d-none');
         }
+        this._renderPersonasAdicionales();
     }
 
     _renderClientesTab() {
@@ -1172,7 +1303,9 @@ class DashboardManager {
         content.classList.remove('d-none');
 
         const promoBtnContainer = document.getElementById('consumos-promo-btns');
-        if (this.ocupacion.promocion && this.ocupacion.promocion.productos && this.ocupacion.promocion.productos.length > 0) {
+        if (this.ocupacion.productos_promocion_agregados) {
+            promoBtnContainer.innerHTML = '';
+        } else if (this.ocupacion.promocion && this.ocupacion.promocion.productos && this.ocupacion.promocion.productos.length > 0) {
             promoBtnContainer.innerHTML = '<button onclick="dashboard.agregarPromoProductos(dashboard.ocupacion.promocion)" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm">+ Agregar Promoción</button>';
         } else if (!this.ocupacion.promocion) {
             const promos = this.promocionesAplicables || [];
@@ -1232,6 +1365,13 @@ class DashboardManager {
 
         const consumosTotal = (this.ocupacion.consumos || []).filter(c => c.origen === 'Consumo').reduce((s, c) => s + c.total, 0);
         document.getElementById('cobro-consumos').textContent = this.formatCurrency(consumosTotal);
+
+        const horaAdicionalRow = document.getElementById('cobro-hora-adicional');
+        this.precioHoraAdicional = this.getPrecioHoraAdicional();
+        horaAdicionalRow.classList.remove('d-none');
+        horaAdicionalRow.classList.add('d-flex', 'justify-content-between', 'align-items-center');
+        document.getElementById('cobro-horas-adicionales-count').textContent = this.horasAdicionales;
+        document.getElementById('cobro-hora-adicional-precio').textContent = '(' + this.formatCurrency(this.precioHoraAdicional) + ' c/u)';
 
         const promoRow = document.getElementById('cobro-promo-row');
         if (this.ocupacion.promocion) {
@@ -1361,7 +1501,7 @@ class DashboardManager {
     }
 
     estadoColor(estado) {
-        const map = { Disponible: 'green', Ocupada: 'red', Reservada: 'yellow', Limpieza: 'blue', Mantenimiento: 'gray' };
+        const map = { Disponible: 'green', Ocupada: 'red', Reservada: 'yellow', Limpieza: 'blue', Mantenimiento: 'gray', Transito: 'orange' };
         return map[estado] || 'gray';
     }
 
@@ -1369,7 +1509,8 @@ class DashboardManager {
         if (!this.ocupacion) return 0;
         const base = this.ocupacion.precio_base || 0;
         const consumos = (this.ocupacion.consumos || []).filter(c => c.origen === 'Consumo').reduce((s, c) => s + c.total, 0);
-        return base + consumos;
+        const extras = (this.horasAdicionales || 0) * (this.precioHoraAdicional || 0);
+        return base + consumos + extras;
     }
 
     totalPagado() {
@@ -1387,5 +1528,32 @@ class DashboardManager {
 }
 
 window.dashboard = new DashboardManager();
+
+// Auto-refresh dashboard sin recargar (no cierra modals)
+(function() {
+    var actualizarDashboard = function() {
+        fetch(window.location.href)
+            .then(r => r.text())
+            .then(html => {
+                var d = new DOMParser().parseFromString(html, 'text/html');
+                // Actualizar contadores de stats
+                document.querySelectorAll('[data-stat]').forEach(function(el) {
+                    var key = el.getAttribute('data-stat');
+                    var nuevo = d.querySelector('[data-stat="' + key + '"]');
+                    if (nuevo) el.textContent = nuevo.textContent;
+                });
+                // Actualizar parpadeo de Llegando
+                var oldCard = document.querySelector('.llegando-card');
+                var newCard = d.querySelector('.llegando-card');
+                if (oldCard && newCard) {
+                    if (newCard.classList.contains('flash-card'))
+                        oldCard.classList.add('flash-card');
+                    else
+                        oldCard.classList.remove('flash-card');
+                }
+            }).catch(function() {});
+    };
+    setInterval(actualizarDashboard, 10000);
+})();
 </script>
 @endpush

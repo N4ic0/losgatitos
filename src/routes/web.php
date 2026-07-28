@@ -24,8 +24,7 @@ Route::get('/habitaciones', [LandingController::class, 'habitaciones'])->name('l
 Route::get('/promociones', [LandingController::class, 'promociones'])->name('landing.promociones');
 Route::get('/contacto', [LandingController::class, 'contacto'])->name('landing.contacto');
 Route::get('/reservar', [LandingController::class, 'reservar'])->name('landing.reservar');
-Route::post('/reservar', [ReservaController::class, 'store'])->name('landing.reservar.store');
-Route::post('/calcular-precio', [LandingController::class, 'calcularPrecio'])->name('landing.calcular-precio');
+Route::get('/disponibilidad', [LandingController::class, 'disponibilidad'])->name('landing.disponibilidad');
 
 // Dashboard redirect (Breeze compatibility)
 Route::get('/dashboard', function () {

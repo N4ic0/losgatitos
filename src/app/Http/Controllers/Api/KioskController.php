@@ -27,6 +27,29 @@ class KioskController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
+    public function reservasHoy(): JsonResponse
+    {
+        $hoy = now()->format('Y-m-d');
+        $reservas = Reserva::whereDate('fecha', $hoy)
+            ->whereIn('estado', ['Reservada', 'Ingresada'])
+            ->with('habitacion')
+            ->get();
+
+        return response()->json([
+            'tiene_reservas' => $reservas->isNotEmpty(),
+            'cantidad' => $reservas->count(),
+            'reservas' => $reservas->map(fn ($r) => [
+                'id' => $r->id,
+                'rut' => $r->rut,
+                'nombre' => $r->nombre,
+                'hora' => $r->hora?->format('H:i'),
+                'personas' => $r->personas,
+                'estado' => $r->estado,
+                'habitacion_numero' => $r->habitacion?->numero,
+            ]),
+        ]);
+    }
+
     public function disponibilidad(): JsonResponse
     {
         $habitaciones = $this->habitacionRepository->getDisponibles();
@@ -105,14 +128,14 @@ class KioskController extends Controller
         $estado = match ($request->estado) {
             'DISPONIBLE' => 'Disponible',
             'RESERVADA' => 'Reservada',
-            'TRANSITO' => 'Ocupada',
+            'TRANSITO' => 'Transito',
             'OCUPADA' => 'Ocupada',
             'LIMPIEZA' => 'Limpieza',
             default => null,
         };
 
         if ($request->estado === 'TRANSITO' && $habitacion->estado === 'Disponible') {
-            $ocupacion = $this->ocupacionService->iniciarOcupacion($habitacion);
+            $ocupacion = $this->ocupacionService->iniciarOcupacion($habitacion, '8h', 0, 'Transito');
             return response()->json([
                 'success' => true,
                 'estado' => 'TRANSITO',
@@ -161,11 +184,7 @@ class KioskController extends Controller
 
     private function obtenerTarifaMinima(string $categoria): int
     {
-        $tarifa = \App\Models\Tarifa::where('categoria', $categoria)
-            ->where('activo', true)
-            ->where('tipo_tiempo', '8h')
-            ->first();
-
-        return $tarifa?->precio_dj ?? 0;
+        $precios = $this->tarifaService->calcularPrecio($categoria, now()->format('Y-m-d'), '8h');
+        return $precios['precio_base'] ?? 0;
     }
 }

@@ -54,7 +54,19 @@
                 {{-- TAB: Estado --}}
                 <div class="tab-pane fade show active" id="tab-estado" role="tabpanel" aria-labelledby="tab-estado-btn">
                     <h3 class="text-white font-semibold mb-4">Cambiar Estado</h3>
-                    <div id="estado-btns" class="d-grid gap-3" style="grid-template-columns: repeat(4, 1fr);"></div>
+                    <div id="estado-btns" class="d-grid gap-3" style="grid-template-columns: repeat(5, 1fr);"></div>
+
+                    <div id="estado-confirmar-llegada" class="d-none mt-4 p-4" style="background: rgba(249, 115, 22, 0.1); border-radius: 0.75rem; border: 1px solid rgba(249, 115, 22, 0.3);">
+                        <h4 class="text-orange-400 font-bold mb-2" style="font-size: 1.1rem;">🚗 Cliente llegando</h4>
+                        <p class="text-gray-300 text-sm mb-3">Un cliente acaba de llegar y el portón se abrió. Confirme la llegada para iniciar la ocupación.</p>
+                        <div class="d-flex gap-2 mb-3">
+                            <button onclick="dashboard.setTipoTiempo('3h')" class="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border tipo-tiempo-btn" data-tipo-tiempo="3h">3 Horas</button>
+                            <button onclick="dashboard.setTipoTiempo('8h')" class="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border tipo-tiempo-btn" data-tipo-tiempo="8h">8 Horas</button>
+                        </div>
+                        <button onclick="dashboard.iniciarOcupacion()" class="w-100" style="background: #ea580c; color: #fff; font-weight: 700; padding: 0.9rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; transition: all 0.2s; font-size: 1rem;">
+                            ✅ Confirmar Llegada
+                        </button>
+                    </div>
 
                     <div id="estado-iniciar-ocupacion" class="d-none mt-4 p-4" style="background: rgba(212,175,55,0.05); border-radius: 0.75rem; border: 1px solid rgba(212,175,55,0.1);">
                         <h4 class="text-white font-medium mb-3">Iniciar Ocupación</h4>
@@ -96,7 +108,12 @@
                         <div style="background: rgba(255,255,255,0.05); border-radius: 0.75rem; padding: 1rem; border: 1px solid rgba(255,255,255,0.05);">
                             <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
                                 <div><span class="text-gray-400">Inicio:</span> <span class="text-white ms-1" id="ocupacion-inicio"></span></div>
-                                <div><span class="text-gray-400">Tarifa base:</span> <span class="text-[#D4AF37] font-bold ms-1" id="ocupacion-precio-base"></span></div>
+                                <div><span class="text-gray-400">Tarifa base:</span> <span class="text-[#D4AF37] font-bold ms-1" id="ocupacion-precio-base"></span>
+                                    <span class="ms-2 d-inline-flex gap-1 align-items-center" id="ocupacion-tiempo-toggle" style="vertical-align: middle;">
+                                        <button onclick="dashboard.setTipoTiempo('3h')" class="px-2 py-0.5 rounded font-medium text-xs border tipo-tiempo-sm-btn" data-tipo-tiempo="3h" style="background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.5); color: #D4AF37;">3h</button>
+                                        <button onclick="dashboard.setTipoTiempo('8h')" class="px-2 py-0.5 rounded font-medium text-xs border tipo-tiempo-sm-btn" data-tipo-tiempo="8h" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #9ca3af;">8h</button>
+                                    </span>
+                                </div>
                                 <div id="ocupacion-tarifa-info" class="d-none d-grid gap-1" style="grid-column: span 2; background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 0.75rem; font-size: 0.75rem;">
                                     <div class="d-flex justify-content-between"><span class="text-gray-400">Categoría:</span><span class="text-white" id="ocupacion-tarifa-categoria"></span></div>
                                     <div class="d-flex justify-content-between"><span class="text-gray-400">Tipo:</span><span class="text-white" id="ocupacion-tarifa-tipo"></span></div>
@@ -244,6 +261,17 @@
                             <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                 <span class="text-gray-300 text-sm">Consumos</span>
                                 <span class="text-white font-bold" id="cobro-consumos"></span>
+                            </div>
+                            <div id="cobro-hora-adicional" class="d-none py-2" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-gray-300 text-sm">Hora Adicional</span>
+                                    <span class="text-xs text-gray-500" id="cobro-hora-adicional-precio"></span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button onclick="dashboard.cambiarHorasAdicionales(-1)" style="width: 1.5rem; height: 1.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.875rem;">−</button>
+                                    <span id="cobro-horas-adicionales-count" class="font-bold" style="color: #D4AF37; min-width: 1.5rem; text-align: center;">0</span>
+                                    <button onclick="dashboard.cambiarHorasAdicionales(1)" style="width: 1.5rem; height: 1.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.875rem;">+</button>
+                                </div>
                             </div>
                             <div id="cobro-promo-row" class="d-none py-2" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                 <span class="text-gray-300 text-sm">Promoción</span>
@@ -486,5 +514,23 @@ select:hover {
     #cobro-content select {
         width: 100% !important;
     }
+}
+@keyframes flashLlegando {
+    0%, 100% { background-color: rgba(0, 0, 0, 1); border-color: rgba(249, 115, 22, 0.6); }
+    50% { background-color: rgba(249, 115, 22, 0.2); border-color: rgba(249, 115, 22, 0.9); }
+}
+.transito-cell {
+    animation: flashLlegando 1.5s ease-in-out infinite;
+}
+.transito-badge {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+.flash-card {
+    animation: flashLlegando 1.5s ease-in-out infinite;
+    border-color: rgba(249, 115, 22, 0.6) !important;
 }
 </style>

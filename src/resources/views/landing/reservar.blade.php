@@ -188,7 +188,7 @@ class ReservaForm {
         try {
             const res = await fetch('{{ route('landing.calcular-precio') }}', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                 body: JSON.stringify({
                     categoria: this.categoria,
                     fecha: this.fecha,
@@ -236,7 +236,7 @@ class ReservaForm {
         try {
             const res = await fetch('{{ route('landing.reservar.store') }}', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                 body: JSON.stringify({
                     rut: this.rut,
                     nombre: this.nombre,

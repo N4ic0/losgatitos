@@ -58,7 +58,7 @@ class OcupacionService
             ->update(['fecha_fin' => now()]);
     }
 
-    public function iniciarOcupacion(Habitacion $habitacion, string $tipoTiempo = '8h', int $personasAdicionales = 0): Ocupacion
+    public function iniciarOcupacion(Habitacion $habitacion, string $tipoTiempo = '8h', int $personasAdicionales = 0, string $estadoInicial = 'Ocupada'): Ocupacion
     {
         $this->cerrarEstadoActual($habitacion);
 
@@ -87,11 +87,19 @@ class OcupacionService
             'horas_beneficio' => 0,
         ]);
 
-        $this->cambiarEstado($habitacion, 'Ocupada', $ocupacion->id);
+        $this->cambiarEstado($habitacion, $estadoInicial, $ocupacion->id);
 
         $this->auditoriaService->registrar('iniciar_ocupacion', 'ocupaciones', $ocupacion->id, null, $ocupacion->toArray());
 
         return $ocupacion->fresh();
+    }
+
+    public function confirmarLlegada(Habitacion $habitacion): array
+    {
+        if ($habitacion->estado !== 'Transito') {
+            return ['success' => false, 'error' => 'La habitación no está en estado Transito.'];
+        }
+        return $this->cambiarEstado($habitacion, 'Ocupada');
     }
 
     public function actualizarPersonasAdicionales(Ocupacion $ocupacion, int $cantidad): Ocupacion
@@ -319,6 +327,7 @@ class OcupacionService
         $reservadas = 0;
         $limpieza = 0;
         $disponibles = 0;
+        $transitos = 0;
 
         foreach ($habitaciones as $h) {
             match ($h->estado) {
@@ -326,11 +335,12 @@ class OcupacionService
                 'Reservada' => $reservadas++,
                 'Limpieza' => $limpieza++,
                 'Disponible' => $disponibles++,
+                'Transito' => $transitos++,
                 default => null,
             };
         }
 
-        return compact('habitaciones', 'ocupadas', 'reservadas', 'limpieza', 'disponibles');
+        return compact('habitaciones', 'ocupadas', 'reservadas', 'limpieza', 'disponibles', 'transitos');
     }
 
     public function getDatosOcupacion(Ocupacion $ocupacion): array

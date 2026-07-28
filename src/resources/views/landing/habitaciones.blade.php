@@ -33,27 +33,27 @@
                 ];
             @endphp
             @foreach($categorias as $cat)
-            <div data-aos="fade-up" class="bg-white/5 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/10 group hover:border-[#D4AF37]/30 transition-all duration-500">
-                <div class="h-64 bg-gradient-to-br from-[#1a1a2e] to-black flex items-center justify-center">
-                    <span class="text-[#D4AF37]/20 text-8xl font-bold">{{ $cat['nombre'][0] }}</span>
+            <div data-aos="fade-up" class="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 group hover:border-[#D4AF37]/30 transition-all duration-500">
+                <div class="h-36 sm:h-64 bg-gradient-to-br from-[#1a1a2e] to-black flex items-center justify-center">
+                    <span class="text-[#D4AF37]/20 text-5xl sm:text-8xl font-bold">{{ $cat['nombre'][0] }}</span>
                 </div>
-                <div class="p-8">
-                    <h2 class="text-2xl font-bold text-white mb-3">{{ $cat['nombre'] }}</h2>
-                    <p class="text-gray-400 mb-6">{{ $cat['descripcion'] }}</p>
-                    <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="p-4 sm:p-8">
+                    <h2 class="text-base sm:text-2xl font-bold text-white mb-2 sm:mb-3">{{ $cat['nombre'] }}</h2>
+                    <p class="text-gray-400 mb-4 sm:mb-6 text-xs sm:text-base">{{ $cat['descripcion'] }}</p>
+                    <div class="grid grid-cols-2 gap-1 sm:gap-3 mb-4 sm:mb-6">
                         @foreach($cat['amenities'] as $amenity)
-                        <div class="flex items-center text-sm text-gray-300">
-                            <svg class="w-4 h-4 text-[#D4AF37] mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                        <div class="flex items-center text-xs sm:text-sm text-gray-300">
+                            <i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i>
                             {{ $amenity }}
                         </div>
                         @endforeach
                     </div>
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-2xl font-bold text-[#D4AF37]">Desde {{ $cat['precio'] }}</p>
-                            <p class="text-gray-500 text-sm">8 horas</p>
+                            <p class="text-base sm:text-2xl font-bold text-[#D4AF37]">Desde {{ $cat['precio'] }}</p>
+                            <p class="text-gray-500 text-xs sm:text-sm">8 horas</p>
                         </div>
-                        <a href="{{ route('landing.reservar') }}" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-6 py-3 rounded-full transition-all duration-300 text-sm">Reservar</a>
+                        {{-- <a href="{{ route('landing.reservar') }}" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-all duration-300 text-xs sm:text-sm">Reservar</a> --}}
                     </div>
                 </div>
             </div>

@@ -2,7 +2,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 lg:h-20">
             <a href="{{ route('landing.index') }}" class="flex items-center space-x-3">
-                <img src="/img/logooscuro.png" alt="Motel Los Gatitos" class="h-12 w-auto lg:h-12">
+                <img src="/img/icono.png" alt="Motel Los Gatitos" class="h-10 w-auto sm:hidden">
+                <img src="/img/logooscuro.png" alt="Motel Los Gatitos" class="h-10 w-auto hidden sm:inline lg:h-12">
             </a>
 
             <nav class="hidden lg:flex items-center space-x-8">
@@ -10,7 +11,7 @@
                 <a href="{{ route('landing.habitaciones') }}" class="text-gray-300 hover:text-[#D4AF37] transition-colors duration-300 text-sm uppercase tracking-wider font-medium">Habitaciones</a>
                 <a href="{{ route('landing.promociones') }}" class="text-gray-300 hover:text-[#D4AF37] transition-colors duration-300 text-sm uppercase tracking-wider font-medium">Promociones</a>
                 <a href="{{ route('landing.contacto') }}" class="text-gray-300 hover:text-[#D4AF37] transition-colors duration-300 text-sm uppercase tracking-wider font-medium">Contacto</a>
-                <a href="{{ route('landing.reservar') }}" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-6 py-2.5 rounded-full transition-all duration-300 text-sm uppercase tracking-wider shadow-lg shadow-[#D4AF37]/25 hover:shadow-[#D4AF37]/40">Reservar</a>
+                <a href="/login" class="text-gray-300 hover:text-[#D4AF37] transition-colors duration-300 text-sm uppercase tracking-wider font-medium">Iniciar</a>
             </nav>
 
             <button class="lg:hidden text-white p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
@@ -20,17 +21,19 @@
         </div>
     </div>
 
-    <div class="offcanvas offcanvas-end lg:hidden bg-black/95" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+    <div class="offcanvas offcanvas-end lg:hidden !bg-[#0a0a0a]" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel" data-bs-theme="dark">
         <div class="offcanvas-header border-b border-white/10">
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body p-6">
             <div class="space-y-4">
-                <a href="{{ route('landing.index') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider" data-bs-dismiss="offcanvas">Inicio</a>
-                <a href="{{ route('landing.habitaciones') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider" data-bs-dismiss="offcanvas">Habitaciones</a>
-                <a href="{{ route('landing.promociones') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider" data-bs-dismiss="offcanvas">Promociones</a>
-                <a href="{{ route('landing.contacto') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider" data-bs-dismiss="offcanvas">Contacto</a>
-                <a href="{{ route('landing.reservar') }}" class="block text-center bg-[#D4AF37] text-black font-semibold px-6 py-3 rounded-full uppercase text-sm tracking-wider" data-bs-dismiss="offcanvas">Reservar</a>
+                <a href="{{ route('landing.index') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5" data-bs-dismiss="offcanvas">Inicio</a>
+                <a href="{{ route('landing.habitaciones') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5" data-bs-dismiss="offcanvas">Habitaciones</a>
+                <a href="{{ route('landing.promociones') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5" data-bs-dismiss="offcanvas">Promociones</a>
+                <a href="{{ route('landing.contacto') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5" data-bs-dismiss="offcanvas">Contacto</a>
+                <div class="pt-4">
+                    <a href="/login" class="block text-center border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black font-bold px-6 py-3 rounded-full uppercase text-sm tracking-wider transition-all duration-300" data-bs-dismiss="offcanvas">Iniciar</a>
+                </div>
             </div>
         </div>
     </div>

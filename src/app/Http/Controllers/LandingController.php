@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Habitacion;
 use App\Models\Promocion;
 use App\Models\Configuracion;
+use App\Models\Feriado;
 use App\Services\TarifaService;
 use App\Repositories\PromocionRepository;
 
@@ -41,9 +42,44 @@ class LandingController extends Controller
 
     public function reservar()
     {
-        $habitaciones = Habitacion::where('estado', 'Disponible')->get();
-        $promocionActiva = $this->promocionRepository->getActivas()->first();
-        return view('landing.reservar', compact('habitaciones', 'promocionActiva'));
+        return redirect('/')->with('info', 'Las reservas no están disponibles en este momento.');
+    }
+
+    public function verificarReserva()
+    {
+        $hoy = now();
+        $dia = $hoy->dayOfWeek;
+        $esFinde = $dia === 5 || $dia === 6;
+        $manana = $hoy->copy()->addDay();
+        $esVispera = Feriado::whereDate('fecha', $manana)->exists();
+        $permitida = !$esFinde && !$esVispera;
+
+        $dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+        if (!$permitida) {
+            $mensaje = 'Solo puedes realizar reservas de <strong>Domingo a Jueves</strong>';
+            if ($esVispera) {
+                $mensaje .= ', y mañana es <strong>víspera de feriado</strong>';
+            }
+            $mensaje .= '.<br><br>Hoy (<strong>' . $dias[$dia] . '</strong>) las reservas <strong>no están disponibles</strong>.<br>Vuelve a intentarlo otro día.';
+        } else {
+            $mensaje = '';
+        }
+
+        return response()->json([
+            'permitida' => $permitida,
+            'mensaje' => $mensaje,
+        ]);
+    }
+
+    public function disponibilidad()
+    {
+        $suites = Habitacion::where('categoria', 'Suite')->where('estado', 'Disponible')->count();
+        $departamentos = Habitacion::where('categoria', 'Departamento')->where('estado', 'Disponible')->count();
+        return response()->json([
+            'suites' => $suites,
+            'departamentos' => $departamentos,
+        ]);
     }
 
     public function calcularPrecio(\Illuminate\Http\Request $request)
