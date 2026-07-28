@@ -67,7 +67,8 @@ jobs:
 
           {
             echo "set ftp:passive-mode off"
-            echo "set ftp:ssl-allow no"
+            echo "set ftp:ssl-allow yes"
+            echo "set ssl:verify-certificate no"
             echo "set net:timeout 300"
             echo "set net:max-retries 5"
             echo "set net:reconnect-interval-base 15"
