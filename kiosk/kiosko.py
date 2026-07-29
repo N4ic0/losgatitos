@@ -150,6 +150,9 @@ def led_parpadear(interval=0.3):
 
 
 def abrir_porton():
+    if not GPIO_OK:
+        print("[RELAY] GPIO no disponible - omitiendo apertura")
+        return
     print("[RELAY] Abriendo portón...")
     GPIO.output(RELAY_PIN, GPIO.HIGH)
     time.sleep(3)
@@ -186,6 +189,18 @@ def api_disponibilidad():
     except Exception as e:
         print(f"[API] Error disponibilidad: {e}")
     return {"suites": [], "departamentos": []}
+
+
+def api_cambiar_estado(habitacion_id, estado):
+    try:
+        r = requests.post(f"{API_BASE}/api/kiosco/habitacion/estado",
+                          headers=HEADERS,
+                          json={"habitacion_id": habitacion_id, "estado": estado},
+                          timeout=5)
+        return r.status_code == 200, r.json()
+    except Exception as e:
+        print(f"[API] Error cambiar estado: {e}")
+        return False, {}
 
 
 def api_validar_reserva(rut):
@@ -381,8 +396,16 @@ def flujo_sin_reserva():
         hablar(f"Tenemos {len(deptos)} departamentos disponibles desde "
                f"{min(d['tarifa'] for d in deptos)} pesos.")
 
-    hablar(f"Elegiste {tipo}. Acércate a recepción para continuar.")
-    print(f"[FLUJO] Selección: {tipo}, {len(seleccion)} disponibles")
+    habitacion = seleccion[0]
+    ok, data = api_cambiar_estado(habitacion["id"], "TRANSITO")
+    if not ok:
+        hablar(f"Lo siento, hubo un problema con la {tipo} {habitacion['numero']}. Intenta de nuevo.")
+        return
+
+    num_hab = data.get("mensaje", f"Habitación {habitacion['numero']}")
+    hablar(f"Diríjase a la {tipo} {habitacion['numero']}. El portón se va a abrir.")
+    abrir_porton()
+    hablar("Gracias por escoger el Motel Los Gatitos.")
 
 
 # ─── MAIN LOOP ────────────────────────────────────────────────────────
@@ -400,7 +423,6 @@ def loop_principal():
 
         esperar_boton()
         flujo_bienvenida()
-        hablar("Gracias por tu visita. Que tengas una excelente estadía.")
         print("[LOOP] Cliente atendido. El programa ha finalizado.")
 
     except Exception as e:
