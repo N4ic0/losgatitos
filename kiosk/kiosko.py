@@ -118,13 +118,13 @@ def hablar(texto):
         print(f"[TTS] {texto}")
         return
     print(f"[TTS] {texto}")
-    subprocess.run(
+    proc = subprocess.Popen(
         ["piper", "--model", PIPER_MODEL, "--output-raw"],
-        input=texto.encode("utf-8"),
-        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
     )
+    out, _ = proc.communicate(input=texto.encode("utf-8"))
     subprocess.run(["aplay", "-r", "22050", "-f", "S16_LE", "-c", "1"],
-                   stdin=subprocess.PIPE)
+                   input=out)
 
 
 # ─── GPIO ─────────────────────────────────────────────────────────────
@@ -268,12 +268,28 @@ def verificar_disponibilidad():
         return {"permitida": False, "mensaje": "Error de conexión"}
 
 
+def api_reservas_hoy():
+    try:
+        r = requests.get(f"{API_BASE}/api/kiosco/reservas/hoy", headers=HEADERS, timeout=5)
+        if r.status_code == 200:
+            return r.json()
+    except Exception as e:
+        print(f"[API] Error reservas hoy: {e}")
+    return {"tiene_reservas": False, "cantidad": 0}
+
+
 # ─── FLUJO PRINCIPAL ──────────────────────────────────────────────────
 
 def flujo_bienvenida():
     check = verificar_disponibilidad()
     if not check.get("permitida", False):
         hablar(check.get("mensaje", "Hoy no hay reservas disponibles."))
+        return
+
+    reservas_hoy = api_reservas_hoy()
+    if not reservas_hoy.get("tiene_reservas", False):
+        hablar("Bienvenido al Motel Los Gatitos.")
+        flujo_sin_reserva()
         return
 
     hablar("Bienvenido al Motel Los Gatitos. ¿Tienes una reserva?")
