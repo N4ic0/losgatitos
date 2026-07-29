@@ -25,6 +25,9 @@ Route::get('/promociones', [LandingController::class, 'promociones'])->name('lan
 Route::get('/contacto', [LandingController::class, 'contacto'])->name('landing.contacto');
 Route::get('/reservar', [LandingController::class, 'reservar'])->name('landing.reservar');
 Route::get('/disponibilidad', [LandingController::class, 'disponibilidad'])->name('landing.disponibilidad');
+Route::get('/verificar-reserva', function () {
+    return response()->json(['permitida' => true, 'mensaje' => '']);
+});
 
 // Dashboard redirect (Breeze compatibility)
 Route::get('/dashboard', function () {
