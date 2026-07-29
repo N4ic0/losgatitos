@@ -375,13 +375,18 @@ def flujo_sin_reserva():
                f"Y {len(suites)} suites desde {desde_s} pesos. "
                "Decí 1 para departamento o 2 para suite.")
         print("[FLUJO] Esperando opción (1=depto, 2=suite)...")
-        texto = escuchar(4)
-        if "1" in texto or "uno" in texto or "departamento" in texto:
-            seleccion = deptos
-            tipo = "departamento"
-        elif "2" in texto or "dos" in texto or "suite" in texto or "suit" in texto:
-            seleccion = suites
-            tipo = "suite"
+        for intento in range(2):
+            texto = escuchar(4)
+            if "1" in texto or "uno" in texto or "departamento" in texto:
+                seleccion = deptos
+                tipo = "departamento"
+                break
+            elif "2" in texto or "dos" in texto or "suite" in texto or "suit" in texto:
+                seleccion = suites
+                tipo = "suite"
+                break
+            if intento == 0:
+                hablar("No te escuché bien. Decí 1 para departamento o 2 para suite.")
         else:
             hablar("No entendí. Presiona el botón para empezar de nuevo.")
             return
@@ -464,6 +469,7 @@ if __name__ == "__main__":
 
     if args.no_button:
         print("[MODO] Sin botón - solo voz, ideal para SSH")
+        setup_gpio()
         iniciar_vosk()
         try:
             if not api_ping():
@@ -472,6 +478,8 @@ if __name__ == "__main__":
             flujo_bienvenida()
             print("[OK] Cliente atendido. Listo.")
         finally:
+            if GPIO_OK:
+                GPIO.cleanup()
             sys.exit(0)
 
     setup_gpio()
