@@ -99,7 +99,7 @@
 
     {{-- Room Grid --}}
     <div>
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem;">
+        <div id="room-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem;">
             @foreach($habitaciones as $habitacion)
             <div onclick="dashboard.abrirModal({{ $habitacion->id }})"
                  class="cursor-pointer rounded-xl px-3 py-2.5 border flex flex-col transition-all duration-300
@@ -207,17 +207,22 @@ class DashboardManager {
     }
 
     iniciarTimers() {
+        if (this._timerIntervals) {
+            this._timerIntervals.forEach(id => clearInterval(id));
+        }
+        this._timerIntervals = [];
         document.querySelectorAll('[data-inicio]').forEach(el => {
             const inicio = parseInt(el.dataset.inicio) * 1000;
             if (isNaN(inicio)) return;
             const span = el.querySelector('.tiempo-valor');
-            setInterval(() => {
+            const id = setInterval(() => {
                 const diff = Math.max(0, Date.now() - inicio);
                 const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
                 const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                 const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                 span.textContent = h + ':' + m + ':' + s;
             }, 1000);
+            this._timerIntervals.push(id);
         });
     }
 
@@ -1550,6 +1555,13 @@ window.dashboard = new DashboardManager();
                         oldCard.classList.add('flash-card');
                     else
                         oldCard.classList.remove('flash-card');
+                }
+                // Actualizar grilla de habitaciones
+                var oldGrid = document.getElementById('room-grid');
+                var newGrid = d.getElementById('room-grid');
+                if (oldGrid && newGrid) {
+                    oldGrid.innerHTML = newGrid.innerHTML;
+                    if (window.dashboard) window.dashboard.iniciarTimers();
                 }
             }).catch(function() {});
     };
