@@ -63,6 +63,26 @@
                             <button onclick="dashboard.setTipoTiempo('3h')" class="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border tipo-tiempo-btn" data-tipo-tiempo="3h">3 Horas</button>
                             <button onclick="dashboard.setTipoTiempo('8h')" class="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all border tipo-tiempo-btn" data-tipo-tiempo="8h">8 Horas</button>
                         </div>
+                        <div id="tarifa-info-llegada" class="d-none mb-3 p-3" style="background: rgba(255,255,255,0.05); border-radius: 0.75rem;">
+                            <div class="d-flex justify-content-between text-xs text-gray-400"><span>Tarifa:</span><span class="text-white" id="tarifa-categoria-llegada"></span></div>
+                            <div class="d-flex justify-content-between text-xs text-gray-400 mt-1"><span>Regla:</span><span class="text-[#D4AF37]" id="tarifa-regla-llegada"></span></div>
+                            <div class="d-flex justify-content-between text-xs text-gray-400 mt-1"><span>Valor:</span><span class="text-green-400 font-bold" id="tarifa-valor-llegada"></span></div>
+                            <div class="d-flex justify-content-between text-xs text-gray-400 mt-1"><span>Horario:</span><span class="text-white" id="tarifa-horario-llegada"></span></div>
+                        </div>
+                        <div id="tarifa-personas-section-llegada" class="d-none mb-3 p-3" style="background: rgba(255,255,255,0.05); border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.05);">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="text-gray-300 text-sm">Personas adicionales</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button onclick="dashboard.cambiarPersonasAdicionales(-1)" class="btn-persona-btn" style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.125rem;">−</button>
+                                    <span id="personas-count-llegada" class="text-[#D4AF37] fw-bold fs-5" style="width: 2rem; text-align: center;">0</span>
+                                    <button onclick="dashboard.cambiarPersonasAdicionales(1)" class="btn-persona-btn" style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.125rem;">+</button>
+                                </div>
+                            </div>
+                            <div id="personas-extra-llegada" class="d-none mt-2 pt-2" style="border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; font-size: 0.75rem;">
+                                <span class="text-gray-400">+ 50% c/u:</span>
+                                <span id="personas-extra-total-llegada" class="text-[#D4AF37] font-bold"></span>
+                            </div>
+                        </div>
                         <button onclick="dashboard.iniciarOcupacion()" class="w-100" style="background: #ea580c; color: #fff; font-weight: 700; padding: 0.9rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; transition: all 0.2s; font-size: 1rem;">
                             ✅ Confirmar Llegada
                         </button>
@@ -193,6 +213,7 @@
                                         <option value="">Seleccione</option>
                                         <option value="RUT">RUT</option>
                                         <option value="Pasaporte">Pasaporte</option>
+                                        <option value="DNI">DNI</option>
                                     </select>
                                 </div>
                                 <div>
@@ -272,6 +293,10 @@
                                     <span id="cobro-horas-adicionales-count" class="font-bold" style="color: #D4AF37; min-width: 1.5rem; text-align: center;">0</span>
                                     <button onclick="dashboard.cambiarHorasAdicionales(1)" style="width: 1.5rem; height: 1.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.875rem;">+</button>
                                 </div>
+                            </div>
+                            <div id="cobro-propina" class="d-flex justify-content-between align-items-center py-2" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span class="text-gray-300 text-sm">Propina</span>
+                                <input type="number" id="cobro-propina-input" value="0" min="0" oninput="dashboard.cambiarPropina(this.value)" style="width: 5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.375rem; padding: 0.25rem 0.5rem; color: #fff; outline: none; font-weight: bold; font-size: 0.875rem; text-align: right;">
                             </div>
                             <div id="cobro-promo-row" class="d-none py-2" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                 <span class="text-gray-300 text-sm">Promoción</span>

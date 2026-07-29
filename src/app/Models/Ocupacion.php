@@ -16,6 +16,7 @@ class Ocupacion extends Model
         'tarifa_id',
         'precio_base',
         'personas_adicionales',
+        'propinas',
         'fecha_inicio',
         'fecha_fin',
         'promocion_id',

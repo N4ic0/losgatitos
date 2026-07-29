@@ -118,6 +118,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('dashboard/promociones', [DashboardController::class, 'promociones'])->name('dashboard.promociones');
     Route::post('dashboard/ocupacion/{ocupacion}/tomar-promocion/{promocion}', [DashboardController::class, 'tomarPromocion'])->name('dashboard.tomar-promocion');
     Route::post('dashboard/ocupacion/{ocupacion}/productos-promocion', [DashboardController::class, 'agregarProductosPromocion'])->name('dashboard.productos-promocion');
+    Route::post('dashboard/ocupacion/{ocupacion}/propina', [DashboardController::class, 'actualizarPropina'])->name('dashboard.actualizar-propina');
+    Route::delete('dashboard/pago/{pago}', [DashboardController::class, 'eliminarPago'])->name('dashboard.eliminar-pago');
 
     // Profile
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('perfil');

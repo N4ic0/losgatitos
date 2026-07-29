@@ -146,6 +146,9 @@
 
 @push('scripts')
 <script>
+window.isAdmin = {{ auth()->user()?->userRole?->slug === 'administrador' ? 'true' : 'false' }};
+</script>
+<script>
 class DashboardManager {
     constructor() {
         this.modalOpen = false;
@@ -169,6 +172,7 @@ class DashboardManager {
         this.consumoSelectorOpen = false;
         this.horasAdicionales = 0;
         this.precioHoraAdicional = 5500;
+        this.propina = 0;
         this.categoriaFiltro = null;
         this.promocionesAplicables = [];
         this.cortesiaAdded = false;
@@ -252,6 +256,7 @@ class DashboardManager {
         this.personasAdicionales = 0;
         this.horasAdicionales = 0;
         this.precioHoraAdicional = 5500;
+        this.propina = 0;
         this.cortesiaAdded = false;
         this._tieneCortesiaBackend = false;
 
@@ -267,6 +272,7 @@ class DashboardManager {
                 const data = await res2.json();
                 this.ocupacion = data.ocupacion;
                 this.promocionesAplicables = data.promociones_aplicables || [];
+                this.propina = this.ocupacion.propinas || 0;
                 this.ocupacionVehiculo = this.ocupacion.vehiculo ? 1 : 0;
                 this.ocupacionPatente = this.ocupacion.patente || '';
                 this._tieneCortesiaBackend = data.tiene_cortesia || false;
@@ -275,7 +281,7 @@ class DashboardManager {
         this._renderAll();
         this._hideLoading();
         requestAnimationFrame(() => this.iniciarTimers());
-        if (this.ocupacion) {
+        if (this.habitacion && this.habitacion.estado === 'Ocupada') {
             const ocupacionTab = bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-ocupacion-btn'));
             ocupacionTab.show();
         } else {
@@ -287,7 +293,7 @@ class DashboardManager {
     }
 
     cerrarModal() {
-        if (!this.ocupacion) {
+        if (!this.ocupacion || this.habitacion.estado !== 'Ocupada') {
             if (this.modalInstance) this.modalInstance.hide();
             return;
         }
@@ -402,6 +408,8 @@ class DashboardManager {
         const confirmSection = document.getElementById('estado-confirmar-llegada');
         if (this.habitacion && this.habitacion.estado === 'Transito') {
             confirmSection.classList.remove('d-none');
+            this._renderTarifaInfoLlegada();
+            this._renderPersonasAdicionalesLlegada();
         } else {
             confirmSection.classList.add('d-none');
         }
@@ -465,6 +473,36 @@ class DashboardManager {
         });
     }
 
+    _renderTarifaInfoLlegada() {
+        const container = document.getElementById('tarifa-info-llegada');
+        if (!container) return;
+        if (!this.tarifaInfo) {
+            container.classList.add('d-none');
+            return;
+        }
+        container.classList.remove('d-none');
+        const info = this.tarifaInfo;
+        document.getElementById('tarifa-categoria-llegada').textContent = info.categoria + ' - ' + info.tipo_tiempo;
+        document.getElementById('tarifa-regla-llegada').textContent = info.regla;
+        document.getElementById('tarifa-valor-llegada').textContent = this.formatCurrency(info.precio);
+        document.getElementById('tarifa-horario-llegada').textContent = info.hora_inicio + ' - ' + info.hora_termino;
+
+        const personasSection = document.getElementById('tarifa-personas-section-llegada');
+        if (personasSection) personasSection.classList.remove('d-none');
+    }
+
+    _renderPersonasAdicionalesLlegada() {
+        document.getElementById('personas-count-llegada').textContent = this.personasAdicionales;
+        const extraContainer = document.getElementById('personas-extra-llegada');
+        if (this.personasAdicionales > 0 && this.tarifaInfo) {
+            extraContainer.classList.remove('d-none');
+            const extraTotal = Math.round(this.tarifaInfo.precio * 0.5 * this.personasAdicionales);
+            document.getElementById('personas-extra-total-llegada').textContent = this.formatCurrency(extraTotal);
+        } else {
+            document.getElementById('personas-extra-llegada')?.classList.add('d-none');
+        }
+    }
+
     async cambiarEstado(estado) {
         if (this.habitacion.estado === 'Ocupada' && estado !== 'Disponible') {
             Swal.fire({ icon: 'error', title: 'Debe finalizar la ocupación primero.', confirmButtonColor: '#D4AF37' });
@@ -489,6 +527,10 @@ class DashboardManager {
     async setTipoTiempo(tt) {
         this.tipoTiempo = tt;
         await this.calcularTarifaPreview();
+        if (this.habitacion?.estado === 'Transito') {
+            this._renderTarifaInfoLlegada();
+            this._renderPersonasAdicionalesLlegada();
+        }
         if (this.ocupacion && this.tarifaInfo) {
             this.ocupacion.precio_base = this.tarifaInfo.precio;
             this.ocupacion.tarifa = this.ocupacion.tarifa || {};
@@ -502,6 +544,9 @@ class DashboardManager {
     cambiarPersonasAdicionales(delta) {
         this.personasAdicionales = Math.max(0, this.personasAdicionales + delta);
         this._renderPersonasAdicionales();
+        if (this.habitacion?.estado === 'Transito') {
+            this._renderPersonasAdicionalesLlegada();
+        }
     }
 
     async cambiarPersonasOcupacion(delta) {
@@ -561,6 +606,44 @@ class DashboardManager {
     cambiarHorasAdicionales(delta) {
         this.horasAdicionales = Math.max(0, this.horasAdicionales + delta);
         this._renderCobroTab();
+    }
+
+    cambiarPropina(valor) {
+        const v = parseInt(valor) || 0;
+        if (v < 0) return;
+        this.propina = v;
+        this._renderCobroTab();
+        this._guardarPropina();
+    }
+
+    async _guardarPropina() {
+        if (!this.ocupacion) return;
+        try {
+            await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/propina', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ propina: this.propina }),
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    async eliminarPago(pagoId) {
+        const confirm = await Swal.fire({ title: '¿Eliminar este pago?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
+        if (!confirm.isConfirmed) return;
+        try {
+            const res = await fetch('/admin/dashboard/pago/' + pagoId, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            });
+            const data = await res.json();
+            if (data.success) {
+                this.ocupacion = data.ocupacion;
+                this._renderCobroTab();
+                Swal.fire({ icon: 'success', title: 'Pago eliminado', timer: 1500, showConfirmButton: false });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error al eliminar pago', confirmButtonColor: '#D4AF37' });
+            }
+        } catch(e) { console.error(e); Swal.fire({ icon: 'error', title: 'Error de conexión', confirmButtonColor: '#D4AF37' }); }
     }
 
     async finalizarOcupacion() {
@@ -655,13 +738,18 @@ class DashboardManager {
     }
 
     onClienteDocumentoChange(value) {
-        this.clienteDocumento = value.toUpperCase();
+        let v = value.toUpperCase().replace(/[^0-9Kk]/g, '');
+        if (v.length > 9) v = v.slice(0, 9);
+        if (v.length > 1) v = v.slice(0, -1) + '-' + v.slice(-1);
+        this.clienteDocumento = v;
         document.getElementById('cliente-documento').value = this.clienteDocumento;
         this.validarRutInput();
         this._renderRutValidez();
     }
 
     validarRutInput() {
+        const tipo = document.querySelector('[name="tipo_documento"]')?.value;
+        if (tipo !== 'RUT') { this.rutValido = null; return; }
         const rut = this.clienteDocumento;
         if (!rut || rut.length < 2) { this.rutValido = null; return; }
         this.rutValido = this.validarRutCompleto(rut);
@@ -732,10 +820,6 @@ class DashboardManager {
         const numDoc = form.querySelector('[name="numero_documento"]').value.trim();
         if (!numDoc) {
             Swal.fire({ icon: 'error', title: 'Ingrese número de documento', confirmButtonColor: '#D4AF37' });
-            return;
-        }
-        if (tipoDoc === 'RUT' && this.rutValido !== true) {
-            Swal.fire({ icon: 'error', title: 'RUT inválido', text: 'Verifique el RUT ingresado', confirmButtonColor: '#D4AF37' });
             return;
         }
         const nombres = form.querySelector('[name="nombres"]').value.trim();
@@ -1378,6 +1462,8 @@ class DashboardManager {
         document.getElementById('cobro-horas-adicionales-count').textContent = this.horasAdicionales;
         document.getElementById('cobro-hora-adicional-precio').textContent = '(' + this.formatCurrency(this.precioHoraAdicional) + ' c/u)';
 
+        document.getElementById('cobro-propina-input').value = this.propina;
+
         const promoRow = document.getElementById('cobro-promo-row');
         if (this.ocupacion.promocion) {
             promoRow.classList.remove('d-none');
@@ -1408,6 +1494,9 @@ class DashboardManager {
                 '<div class="flex items-center space-x-3">' +
                 '<span class="text-xs text-gray-400 uppercase">' + this._escapeHtml(p.forma_pago) + '</span>' +
                 '<span class="text-green-400 font-bold">' + this.formatCurrency(p.monto) + '</span>' +
+                (window.isAdmin
+                    ? '<button onclick="dashboard.eliminarPago(' + p.id + ')" class="text-red-500 hover:text-red-400 transition-colors ml-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>'
+                    : '') +
                 '</div></div>'
             ).join('');
         } else {
@@ -1515,7 +1604,8 @@ class DashboardManager {
         const base = this.ocupacion.precio_base || 0;
         const consumos = (this.ocupacion.consumos || []).filter(c => c.origen === 'Consumo').reduce((s, c) => s + c.total, 0);
         const extras = (this.horasAdicionales || 0) * (this.precioHoraAdicional || 0);
-        return base + consumos + extras;
+        const propina = this.propina || 0;
+        return base + consumos + extras + propina;
     }
 
     totalPagado() {

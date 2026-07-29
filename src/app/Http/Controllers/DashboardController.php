@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Consumo;
 use App\Models\Habitacion;
 use App\Models\Ocupacion;
+use App\Models\Pago;
 use App\Models\Producto;
 use App\Models\Promocion;
 use App\Models\Tarifa;
@@ -247,6 +248,36 @@ class DashboardController extends Controller
             'success' => true,
             'ocupacion' => $ocupacion->load('consumos.producto', 'pagos', 'clientes', 'promocion.productos', 'tarifa'),
         ]);
+    }
+
+    public function actualizarPropina(Request $request, Ocupacion $ocupacion)
+    {
+        $request->validate([
+            'propina' => 'required|integer|min:0|max:999999',
+        ]);
+
+        $ocupacion->update(['propinas' => $request->integer('propina')]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function eliminarPago(Pago $pago)
+    {
+        $ocupacion = $pago->ocupacion;
+        $monto = $pago->monto;
+        $forma = $pago->forma_pago;
+        $user = auth()->user();
+
+        $pago->delete();
+
+        $ocupacion->observaciones()->create([
+            'contenido' => 'Pago de $' . number_format($monto, 0, ',', '.') . ' (' . $forma . ') eliminado por ' . ($user->name ?? 'Usuario #' . $user->id),
+            'user_id' => $user->id,
+        ]);
+
+        $data = $this->ocupacionService->getDatosOcupacion($ocupacion->fresh());
+
+        return response()->json(['success' => true] + $data);
     }
 
     public function agregarObservacion(Request $request, Ocupacion $ocupacion)
