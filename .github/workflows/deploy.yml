@@ -16,11 +16,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup PHP (8.3 = server version)
+      - name: Setup PHP (8.3)
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           extensions: mbstring, pdo_mysql, intl
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: src/vendor
+          key: composer-${{ hashFiles('src/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP dependencies
+        run: cd src && composer install --no-dev --optimize-autoloader
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -29,33 +40,17 @@ jobs:
           cache: 'npm'
           cache-dependency-path: src/package-lock.json
 
-      - name: Install PHP dependencies
-        run: cd src && composer install --no-dev --optimize-autoloader
+      - name: Cache Node modules
+        uses: actions/cache@v4
+        with:
+          path: src/node_modules
+          key: npm-${{ hashFiles('src/package-lock.json') }}
+          restore-keys: npm-
 
       - name: Install Node dependencies & build assets
         run: cd src && npm ci && npm run build
 
-      - name: Prepare files for FTP
-        run: |
-          cd src
-          cp public_html/.htaccess ./
-
-      - name: Debug FTP credentials
-        env:
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-        run: |
-          echo "User length: ${#FTP_USER}"
-          echo "Pass length: ${#FTP_PASS}"
-          echo "Host: $FTP_HOST"
-          echo "---"
-          sudo apt-get install -y -qq curl 2>/dev/null
-          echo "=== curl FTP test (plain) ==="
-          curl -v --connect-timeout 15 -u "$FTP_USER:$FTP_PASS" ftp://$FTP_HOST/ 2>&1 | head -30
-          echo "=== done ==="
-
-      - name: Deploy via FTP
+      - name: Deploy via FTP (only changed files)
         env:
           FTP_USER: ${{ secrets.FTP_USER }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
@@ -75,7 +70,7 @@ jobs:
             echo "set mirror:parallel-transfer-count 10"
             echo "set mirror:use-pget-n 10"
             echo "open -u $FTP_USER,$FTP_PASS $FTP_HOST"
-            echo "mirror -R --exclude public_html/ --exclude node_modules/ --exclude tests/ --exclude .env --exclude .env.example --exclude .gitignore --exclude docker-compose.yml --exclude docker-compose.opencode.yml --exclude Dockerfile --exclude phpunit.xml --exclude README.md --verbose . /"
+            echo "mirror -R --only-newer --exclude node_modules/ --exclude tests/ --exclude .env --exclude .env.example --exclude .gitignore --exclude docker-compose.yml --exclude docker-compose.opencode.yml --exclude Dockerfile --exclude phpunit.xml --exclude README.md --exclude storage/framework/cache/ --exclude storage/framework/sessions/ --exclude storage/framework/views/ --verbose . /"
             echo "quit"
           } > /tmp/lftp.cmd
 
