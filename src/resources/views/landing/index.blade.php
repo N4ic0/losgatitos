@@ -217,7 +217,7 @@
         <div class="text-center mb-16" data-aos="fade-up">
             <span class="text-[#D4AF37] uppercase tracking-[0.2em] text-sm font-semibold">Ubicación</span>
             <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4">Encuéntranos</h2>
-            <p class="text-gray-400 mt-4">Av. Macul 4849, Santiago, Chile</p>
+            <p class="text-gray-400 mt-4">{{ $config['direccion'] ?? 'Av. Macul 4849, Santiago, Chile' }}</p>
         </div>
         <div data-aos="fade-up" class="rounded-3xl overflow-hidden border border-white/10 h-[400px]">
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3327.1404011832533!2d-70.60026012574865!3d-33.49772407337079!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662d03e1f3b2cdd%3A0xef9e7076e7a11612!2sAv.%20Macul%204849%2C%207821081%20Macul%2C%20Regi%C3%B3n%20Metropolitana!5e0!3m2!1ses!2scl!4v1782945633381!5m2!1ses!2scl" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
