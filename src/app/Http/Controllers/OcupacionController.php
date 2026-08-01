@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\Ocupacion;
 use App\Models\Habitacion;
 use App\Services\AuditoriaService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OcupacionController extends Controller
@@ -41,6 +43,49 @@ class OcupacionController extends Controller
     {
         $ocupacion->load('habitacion', 'tarifa', 'promocion', 'clientes', 'consumos.producto', 'pagos', 'observaciones', 'historialEstados');
         return view('admin.ocupaciones.show', compact('ocupacion'));
+    }
+
+    public function informeCierre(Request $request)
+    {
+        $request->validate([
+            'desde' => 'required|date_format:Y-m-d\TH:i',
+            'hasta' => 'required|date_format:Y-m-d\TH:i|after_or_equal:desde',
+        ]);
+
+        $desde = Carbon::parse($request->desde);
+        $hasta = Carbon::parse($request->hasta);
+
+        $ocupaciones = Ocupacion::with([
+            'habitacion',
+            'tarifa',
+            'promocion',
+            'clientes',
+            'consumos' => fn ($q) => $q->with('producto')->orderBy('created_at'),
+            'pagos' => fn ($q) => $q->orderBy('created_at'),
+        ])
+            ->whereBetween('fecha_inicio', [$desde, $hasta])
+            ->orderBy('fecha_inicio')
+            ->get();
+
+        $totalOcupaciones = $ocupaciones->sum(fn ($o) => $o->total);
+        $totalConsumos = $ocupaciones->sum(fn ($o) => $o->total_consumos);
+        $totalPagos = $ocupaciones->sum(fn ($o) => $o->total_pagado);
+        $totalPropinas = $ocupaciones->sum('propinas');
+
+        $totalesPorForma = $ocupaciones
+            ->flatMap(fn ($o) => $o->pagos)
+            ->groupBy('forma_pago')
+            ->map(fn ($p) => $p->sum('monto'));
+
+        $logoPath = public_path('img/logo.png');
+
+        $pdf = Pdf::loadView('admin.ocupaciones.pdf.informe_cierre', compact(
+            'ocupaciones', 'desde', 'hasta', 'totalOcupaciones', 'totalConsumos',
+            'totalPagos', 'totalPropinas', 'totalesPorForma', 'logoPath'
+        ));
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->stream('informe-cierre-' . $desde->format('Ymd_His') . '-' . $hasta->format('Ymd_His') . '.pdf');
     }
 
     public function destroy(Ocupacion $ocupacion)

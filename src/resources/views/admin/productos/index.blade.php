@@ -183,7 +183,7 @@ div.dt-container div.dt-info { color: #9ca3af; }
                             <div id="prodImagenPreview" class="mb-2 hidden">
                                 <img id="prodImagenImg" class="h-16 w-16 object-cover rounded-lg">
                             </div>
-                            <input type="file" name="imagen" id="prodImagen" accept="image/*" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white file:bg-[#D4AF37] file:text-black file:font-semibold file:px-4 file:py-2 file:rounded-xl file:border-0 file:cursor-pointer">
+                            <input type="file" name="imagen" id="prodImagen" accept="image/jpeg,image/png,image/webp" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white file:bg-[#D4AF37] file:text-black file:font-semibold file:px-4 file:py-2 file:rounded-xl file:border-0 file:cursor-pointer">
                         </div>
                     </div>
                     <div class="mt-4">
@@ -360,6 +360,23 @@ const ProductosManager = {
         $('#productoForm').on('submit', function(e) {
             e.preventDefault();
             self.guardarProducto();
+        });
+
+        $('#prodImagen').on('change', function() {
+            var file = this.files && this.files[0];
+            var preview = document.getElementById('prodImagenPreview');
+            var img = document.getElementById('prodImagenImg');
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                img.src = '';
+                preview.classList.add('hidden');
+            }
         });
     },
 

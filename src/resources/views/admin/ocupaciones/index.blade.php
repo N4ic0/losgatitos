@@ -30,6 +30,7 @@ div.dt-container div.dt-info { color: #9ca3af; }
 <div class="space-y-6">
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-white">Ocupaciones</h1>
+    <button type="button" id="btnInformeCierre" class="bg-[#D4AF37] hover:bg-[#C49A2C] text-black font-semibold px-5 py-2.5 rounded-xl transition-all text-sm">Informe Cierre</button>
 </div>
 
 <div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/5 p-4">
@@ -126,6 +127,41 @@ const OcupacionesManager = {
 
     bindEvents: function() {
         var self = this;
+
+        $('#btnInformeCierre').on('click', function() {
+            Swal.fire({
+                title: 'Informe de Cierre',
+                html: '<div style="text-align:left; font-family:inherit;">' +
+                        '<label style="display:block; color:#9ca3af; font-size:0.8rem; margin-bottom:4px;">Desde</label>' +
+                        '<input type="datetime-local" id="cierreDesde" class="swal2-input" style="margin-bottom:12px;">' +
+                        '<label style="display:block; color:#9ca3af; font-size:0.8rem; margin-bottom:4px;">Hasta</label>' +
+                        '<input type="datetime-local" id="cierreHasta" class="swal2-input">' +
+                      '</div>',
+                confirmButtonText: 'Generar Informe',
+                confirmButtonColor: '#D4AF37',
+                cancelButtonText: 'Cancelar',
+                showCancelButton: true,
+                focusConfirm: false,
+                allowOutsideClick: false,
+                preConfirm: function() {
+                    var desde = document.getElementById('cierreDesde').value;
+                    var hasta = document.getElementById('cierreHasta').value;
+                    if (!desde || !hasta) {
+                        Swal.showValidationMessage('Debe ingresar fecha y hora desde y hasta');
+                        return false;
+                    }
+                    if (hasta < desde) {
+                        Swal.showValidationMessage('La fecha "Hasta" debe ser mayor o igual que "Desde"');
+                        return false;
+                    }
+                    return { desde: desde, hasta: hasta };
+                }
+            }).then(function(result) {
+                if (!result.isConfirmed) return;
+                var params = new URLSearchParams({ desde: result.value.desde, hasta: result.value.hasta });
+                window.open('/admin/ocupaciones/informe-cierre?' + params.toString(), '_blank');
+            });
+        });
 
         $(document).on('click', '.accion-eliminar', function() {
             var id = parseInt($(this).data('id'));

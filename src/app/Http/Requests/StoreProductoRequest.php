@@ -21,7 +21,7 @@ class StoreProductoRequest extends FormRequest
             'stock_actual' => 'nullable|numeric|min:0',
             'stock_minimo' => 'nullable|numeric|min:0',
             'stock_maximo' => 'nullable|numeric|min:0',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'categoria' => 'required|string|max:100',
             'activo' => 'boolean',
             'cortesia' => 'boolean',

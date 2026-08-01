@@ -81,6 +81,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update');
 
     // Occupations
+    Route::get('ocupaciones/informe-cierre', [OcupacionController::class, 'informeCierre'])->name('ocupaciones.informe-cierre');
     Route::get('ocupaciones-json', [OcupacionController::class, 'data'])->name('ocupaciones.data');
     Route::resource('ocupaciones', OcupacionController::class)->parameters(['ocupaciones' => 'ocupacion'])->only(['index', 'show', 'destroy']);
 
