@@ -77,15 +77,26 @@ class OcupacionService
 
         $precioBase = ($precios['precio_base'] ?? 0) + (int)round(($precios['precio_base'] ?? 0) * 0.5 * $personasAdicionales);
 
-        $ocupacion = Ocupacion::create([
-            'habitacion_id' => $habitacion->id,
-            'tarifa_id' => $tarifaId,
-            'precio_base' => $precioBase,
-            'personas_adicionales' => $personasAdicionales,
-            'fecha_inicio' => now(),
-            'promocion_id' => null,
-            'horas_beneficio' => 0,
-        ]);
+        $ocupacionActiva = $habitacion->ocupacionActiva;
+
+        if ($ocupacionActiva && $habitacion->estado === 'Transito') {
+            $ocupacionActiva->update([
+                'tarifa_id' => $tarifaId,
+                'precio_base' => $precioBase,
+                'personas_adicionales' => $personasAdicionales,
+            ]);
+            $ocupacion = $ocupacionActiva;
+        } else {
+            $ocupacion = Ocupacion::create([
+                'habitacion_id' => $habitacion->id,
+                'tarifa_id' => $tarifaId,
+                'precio_base' => $precioBase,
+                'personas_adicionales' => $personasAdicionales,
+                'fecha_inicio' => now(),
+                'promocion_id' => null,
+                'horas_beneficio' => 0,
+            ]);
+        }
 
         $this->cambiarEstado($habitacion, $estadoInicial, $ocupacion->id);
 

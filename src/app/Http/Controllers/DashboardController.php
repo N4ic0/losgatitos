@@ -51,8 +51,8 @@ class DashboardController extends Controller
             'personas_adicionales' => 'nullable|integer|min:0|max:10',
         ]);
 
-        if (!in_array($habitacion->estado, ['Disponible', 'Reservada'])) {
-            return response()->json(['error' => 'La habitación debe estar disponible o reservada.'], 422);
+        if (!in_array($habitacion->estado, ['Disponible', 'Reservada', 'Transito'])) {
+            return response()->json(['error' => 'La habitación debe estar disponible, reservada o en llegada.'], 422);
         }
 
         $ocupacion = $this->ocupacionService->iniciarOcupacion($habitacion, $request->tipo_tiempo, $request->integer('personas_adicionales', 0));
