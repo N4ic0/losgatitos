@@ -67,10 +67,7 @@ class DashboardController extends Controller
             'tipo_tiempo' => 'required|in:3h,8h',
         ]);
 
-        $hoy = now();
-        $manana = $hoy->copy()->addDay()->startOfDay();
-        $esVispera = Feriado::whereDate('fecha', $manana)->exists();
-        $dia = $hoy->dayOfWeek;
+        $ahora = now();
 
         $tarifa = Tarifa::where('categoria', $request->categoria)
             ->where('tipo_tiempo', $request->tipo_tiempo)
@@ -80,6 +77,16 @@ class DashboardController extends Controller
         if (!$tarifa) {
             return response()->json(['error' => 'Tarifa no encontrada'], 404);
         }
+
+        // Corte del turno a las 08:00 (hora_inicio de la tarifa): día efectivo desplazado
+        $horaCorte = 8;
+        if ($tarifa->hora_inicio) {
+            $horaCorte = \Carbon\Carbon::parse($tarifa->hora_inicio)->hour;
+        }
+        $hoy = $ahora->hour < $horaCorte ? $ahora->copy()->subDay() : $ahora;
+        $manana = $hoy->copy()->addDay()->startOfDay();
+        $esVispera = Feriado::whereDate('fecha', $manana)->exists();
+        $dia = $hoy->dayOfWeek;
 
         if ($esVispera) {
             $precio = $tarifa->precio_vispera ?? $tarifa->precio_dj;

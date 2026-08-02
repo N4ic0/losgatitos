@@ -7,10 +7,11 @@ use Carbon\Carbon;
 
 class TarifaService
 {
+    private const HORA_CORTE_DEFECTO = 8;
+
     public function calcularPrecio(string $categoria, string $fecha, string $tipoTiempo = '8h', int $horasAdicionales = 0, bool $terceraPersona = false): array
     {
         $fechaCarbon = Carbon::parse($fecha);
-        $diaSemana = $this->getDiaSemana($fechaCarbon);
         
         $tarifa = Tarifa::where('categoria', $categoria)
             ->where('tipo_tiempo', $tipoTiempo)
@@ -20,6 +21,9 @@ class TarifaService
         if (!$tarifa) {
             return ['precio_base' => 0, 'horas_adicionales' => 0, 'tercera_persona' => 0, 'total' => 0, 'error' => 'Tarifa no encontrada'];
         }
+
+        // Corte del turno a las 08:00: el día tarifario efectivo se desplaza hacia atrás
+        $diaSemana = $this->getDiaSemana($this->diaEfectivo($fechaCarbon, $tarifa));
         
         $precioBase = match($diaSemana) {
             'viernes' => $tarifa->precio_viernes,
@@ -37,7 +41,9 @@ class TarifaService
             
             if ($tarifaAdicional) {
                 $precioHora = match($diaSemana) {
-                    'viernes', 'sabado' => $tarifaAdicional->precio_viernes,
+                    'viernes' => $tarifaAdicional->precio_viernes,
+                    'sabado' => $tarifaAdicional->precio_sabado,
+                    'vispera' => $tarifaAdicional->precio_vispera ?? $tarifaAdicional->precio_dj,
                     default => $tarifaAdicional->precio_dj,
                 };
                 $costoAdicional = $precioHora * $horasAdicionales;
@@ -62,6 +68,20 @@ class TarifaService
             'dia_semana' => $diaSemana,
             'tarifa_id' => $tarifa?->id,
         ];
+    }
+
+    private function diaEfectivo(Carbon $fecha, ?Tarifa $tarifa): Carbon
+    {
+        if ($fecha->isSameDay(now())) {
+            $fecha = now();
+        }
+
+        $horaCorte = self::HORA_CORTE_DEFECTO;
+        if ($tarifa && $tarifa->hora_inicio) {
+            $horaCorte = Carbon::parse($tarifa->hora_inicio)->hour;
+        }
+
+        return $fecha->hour < $horaCorte ? $fecha->copy()->subDay() : $fecha;
     }
 
     private function getDiaSemana(Carbon $fecha): string

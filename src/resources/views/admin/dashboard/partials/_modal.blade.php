@@ -326,7 +326,7 @@
                                     <option value="tarjeta">Tarjeta</option>
                                 </select>
                             </div>
-                            <button onclick="dashboard.registrarPago()" class="w-100 mt-3" style="background: #16a34a; color: #fff; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; font-size: 0.875rem;">
+                            <button id="btn-registrar-pago" onclick="dashboard.registrarPago()" class="w-100 mt-3" style="background: #16a34a; color: #fff; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; font-size: 0.875rem;">
                                 Registrar Pago
                             </button>
                         </div>

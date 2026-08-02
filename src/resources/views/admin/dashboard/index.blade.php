@@ -1171,22 +1171,44 @@ class DashboardManager {
     }
 
     async registrarPago() {
-        const monto = document.getElementById('pago-monto').value;
+        const monto = parseInt(document.getElementById('pago-monto').value || '0', 10);
         const forma = document.getElementById('pago-forma').value;
         if (!monto || monto <= 0) { Swal.fire({ icon: 'error', title: 'Ingrese un monto válido' }); return; }
+
+        const pendiente = this.saldoPendiente();
+        if (pendiente <= 0) {
+            Swal.fire({ icon: 'warning', title: 'Cuenta saldada', text: 'No hay saldo pendiente para registrar otro pago.' });
+            return;
+        }
+
+        let excedente = 0;
+        if (monto > pendiente) {
+            excedente = monto - pendiente;
+            this.propina = (this.propina || 0) + excedente;
+            await this._guardarPropina();
+        }
+
         try {
             const res = await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/pago', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                body: JSON.stringify({ monto: parseInt(monto), forma_pago: forma }),
+                body: JSON.stringify({ monto: monto, forma_pago: forma }),
             });
             const json = await res.json();
             if (json.success) {
                 document.getElementById('pago-monto').value = '';
                 await this.recargarOcupacion();
-                Swal.fire({ icon: 'success', title: 'Pago registrado', timer: 1500, showConfirmButton: false });
+                Swal.fire({
+                    icon: 'success',
+                    title: excedente > 0 ? 'Pago registrado, excedente a propina' : 'Pago registrado',
+                    text: excedente > 0 ? '$' + excedente.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' asignados a propina' : undefined,
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: json.error || 'Error al registrar pago', confirmButtonColor: '#D4AF37' });
             }
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error(e); Swal.fire({ icon: 'error', title: 'Error de conexión', confirmButtonColor: '#D4AF37' }); }
     }
 
     setSaldoPendiente() {
@@ -1484,6 +1506,16 @@ class DashboardManager {
 
         document.getElementById('pago-monto').max = pendiente;
 
+        const pagoBtn = document.getElementById('btn-registrar-pago');
+        const pagoInput = document.getElementById('pago-monto');
+        if (pendiente <= 0) {
+            if (pagoBtn) { pagoBtn.disabled = true; pagoBtn.style.opacity = '0.45'; pagoBtn.style.cursor = 'not-allowed'; }
+            if (pagoInput) { pagoInput.disabled = true; }
+        } else {
+            if (pagoBtn) { pagoBtn.disabled = false; pagoBtn.style.opacity = '1'; pagoBtn.style.cursor = 'pointer'; }
+            if (pagoInput) { pagoInput.disabled = false; }
+        }
+
         const pagosSection = document.getElementById('pagos-registered');
         const pagosList = document.getElementById('pagos-list');
         if (this.ocupacion.pagos && this.ocupacion.pagos.length > 0) {
@@ -1494,9 +1526,7 @@ class DashboardManager {
                 '<div class="flex items-center space-x-3">' +
                 '<span class="text-xs text-gray-400 uppercase">' + this._escapeHtml(p.forma_pago) + '</span>' +
                 '<span class="text-green-400 font-bold">' + this.formatCurrency(p.monto) + '</span>' +
-                (window.isAdmin
-                    ? '<button onclick="dashboard.eliminarPago(' + p.id + ')" class="text-red-500 hover:text-red-400 transition-colors ml-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>'
-                    : '') +
+                '<button onclick="dashboard.eliminarPago(' + p.id + ')" class="text-red-500 hover:text-red-400 transition-colors ml-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>' +
                 '</div></div>'
             ).join('');
         } else {
