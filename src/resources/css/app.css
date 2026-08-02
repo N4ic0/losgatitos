@@ -232,6 +232,15 @@ table.dataTable tbody tr.dt-hasChild td.dt-control:before {
     box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.4);
 }
 
+/* ===== Icono de calendario/reloj blanco en inputs de fecha (modo oscuro) ===== */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 1;
+}
+
 @layer utilities {
     .text-glow {
         text-shadow: 0 0 10px rgba(212, 175, 55, 0.5), 0 0 20px rgba(212, 175, 55, 0.3);

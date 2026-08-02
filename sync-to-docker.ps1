@@ -1,8 +1,8 @@
 # Sincroniza cambios del código fuente desde Windows al volumen Docker
 # Ejecuta: .\sync-to-docker.ps1 (desde PowerShell en D:\Desarrollo\Contenedores\losgatitos)
 
-Write-Host "Sincronizando src/ → losgatitos_src ..." -ForegroundColor Cyan
-docker run --rm -v "D:\Desarrollo\Contenedores\losgatitos\src:/source" -v losgatitos_src:/target alpine sh -c "cp -a /source/. /target/"
+Write-Host "Sincronizando src/ → losgatitos_src (sin node_modules/vendor/build/storage)..." -ForegroundColor Cyan
+docker run --rm -v "D:\Desarrollo\Contenedores\losgatitos\src:/source" -v losgatitos_src:/target alpine sh -c "tar cf - --exclude=node_modules --exclude=vendor --exclude=public/build --exclude=storage --exclude=.git -C /source . | tar xf - -C /target"
 
 if (-not $?) {
     Write-Host "❌ Error en sincronización" -ForegroundColor Red

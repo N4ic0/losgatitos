@@ -73,7 +73,6 @@
                 <p class="text-gray-400 text-xs sm:text-base mb-4 sm:mb-6">Ambiente íntimo y acogedor. Perfecta para parejas que buscan una experiencia inolvidable.</p>
                 <ul class="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-400 mb-4 sm:mb-6">
                     <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Cama King Size</li>
-                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Jacuzzi</li>
                     <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> TV LED 50"</li>
                     <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Aire Acondicionado</li>
                 </ul>
@@ -88,7 +87,6 @@
                 <p class="text-gray-400 text-xs sm:text-base mb-4 sm:mb-6">Más espacio y comodidad. Ideal para quienes buscan una estadía prolongada con todas las facilidades.</p>
                 <ul class="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-400 mb-4 sm:mb-6">
                     <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Sala de Estar</li>
-                    <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Hidromasaje</li>
                     <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Mini Bar</li>
                     <li class="flex items-center"><i class="fas fa-check text-[#D4AF37] text-[9px] sm:text-xs mr-1.5 sm:mr-2"></i> Wifi Premium</li>
                 </ul>
@@ -113,7 +111,7 @@
                 $servicios = [
                     ['icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => '24 Horas', 'desc' => 'Atención y check-in las 24 horas del día'],
                     ['icon' => 'M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3', 'title' => 'Estacionamiento', 'desc' => 'Estacionamiento privado y seguro'],
-                    ['icon' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'title' => 'TV & Smart TV', 'desc' => 'TV LED con Netflix y YouTube'],
+                    ['icon' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'title' => 'TV & Smart TV', 'desc' => 'Smart Tv para conectar tus cuentas'],
                     ['icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', 'title' => 'WiFi Premium', 'desc' => 'Internet de alta velocidad gratuito'],
                 ];
             @endphp

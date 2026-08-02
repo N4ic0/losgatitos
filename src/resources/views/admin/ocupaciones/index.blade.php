@@ -143,6 +143,15 @@ const OcupacionesManager = {
                 showCancelButton: true,
                 focusConfirm: false,
                 allowOutsideClick: false,
+                didOpen: function() {
+                    var rango = rangoTurnoPorDefecto();
+                    var fmt = function(d) {
+                        var pad = function(n) { return (n < 10 ? '0' : '') + n; };
+                        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+                    };
+                    document.getElementById('cierreDesde').value = fmt(rango.inicio);
+                    document.getElementById('cierreHasta').value = fmt(rango.fin);
+                },
                 preConfirm: function() {
                     var desde = document.getElementById('cierreDesde').value;
                     var hasta = document.getElementById('cierreHasta').value;
@@ -188,6 +197,21 @@ const OcupacionesManager = {
         });
     },
 };
+
+function rangoTurnoPorDefecto() {
+    var ahora = new Date();
+    var hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+    var ayer = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - 1);
+    var inicio, fin;
+    if (ahora.getHours() < 22) {
+        inicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 8, 0);
+        fin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 20, 0);
+    } else {
+        inicio = new Date(ayer.getFullYear(), ayer.getMonth(), ayer.getDate(), 20, 0);
+        fin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 8, 0);
+    }
+    return { inicio: inicio, fin: fin };
+}
 
 document.addEventListener('DOMContentLoaded', function() { OcupacionesManager.init(); });
 </script>
