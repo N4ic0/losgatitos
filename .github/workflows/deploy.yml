@@ -15,6 +15,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restaurar fechas de archivos segun ultimo commit
+        run: |
+          set -e
+          while IFS= read -r f; do
+            ft=$(git log -1 --format=%ci -- "$f")
+            touch -d "$ft" "$f"
+          done < <(git ls-files)
 
       - name: Setup PHP (8.3)
         uses: shivammathur/setup-php@v2
