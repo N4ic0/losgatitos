@@ -26,7 +26,34 @@ jobs:
             touch -d "$ft" "$f"
           done < <(git ls-files)
 
+      - name: Detectar archivos cambiados
+        id: changed
+        run: |
+          set -e
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            composer_changed=true
+            assets_changed=true
+          else
+            changed=$(git diff --name-only "$BEFORE" HEAD || true)
+            composer_changed=false
+            assets_changed=false
+            for f in $changed; do
+              case "$f" in
+                composer.lock|composer.json|src/composer.lock|src/composer.json|vendor/*|src/vendor/*)
+                  composer_changed=true;;
+                package*.json|src/package*.json|resources/*|src/resources/*|vite.config.*|src/vite.config.*)
+                  assets_changed=true;;
+              esac
+            done
+          fi
+          echo "composer_changed=$composer_changed"
+          echo "assets_changed=$assets_changed"
+          echo "composer_changed=$composer_changed" >> $GITHUB_OUTPUT
+          echo "assets_changed=$assets_changed" >> $GITHUB_OUTPUT
+
       - name: Setup PHP (8.3)
+        if: steps.changed.outputs.composer_changed == 'true'
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
@@ -34,6 +61,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache Composer
+        if: steps.changed.outputs.composer_changed == 'true'
         uses: actions/cache@v4
         with:
           path: src/vendor
@@ -41,9 +69,11 @@ jobs:
           restore-keys: composer-
 
       - name: Install PHP dependencies
+        if: steps.changed.outputs.composer_changed == 'true'
         run: cd src && composer install --no-dev --optimize-autoloader
 
       - name: Setup Node
+        if: steps.changed.outputs.assets_changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -51,6 +81,7 @@ jobs:
           cache-dependency-path: src/package-lock.json
 
       - name: Cache Node modules
+        if: steps.changed.outputs.assets_changed == 'true'
         uses: actions/cache@v4
         with:
           path: src/node_modules
@@ -58,6 +89,7 @@ jobs:
           restore-keys: npm-
 
       - name: Install Node dependencies & build assets
+        if: steps.changed.outputs.assets_changed == 'true'
         run: cd src && npm ci && npm run build
 
       - name: Deploy via FTP (only changed files)
