@@ -26,9 +26,10 @@ import wave
 import argparse
 
 # ─── CONFIG ───────────────────────────────────────────────────────────
-API_BASE = os.getenv("API_BASE", "http://192.168.100.142:8080")
-API_TOKEN = os.getenv("API_TOKEN", "REEMPLAZA_CON_TU_TOKEN")
-HEADERS = {"Authorization": f"Bearer {API_TOKEN}", "Accept": "application/json"}
+API_BASE = os.getenv("API_BASE", "https://motellosgatitos.cl")
+API_TOKEN = os.getenv("API_TOKEN", "1|llE7NvmHemmqqKh2b5zfzoVwm4fZj7FII2qvCTXR7e93e222")
+HEADERS = {"Authorization": f"Bearer {API_TOKEN}", "Accept": "application/json",
+           "User-Agent": "kiosko-losgatitos/1.0"}
 
 BUTTON_PIN = 17       # GPIO17 (físico) para activar
 LED_PIN = 27          # GPIO27 - LED indicador de espera
@@ -127,6 +128,12 @@ def hablar(texto):
                    input=out)
 
 
+def hablar_contacto():
+    """En caso de error, indica los canales de contacto con recepción."""
+    hablar("Para más ayuda, llámenos al 4 4 3 6 8 7 9 9 9, "
+           "o escríbanos por WhatsApp al 5 6 9 9 8 8 9 8 6 9 3.")
+
+
 # ─── GPIO ─────────────────────────────────────────────────────────────
 
 def setup_gpio():
@@ -195,7 +202,7 @@ def api_cambiar_estado(habitacion_id, estado):
     try:
         r = requests.post(f"{API_BASE}/api/kiosco/habitacion/estado",
                           headers=HEADERS,
-                          json={"habitacion_id": habitacion_id, "estado": estado},
+                          data={"habitacion_id": habitacion_id, "estado": estado},
                           timeout=5)
         return r.status_code == 200, r.json()
     except Exception as e:
@@ -206,7 +213,7 @@ def api_cambiar_estado(habitacion_id, estado):
 def api_validar_reserva(rut):
     try:
         r = requests.post(f"{API_BASE}/api/kiosco/reserva",
-                          headers=HEADERS, json={"rut": rut}, timeout=5)
+                          headers=HEADERS, data={"rut": rut}, timeout=5)
         return r.status_code == 200, r.json()
     except Exception as e:
         print(f"[API] Error validar reserva: {e}")
@@ -217,7 +224,7 @@ def api_asignar(reserva_id, habitacion_id):
     try:
         r = requests.post(f"{API_BASE}/api/kiosco/asignar",
                           headers=HEADERS,
-                          json={"reserva_id": reserva_id, "habitacion_id": habitacion_id},
+                          data={"reserva_id": reserva_id, "habitacion_id": habitacion_id},
                           timeout=5)
         return r.status_code == 200, r.json()
     except Exception as e:
@@ -296,29 +303,14 @@ def api_reservas_hoy():
 # ─── FLUJO PRINCIPAL ──────────────────────────────────────────────────
 
 def flujo_bienvenida():
-    check = verificar_disponibilidad()
-    if not check.get("permitida", False):
-        hablar(check.get("mensaje", "Hoy no hay reservas disponibles."))
-        return
-
-    reservas_hoy = api_reservas_hoy()
-    if not reservas_hoy.get("tiene_reservas", False):
-        hablar("Bienvenido al Motel Los Gatitos.")
-        flujo_sin_reserva()
-        return
-
-    hablar("Bienvenido al Motel Los Gatitos. ¿Tienes una reserva?")
-    print("[FLUJO] ¿Tiene reserva? (decí 'sí' o 'no')")
-    texto = escuchar(4)
-
-    if "si" in texto or "sí" in texto:
-        flujo_con_reserva()
-    else:
-        flujo_sin_reserva()
+    # Módulo de reservas desactivado temporalmente (hasta terminar su desarrollo).
+    # Flujo directo sin reserva: disponibilidad + asignación + apertura de portón.
+    hablar("Bienvenido al Motel Los Gatitos.")
+    flujo_sin_reserva()
 
 
 def flujo_con_reserva():
-    hablar("Por favor, decí tu RUT en voz alta.")
+    hablar("Por favor, diga su RUT en voz alta.")
     print("[FLUJO] Esperando RUT por voz...")
     for intento in range(3):
         texto = escuchar(6)
@@ -336,12 +328,13 @@ def flujo_con_reserva():
             break
         hablar("OK, intentemos otra vez.")
     else:
-        hablar("No pude entender el RUT después de varios intentos. "
-               "Presiona el botón para empezar de nuevo.")
+        hablar("No pude entender el RUT después de varios intentos. ")
+        hablar_contacto()
         return
     ok, data = api_validar_reserva(rut_limpio)
     if not ok or not data.get("valido"):
-        hablar(data.get("mensaje", "No se encontró ninguna reserva para ese RUT."))
+        hablar(data.get("mensaje", "No se encontró ninguna reserva para ese RUT.") + " ")
+        hablar_contacto()
         return
     reserva = data["reserva"]
     hab_id = reserva.get("habitacion_id")
@@ -359,21 +352,22 @@ def flujo_con_reserva():
 
 
 def flujo_sin_reserva():
-    hablar("Déjame consultar la disponibilidad.")
+    #hablar("Déjame consultar la disponibilidad.")
     disp = api_disponibilidad()
     suites = disp.get("suites", [])
     deptos = disp.get("departamentos", [])
 
     if not suites and not deptos:
-        hablar("Lo siento, no hay habitaciones disponibles en este momento.")
+        hablar("Lo siento, no hay habitaciones disponibles en este momento. ")
+        hablar_contacto()
         return
 
     if suites and deptos:
         desde_s = min(s["tarifa"] for s in suites)
         desde_d = min(d["tarifa"] for d in deptos)
         hablar(f"Hay {len(deptos)} departamentos desde {desde_d} pesos. "
-               f"Y {len(suites)} suites desde {desde_s} pesos. "
-               "Decí 1 para departamento o 2 para suite.")
+               f"Y {len(suites)} suits desde {desde_s} pesos. "
+               "Decí 1 para departamento o 2 para suit.")
         print("[FLUJO] Esperando opción (1=depto, 2=suite)...")
         for intento in range(2):
             texto = escuchar(4)
@@ -386,14 +380,15 @@ def flujo_sin_reserva():
                 tipo = "suite"
                 break
             if intento == 0:
-                hablar("No te escuché bien. Decí 1 para departamento o 2 para suite.")
+                hablar("No te escuché bien. Diga 1 para departamento o 2 para suit.")
         else:
-            hablar("No entendí. Presiona el botón para empezar de nuevo.")
+            hablar("No entendí la opción. ")
+            hablar_contacto()
             return
     elif suites:
         seleccion = suites
         tipo = "suite"
-        hablar(f"Tenemos {len(suites)} suites disponibles desde "
+        hablar(f"Tenemos {len(suites)} suits disponibles desde "
                f"{min(s['tarifa'] for s in suites)} pesos.")
     else:
         seleccion = deptos
@@ -404,7 +399,8 @@ def flujo_sin_reserva():
     habitacion = seleccion[0]
     ok, data = api_cambiar_estado(habitacion["id"], "TRANSITO")
     if not ok:
-        hablar(f"Lo siento, hubo un problema con la {tipo} {habitacion['numero']}. Intenta de nuevo.")
+        hablar(f"Lo siento, hubo un problema con la {tipo} {habitacion['numero']}. ")
+        hablar_contacto()
         return
 
     num_hab = data.get("mensaje", f"Habitación {habitacion['numero']}")
@@ -417,21 +413,23 @@ def flujo_sin_reserva():
 
 def loop_principal():
     print("=" * 50)
-    print("Kiosco Los Gatitos - Una ejecución por ciclo")
-    print("Presioná el botón físico para activar")
+    print("Kiosco Los Gatitos - en espera del pulsor")
     print("=" * 50)
 
-    try:
-        if not api_ping():
-            hablar("El sistema no está disponible. Contacta al administrador.")
-            return
+    while True:
+        try:
+            if not api_ping():
+                hablar("El sistema no está disponible en este momento. ")
+                hablar_contacto()
+                time.sleep(30)
+                continue
 
-        esperar_boton()
-        flujo_bienvenida()
-        print("[LOOP] Cliente atendido. El programa ha finalizado.")
-
-    except Exception as e:
-        print(f"[ERROR] {e}")
+            esperar_boton()
+            flujo_bienvenida()
+            print("[LOOP] Cliente atendido. Volviendo a la espera del pulsor.")
+        except Exception as e:
+            print(f"[ERROR] {e}")
+            time.sleep(5)
 
 
 if __name__ == "__main__":
