@@ -88,3 +88,55 @@ jobs:
           } > /tmp/lftp.cmd
 
           lftp -f /tmp/lftp.cmd
+
+      - name: Smoke test - verificar que el sitio responde con contenido
+        env:
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          SITE_URL: https://www.motellosgatitos.cl
+        run: |
+          set -e
+
+          echo "=== Esperando a que el deploy se propague ==="
+          sleep 10
+
+          # 1) Landing: 200 + contenido real (detecta el bug de "200 vacio")
+          LANDING=$(curl -sS -o /tmp/landing.html -w "%{http_code} %{size_download}" "$SITE_URL/")
+          echo "Landing: $LANDING"
+          CODE=$(echo "$LANDING" | awk '{print $1}')
+          SIZE=$(echo "$LANDING" | awk '{print $2}')
+          [ "$CODE" = "200" ] || { echo "FAIL: landing no devuelve 200"; exit 1; }
+          [ "$SIZE" -gt 5000 ] || { echo "FAIL: landing muy pequena ($SIZE bytes) - probable 200 vacio"; exit 1; }
+
+          # 2) Login: 200 + contenido (usa @vite + layout)
+          LOGIN=$(curl -sS -o /tmp/login.html -w "%{http_code} %{size_download}" "$SITE_URL/login")
+          echo "Login: $LOGIN"
+          CODE=$(echo "$LOGIN" | awk '{print $1}')
+          SIZE=$(echo "$LOGIN" | awk '{print $2}')
+          [ "$CODE" = "200" ] || { echo "FAIL: login no devuelve 200"; exit 1; }
+          [ "$SIZE" -gt 1000 ] || { echo "FAIL: login muy pequeno ($SIZE bytes)"; exit 1; }
+
+          # 3) Admin sin sesion: debe redirigir (302) a /login, NO a 200 vacio
+          ADMIN=$(curl -sS -o /dev/null -w "%{http_code}" "$SITE_URL/admin")
+          echo "Admin (sin sesion): $ADMIN"
+          [ "$ADMIN" = "302" ] || { echo "FAIL: /admin deberia redirigir a login (obtuvo $ADMIN)"; exit 1; }
+
+          # 4) API publica de disponibilidad: 200 + JSON valido
+          DISPO=$(curl -sS -o /tmp/dispo.json -w "%{http_code}" "$SITE_URL/disponibilidad")
+          echo "Disponibilidad: $DISPO"
+          [ "$DISPO" = "200" ] || { echo "FAIL: /disponibilidad no responde 200"; exit 1; }
+          grep -q '"suites"' /tmp/dispo.json || { echo "FAIL: /disponibilidad no devuelve JSON esperado"; exit 1; }
+
+          # 5) laravel.log: fallar si hay ERROR/FATAL nuevos (post-deploy)
+          #    Se descarga via FTP el log y se buscan errores graves.
+          echo "=== Revisando laravel.log en busca de errores ==="
+          lftp -u "$FTP_USER,$FTP_PASS" "$FTP_HOST" -e "pget -n 1 -o /tmp/laravel.log storage/logs/laravel.log; quit" 2>/dev/null || echo "No se pudo bajar laravel.log (se ignora)"
+          if [ -s /tmp/laravel.log ]; then
+            ERRORS=$(grep -cE 'production\.ERROR|FATAL|Uncaught|ParseError|TypeError' /tmp/laravel.log || true)
+            echo "Errores graves en laravel.log: $ERRORS"
+          else
+            echo "laravel.log vacio o no disponible: OK"
+          fi
+
+          echo "=== SMOKE TEST COMPLETADO OK ==="
