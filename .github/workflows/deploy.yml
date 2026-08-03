@@ -7,6 +7,9 @@ concurrency:
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 jobs:
@@ -106,11 +109,11 @@ jobs:
             echo "set ftp:passive-mode off"
             echo "set ftp:ssl-allow yes"
             echo "set ssl:verify-certificate no"
-            echo "set net:timeout 300"
-            echo "set net:max-retries 5"
-            echo "set net:reconnect-interval-base 15"
-            echo "set mirror:parallel-transfer-count 10"
-            echo "set mirror:use-pget-n 10"
+            echo "set net:timeout 60"
+            echo "set net:max-retries 3"
+            echo "set net:reconnect-interval-base 5"
+            echo "set mirror:parallel-transfer-count 20"
+            echo "set mirror:use-pget-n 20"
             echo "open -u $FTP_USER,$FTP_PASS $FTP_HOST"
             echo "mirror -R --only-newer --exclude node_modules/ --exclude vendor/ --exclude tests/ --exclude .env --exclude .env.example --exclude .gitignore --exclude docker-compose.yml --exclude docker-compose.opencode.yml --exclude Dockerfile --exclude phpunit.xml --exclude README.md --exclude .htaccess --exclude bootstrap/cache/ --exclude public/storage --exclude storage/app/public/ --exclude storage/framework/cache/ --exclude storage/framework/sessions/ --exclude storage/framework/views/ --exclude storage/logs/ --verbose . /"
             echo "rm -f bootstrap/cache/routes-*.php"
