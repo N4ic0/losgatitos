@@ -91,20 +91,43 @@ def callback_audio(indata, frames, time_info, status):
 
 
 def escuchar(tiempo=LISTEN_SECONDS) -> str:
-    """Escucha y transcribe. Retorna texto normalizado en minúsculas."""
+    """Escucha y transcribe. Retorna texto normalizado en minúsculas.
+    Nunca debe bloquear el flujo: si el micrófono o el modelo fallan,
+    retorna "" en tiempo limitado para que el ciclo siga (repita pregunta)."""
     if not recognizer:
         return ""
-    with sd.RawInputStream(samplerate=SAMPLE_RATE, blocksize=8000,
-                           device=None, dtype="int16",
-                           channels=1, callback=callback_audio):
-        print("[MICRO] Escuchando...")
-        sd.sleep(int(tiempo * 1000))
-
     while not audio_queue.empty():
-        data = audio_queue.get()
-        recognizer.AcceptWaveform(data)
-    result = json.loads(recognizer.FinalResult())
-    texto = result.get("text", "").strip().lower()
+        try:
+            audio_queue.get_nowait()
+        except Exception:
+            break
+
+    resultado = {"texto": ""}
+
+    def _grabar():
+        try:
+            with sd.RawInputStream(samplerate=SAMPLE_RATE, blocksize=8000,
+                                   device=None, dtype="int16",
+                                   channels=1, callback=callback_audio):
+                print("[MICRO] Escuchando...")
+                sd.sleep(int(tiempo * 1000))
+        except Exception as e:
+            print(f"[MICRO] Error abrir audio: {e}")
+            return
+        try:
+            while not audio_queue.empty():
+                data = audio_queue.get(timeout=1)
+                recognizer.AcceptWaveform(data)
+            res = json.loads(recognizer.FinalResult())
+            resultado["texto"] = res.get("text", "").strip().lower()
+        except Exception as e:
+            print(f"[MICRO] Error reconocer: {e}")
+
+    hilo = threading.Thread(target=_grabar, daemon=True)
+    hilo.start()
+    hilo.join(timeout=max(tiempo + 2, int(tiempo * 1.5) + 3))
+
+    texto = resultado["texto"]
     if texto:
         texto = normalizar(texto)
         print(f"[TRANSCRIPCION] {texto}")
@@ -112,20 +135,31 @@ def escuchar(tiempo=LISTEN_SECONDS) -> str:
 
 
 def hablar(texto):
-    """Sintetiza voz con Piper TTS."""
+    """Sintetiza voz con Piper TTS. Con timeout para no trabar el flujo."""
     texto = texto.replace(" suite ", " suit ").replace(" suites ", " suits ")
     texto = texto.replace("Suite", "Suit").replace("Suites", "Suits")
     if not os.path.exists(PIPER_MODEL):
         print(f"[TTS] {texto}")
         return
     print(f"[TTS] {texto}")
-    proc = subprocess.Popen(
-        ["piper", "--model", PIPER_MODEL, "--output-raw"],
-        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-    )
-    out, _ = proc.communicate(input=texto.encode("utf-8"))
-    subprocess.run(["aplay", "-r", "22050", "-f", "S16_LE", "-c", "1"],
-                   input=out)
+    proc = None
+    try:
+        proc = subprocess.Popen(
+            ["piper", "--model", PIPER_MODEL, "--output-raw"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+        )
+        out, _ = proc.communicate(input=texto.encode("utf-8"), timeout=30)
+        subprocess.run(["aplay", "-r", "22050", "-f", "S16_LE", "-c", "1"],
+                       input=out, timeout=30)
+    except subprocess.TimeoutExpired:
+        if proc is not None:
+            try:
+                proc.kill()
+            except Exception:
+                pass
+        print("[TTS] Timeout al sintetizar/reproducir")
+    except Exception as e:
+        print(f"[TTS] Error: {e}")
 
 
 def hablar_contacto():
