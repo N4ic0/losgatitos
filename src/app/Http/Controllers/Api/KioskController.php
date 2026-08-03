@@ -22,6 +22,44 @@ class KioskController extends Controller
         private ReservaRepository $reservaRepository
     ) {}
 
+    private function reconstruirInput(Request $request): void
+    {
+        if ($request->input()) {
+            return;
+        }
+
+        $raw = $request->getContent();
+        if (!$raw) {
+            return;
+        }
+
+        $data = json_decode($raw, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+            $request->merge($data);
+            return;
+        }
+
+        if (preg_match('/^\s*\{([^}]*)\}\s*$/', $raw, $m)) {
+            $parsed = [];
+            foreach (explode(',', $m[1]) as $par) {
+                $par = trim($par);
+                if ($par === '') {
+                    continue;
+                }
+                $pos = strpos($par, ':');
+                if ($pos === false) {
+                    continue;
+                }
+                $key = trim(substr($par, 0, $pos), " \t\n\r\0\x0B\"'");
+                $val = trim(substr($par, $pos + 1), " \t\n\r\0\x0B\"'");
+                if ($key !== '') {
+                    $parsed[$key] = $val;
+                }
+            }
+            $request->merge($parsed);
+        }
+    }
+
     public function ping(): JsonResponse
     {
         return response()->json(['status' => 'ok']);
@@ -82,6 +120,8 @@ class KioskController extends Controller
 
     public function validarReserva(Request $request): JsonResponse
     {
+        $this->reconstruirInput($request);
+
         $request->validate([
             'rut' => 'required|string',
         ]);
@@ -123,6 +163,8 @@ class KioskController extends Controller
 
     public function cambiarEstado(Request $request): JsonResponse
     {
+        $this->reconstruirInput($request);
+
         $request->validate([
             'habitacion_id' => 'required|integer|exists:habitaciones,id',
             'estado' => 'required|in:DISPONIBLE,RESERVADA,TRANSITO,OCUPADA,LIMPIEZA',
@@ -163,6 +205,8 @@ class KioskController extends Controller
 
     public function asignar(Request $request): JsonResponse
     {
+        $this->reconstruirInput($request);
+
         $request->validate([
             'reserva_id' => 'required|integer|exists:reservas,id',
             'habitacion_id' => 'required|integer|exists:habitaciones,id',
