@@ -102,6 +102,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('dashboard/calcular-tarifa', [DashboardController::class, 'calcularTarifa'])->name('dashboard.calcular-tarifa');
     Route::get('dashboard/habitacion/{habitacion}', [DashboardController::class, 'datosHabitacion'])->name('dashboard.habitacion');
     Route::post('dashboard/habitacion/{habitacion}/cambiar-estado', [DashboardController::class, 'cambiarEstado'])->name('dashboard.cambiar-estado');
+    Route::post('dashboard/habitacion/{habitacion}/aire', [DashboardController::class, 'toggleAire'])->name('dashboard.toggle-aire');
     Route::post('dashboard/habitacion/{habitacion}/iniciar-ocupacion', [DashboardController::class, 'iniciarOcupacion'])->name('dashboard.iniciar-ocupacion');
     Route::get('dashboard/ocupacion/{ocupacion}', [DashboardController::class, 'datosOcupacion'])->name('dashboard.ocupacion');
     Route::post('dashboard/ocupacion/{ocupacion}/cliente', [DashboardController::class, 'registrarCliente'])->name('dashboard.registrar-cliente');

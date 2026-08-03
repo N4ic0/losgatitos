@@ -54,16 +54,22 @@ class KioskController extends Controller
     {
         $habitaciones = $this->habitacionRepository->getDisponibles();
 
-        $departamentos = $habitaciones->where('categoria', 'Departamento')->values()->map(fn ($h) => [
+        $departamentos = $habitaciones->where('categoria', 'Departamento')->values()
+            ->sortBy(fn ($h) => (!$h->aire ? 1000 : 0) + (int) $h->numero)
+            ->map(fn ($h) => [
             'id' => $h->id,
             'numero' => $h->numero,
             'tarifa' => $this->obtenerTarifaMinima('Departamento'),
+            'aire' => (bool) $h->aire,
         ]);
 
-        $suites = $habitaciones->where('categoria', 'Suite')->values()->map(fn ($h) => [
+        $suites = $habitaciones->where('categoria', 'Suite')->values()
+            ->sortBy(fn ($h) => (!$h->aire ? 1000 : 0) + (int) $h->numero)
+            ->map(fn ($h) => [
             'id' => $h->id,
             'numero' => $h->numero,
             'tarifa' => $this->obtenerTarifaMinima('Suite'),
+            'aire' => (bool) $h->aire,
         ]);
 
         return response()->json([

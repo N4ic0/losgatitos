@@ -119,9 +119,17 @@
                         @if($habitacion->estado === 'Transito') LLEGANDO @else {{ $habitacion->estado }} @endif
                     </span>
                 </div>
-                <p class="text-gray-400 text-[10px] leading-tight mt-0.5">{{ $habitacion->categoria }}</p>
 
-                <div class="flex items-center gap-1.5 mt-auto pt-1">
+                <div class="flex items-center justify-between mt-1.5" onclick="event.stopPropagation();">
+                    <span class="text-gray-400 text-[10px] leading-tight">{{ $habitacion->categoria }}</span>
+                    <div class="flex items-center gap-1" onclick="event.stopPropagation();">
+                        <span class="aire-chip cursor-pointer px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-colors
+                            @if($habitacion->aire) bg-[#FACC15] text-black @else bg-white/10 text-gray-300 hover:bg-white/20 @endif"
+                              data-habitacion="{{ $habitacion->id }}" title="Hacer clic para activar/desactivar Aire">Aire</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-auto pt-1">
                     @if($habitacion->ultimoEstado && $habitacion->estado !== 'Disponible')
                     <span class="timer-{{ $habitacion->id }} text-[#D4AF37] text-[10px] font-mono"
                           data-inicio="{{ $habitacion->ultimoEstado->fecha_inicio->timestamp }}">
@@ -1653,6 +1661,31 @@ class DashboardManager {
 }
 
 window.dashboard = new DashboardManager();
+
+// Delegación del chip "Aire" (capture: el stopPropagation de los divs no lo bloquea, y sobrevive al auto-refresh)
+document.addEventListener('click', function(e) {
+    var el = e.target.closest ? e.target.closest('.aire-chip') : null;
+    if (el) {
+        var chip = el;
+        var habitacionId = chip.getAttribute('data-habitacion');
+        var activar = !chip.classList.contains('bg-[#FACC15]');
+        var csrf = document.querySelector('meta[name="csrf-token"]');
+        fetch('/admin/dashboard/habitacion/' + habitacionId + '/aire', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf ? csrf.getAttribute('content') : ''},
+            body: JSON.stringify({aire: activar})
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            if (data.success) {
+                chip.classList.toggle('bg-[#FACC15]', data.aire);
+                chip.classList.toggle('text-black', data.aire);
+                chip.classList.toggle('bg-white/10', !data.aire);
+                chip.classList.toggle('text-gray-300', !data.aire);
+            }
+        }).catch(function() {});
+        e.preventDefault();
+        e.stopPropagation();
+    }
+}, true);
 
 // Auto-refresh dashboard sin recargar (no cierra modals)
 (function() {

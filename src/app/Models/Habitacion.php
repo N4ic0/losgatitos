@@ -15,7 +15,15 @@ class Habitacion extends Model
         'categoria',
         'estado',
         'observaciones',
+        'aire',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'aire' => 'boolean',
+        ];
+    }
 
     public function reservas()
     {

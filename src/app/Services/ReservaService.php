@@ -43,6 +43,9 @@ class ReservaService
         ]);
         
         $habitacion = Habitacion::findOrFail($habitacionId);
+        if ($habitacion->aire) {
+            $habitacion->update(['aire' => false]);
+        }
         $habitacion->update(['estado' => 'Ocupada']);
         
         $this->auditoriaService->registrar('asignar', 'reservas', $reservaId, null, $reserva->toArray());

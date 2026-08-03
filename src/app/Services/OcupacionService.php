@@ -35,6 +35,10 @@ class OcupacionService
             'ocupacion_id' => $ocupacionId,
         ]);
 
+        if ($nuevoEstado === 'Ocupada' && $habitacion->aire) {
+            $habitacion->update(['aire' => false]);
+        }
+
         $habitacion->update(['estado' => $nuevoEstado]);
 
         $this->auditoriaService->registrar(

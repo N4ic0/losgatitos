@@ -44,6 +44,16 @@ class DashboardController extends Controller
         return response()->json(['success' => true, 'estado' => $request->estado]);
     }
 
+    public function toggleAire(Request $request, Habitacion $habitacion)
+    {
+        \Illuminate\Support\Facades\Log::info('toggleAire HIT', ['habitacion' => $habitacion->id, 'user' => auth()->id(), 'input' => $request->all(), 'json' => $request->json()->all()]);
+        $request->validate(['aire' => 'required|boolean']);
+
+        $habitacion->update(['aire' => $request->boolean('aire')]);
+
+        return response()->json(['success' => true, 'aire' => (bool) $habitacion->aire]);
+    }
+
     public function iniciarOcupacion(Request $request, Habitacion $habitacion)
     {
         $request->validate([
