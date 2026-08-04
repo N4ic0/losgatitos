@@ -557,4 +557,12 @@ select:hover {
     animation: flashLlegando 1.5s ease-in-out infinite;
     border-color: rgba(249, 115, 22, 0.6) !important;
 }
+@keyframes timerBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.15; }
+}
+.timer-alerta {
+    animation: timerBlink 1s step-start infinite;
+    color: #ef4444 !important;
+}
 </style>

@@ -132,7 +132,9 @@
                 <div class="flex items-center justify-between mt-auto pt-1">
                     @if($habitacion->ultimoEstado && $habitacion->estado !== 'Disponible')
                     <span class="timer-{{ $habitacion->id }} text-[#D4AF37] text-[10px] font-mono"
-                          data-inicio="{{ $habitacion->ultimoEstado->fecha_inicio->timestamp }}">
+                          data-inicio="{{ $habitacion->ultimoEstado->fecha_inicio->timestamp }}"
+                          data-duracion="{{ $habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa ? ($habitacion->ocupacionActiva->tarifa->tipo_tiempo === '8h' ? 28800 : 10800) : '' }}"
+                          data-alarma-key="{{ $habitacion->id }}">
                         <span class="tiempo-valor">00:00:00</span>
                     </span>
                     @endif
@@ -187,6 +189,7 @@ class DashboardManager {
         this._tieneCortesiaBackend = false;
 
         this.modalInstance = null;
+        this._unlockAudio();
         this.init();
     }
 
@@ -223,19 +226,67 @@ class DashboardManager {
             this._timerIntervals.forEach(id => clearInterval(id));
         }
         this._timerIntervals = [];
+        if (!this._alarmados) this._alarmados = new Set();
         document.querySelectorAll('[data-inicio]').forEach(el => {
             const inicio = parseInt(el.dataset.inicio) * 1000;
             if (isNaN(inicio)) return;
             const span = el.querySelector('.tiempo-valor');
+            const duracion = parseInt(el.dataset.duracion);
+            const hasDuracion = !isNaN(duracion) && duracion > 0;
+            const fin = inicio + (hasDuracion ? duracion * 1000 : 0);
             const id = setInterval(() => {
-                const diff = Math.max(0, Date.now() - inicio);
+                const now = Date.now();
+                const diff = Math.max(0, now - inicio);
                 const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
                 const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                 const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                 span.textContent = h + ':' + m + ':' + s;
+                if (hasDuracion && el.dataset.alarmaKey) {
+                    const restante = fin - now;
+                    if (restante > 0 && restante <= 900000 && !this._alarmados.has(el.dataset.alarmaKey)) {
+                        if (!span.classList.contains('timer-alerta')) span.classList.add('timer-alerta');
+                        this._alarmados.add(el.dataset.alarmaKey);
+                        this.dinDon();
+                    }
+                }
             }, 1000);
             this._timerIntervals.push(id);
         });
+    }
+
+    dinDon() {
+        try {
+            const ctx = this._audioCtx || (this._audioCtx = new (window.AudioContext || window.webkitAudioContext)());
+            if (ctx.state === 'suspended') ctx.resume();
+            const t = ctx.currentTime;
+            const freq = [880, 660];
+            freq.forEach((f, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = f;
+                const start = t + i * 0.32;
+                const dur = 0.25;
+                gain.gain.setValueAtTime(0, start);
+                gain.gain.linearRampToValueAtTime(0.25, start + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+                osc.start(start);
+                osc.stop(start + dur + 0.05);
+            });
+        } catch (e) {}
+    }
+
+    _unlockAudio() {
+        document.addEventListener('pointerdown', () => {
+            if (!this._audioCtx) {
+                try {
+                    this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {}
+            }
+            if (this._audioCtx && this._audioCtx.state === 'suspended') this._audioCtx.resume();
+        }, { once: true });
     }
 
     _initModal() {
@@ -383,8 +434,11 @@ class DashboardManager {
         if (this.habitacion.ultimo_estado && this.habitacion.estado !== 'Disponible') {
             timerEl.style.display = '';
             timerEl.dataset.inicio = new Date(this.habitacion.ultimo_estado.fecha_inicio).getTime() / 1000;
+            timerEl.dataset.alarmaKey = String(this.habitacion.id);
+            const tt = this.ocupacion && this.ocupacion.tarifa ? this.ocupacion.tarifa.tipo_tiempo : null;
+            timerEl.dataset.duracion = (this.habitacion.estado === 'Ocupada' && tt) ? (tt === '8h' ? 28800 : 10800) : '';
             const valEl = timerEl.querySelector('.tiempo-valor');
-            if (valEl) valEl.textContent = '00:00:00';
+            if (valEl) { valEl.textContent = '00:00:00'; valEl.classList.remove('timer-alerta'); }
         } else {
             timerEl.style.display = 'none';
         }
