@@ -1,0 +1,20 @@
+[Unit]
+Description=Kiosco Motel Los Gatitos
+Wants=network-online.target
+After=network-online.target sound.target
+
+[Service]
+Type=simple
+User=naico
+WorkingDirectory=/home/naico/kiosko
+Environment=PYTHONUNBUFFERED=1
+Environment=PATH=/home/naico/kiosko/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+ExecStart=/home/naico/kiosko/bin/python /home/naico/kiosko/kiosko.py
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

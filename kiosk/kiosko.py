@@ -340,6 +340,7 @@ def flujo_bienvenida():
     # Módulo de reservas desactivado temporalmente (hasta terminar su desarrollo).
     # Flujo directo sin reserva: disponibilidad + asignación + apertura de portón.
     hablar("Bienvenido al Motel Los Gatitos.")
+    time.sleep(1)
     flujo_sin_reserva()
 
 
@@ -404,7 +405,7 @@ def flujo_sin_reserva():
                "Decí 1 para departamento o 2 para suit.")
         print("[FLUJO] Esperando opción (1=depto, 2=suite)...")
         for intento in range(2):
-            texto = escuchar(4)
+            texto = escuchar(3)
             if "1" in texto or "uno" in texto or "departamento" in texto:
                 seleccion = deptos
                 tipo = "departamento"
