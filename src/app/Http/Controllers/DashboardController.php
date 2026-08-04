@@ -103,13 +103,27 @@ class DashboardController extends Controller
             $regla = 'Víspera de feriado';
         } elseif (in_array($dia, [0, 1, 2, 3, 4])) {
             $precio = $tarifa->precio_dj;
-            $regla = $dia === 0 ? 'Domingo' : 'D-J';
+            $regla = $dia === 0 ? 'Domingo' : 'D-j';
         } elseif ($dia === 5) {
             $precio = $tarifa->precio_viernes;
             $regla = 'Viernes';
         } else {
             $precio = $tarifa->precio_sabado;
             $regla = 'Sábado';
+        }
+
+        $precioHoraAdicional = null;
+        $tarifaAdicional = Tarifa::where('categoria', $request->categoria)
+            ->where('tipo_tiempo', 'Hora adicional')
+            ->where('activo', true)
+            ->first();
+        if ($tarifaAdicional) {
+            $precioHoraAdicional = match (true) {
+                $esVispera => $tarifaAdicional->precio_vispera ?? $tarifaAdicional->precio_dj,
+                in_array($dia, [0, 1, 2, 3, 4]) => $tarifaAdicional->precio_dj,
+                $dia === 5 => $tarifaAdicional->precio_viernes,
+                default => $tarifaAdicional->precio_sabado,
+            };
         }
 
         return response()->json([
@@ -121,6 +135,7 @@ class DashboardController extends Controller
             'tipo_tiempo' => $tarifa->tipo_tiempo,
             'hora_inicio' => $tarifa->hora_inicio,
             'hora_termino' => $tarifa->hora_termino,
+            'precio_hora_adicional' => $precioHoraAdicional,
         ]);
     }
 

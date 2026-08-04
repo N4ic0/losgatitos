@@ -605,9 +605,11 @@ class DashboardManager {
     }
 
     getPrecioHoraAdicional() {
+        const desdeTabla = this.tarifaInfo?.precio_hora_adicional;
+        if (typeof desdeTabla === 'number' && desdeTabla >= 0) return desdeTabla;
         const regla = this.tarifaInfo?.regla || '';
         if (regla.includes('Viernes')) return 6000;
-        if (regla.includes('Sábado')) return 7000;
+        if (regla.includes('Sábado')) return 6000;
         return 5500;
     }
 
@@ -1490,7 +1492,6 @@ class DashboardManager {
         horaAdicionalRow.classList.remove('d-none');
         horaAdicionalRow.classList.add('d-flex', 'justify-content-between', 'align-items-center');
         document.getElementById('cobro-horas-adicionales-count').textContent = this.horasAdicionales;
-        document.getElementById('cobro-hora-adicional-precio').textContent = '(' + this.formatCurrency(this.precioHoraAdicional) + ' c/u)';
 
         document.getElementById('cobro-propina-input').value = this.propina;
 

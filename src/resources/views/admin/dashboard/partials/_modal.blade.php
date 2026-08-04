@@ -286,7 +286,6 @@
                             <div id="cobro-hora-adicional" class="d-none py-2" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="text-gray-300 text-sm">Hora Adicional</span>
-                                    <span class="text-xs text-gray-500" id="cobro-hora-adicional-precio"></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <button onclick="dashboard.cambiarHorasAdicionales(-1)" style="width: 1.5rem; height: 1.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.875rem;">−</button>
