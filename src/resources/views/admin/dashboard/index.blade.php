@@ -256,8 +256,32 @@ class DashboardManager {
 
     dinDon() {
         try {
-            const ctx = this._audioCtx || (this._audioCtx = new (window.AudioContext || window.webkitAudioContext)());
-            if (ctx.state === 'suspended') ctx.resume();
+            if (this._audioCtx && this._audioCtx.state === 'running') {
+                this._tocarDindon();
+            } else {
+                this._pendientesDindon = (this._pendientesDindon || 0) + 1;
+                if (!this._audioCtx) {
+                    try { this._audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+                }
+                if (this._audioCtx && this._audioCtx.state === 'suspended') {
+                    this._audioCtx.resume().then(() => this._flushPendientes()).catch(() => {});
+                }
+            }
+        } catch (e) {}
+    }
+
+    _flushPendientes() {
+        if (this._audioCtx && this._audioCtx.state === 'running' && this._pendientesDindon > 0) {
+            const n = this._pendientesDindon;
+            this._pendientesDindon = 0;
+            for (let i = 0; i < n; i++) this._tocarDindon();
+        }
+    }
+
+    _tocarDindon() {
+        try {
+            const ctx = this._audioCtx;
+            if (!ctx || ctx.state !== 'running') return;
             const t = ctx.currentTime;
             const freq = [880, 660];
             freq.forEach((f, i) => {
@@ -280,12 +304,14 @@ class DashboardManager {
 
     _unlockAudio() {
         document.addEventListener('pointerdown', () => {
-            if (!this._audioCtx) {
-                try {
-                    this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) {}
-            }
-            if (this._audioCtx && this._audioCtx.state === 'suspended') this._audioCtx.resume();
+            try {
+                if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (this._audioCtx.state === 'suspended') {
+                    this._audioCtx.resume().then(() => this._flushPendientes()).catch(() => {});
+                } else {
+                    this._flushPendientes();
+                }
+            } catch (e) {}
         }, { once: true });
     }
 

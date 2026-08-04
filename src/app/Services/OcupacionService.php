@@ -336,7 +336,13 @@ class OcupacionService
                 $q->with(['consumos.producto', 'pagos', 'clientes', 'promocion.productos', 'tarifa']);
             },
             'reservaActiva',
-        ])->orderBy('numero')->get();
+        ])->get()->sortBy(function ($h) {
+            $n = (string) $h->numero;
+            if (is_numeric($n)) {
+                return [1, (int) $n];
+            }
+            return [0, $n];
+        })->values();
 
         $ocupadas = 0;
         $reservadas = 0;
