@@ -115,12 +115,19 @@ jobs:
             echo "set mirror:parallel-transfer-count 20"
             echo "set mirror:use-pget-n 20"
             echo "open -u $FTP_USER,$FTP_PASS $FTP_HOST"
-            echo "mirror -R --only-newer --exclude node_modules/ --exclude vendor/ --exclude tests/ --exclude .env --exclude .env.example --exclude .gitignore --exclude docker-compose.yml --exclude docker-compose.opencode.yml --exclude Dockerfile --exclude phpunit.xml --exclude README.md --exclude .htaccess --exclude bootstrap/cache/ --exclude public/storage --exclude storage/app/public/ --exclude storage/framework/cache/ --exclude storage/framework/sessions/ --exclude storage/framework/views/ --exclude storage/logs/ --verbose . /"
+            # Modo mantenimiento ANTES de tocar archivos: evita 500 durante el deploy
+            echo "put /tmp/down -o storage/framework/down"
+            echo "mirror -R --only-newer --exclude node_modules/ --exclude vendor/ --exclude tests/ --exclude .env --exclude .env.example --exclude .gitignore --exclude docker-compose.yml --exclude docker-compose.opencode.yml --exclude Dockerfile --exclude phpunit.xml --exclude README.md --exclude .htaccess --exclude bootstrap/cache/ --exclude public/storage --exclude storage/app/public/ --exclude storage/framework/cache/ --exclude storage/framework/sessions/ --exclude storage/framework/views/ --exclude storage/logs/ --exclude storage/framework/down --verbose . /"
             echo "rm -f bootstrap/cache/routes-*.php"
             echo "rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php"
             echo "rm -f storage/framework/views/*.php"
+            # Salir de modo mantenimiento al terminar
+            echo "rm -f storage/framework/down"
             echo "quit"
           } > /tmp/lftp.cmd
+
+          # El archivo down activa el modo mantenimiento de Laravel (503 con aviso)
+          mkdir -p /tmp/down-dir && echo "Deploy en curso, vuelva en unos momentos." > /tmp/down
 
           lftp -f /tmp/lftp.cmd
 
