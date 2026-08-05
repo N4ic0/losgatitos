@@ -362,7 +362,23 @@ class OcupacionService
             };
         }
 
-        return compact('habitaciones', 'ocupadas', 'reservadas', 'limpieza', 'disponibles', 'transitos');
+        // Ocupaciones finalizadas dentro del turno actual (08:00-20:00 o 20:00-08:00)
+        $ahora = now();
+        if ($ahora->hour >= 8 && $ahora->hour < 20) {
+            $turnoInicio = $ahora->copy()->setTime(8, 0);
+            $turnoFin = $ahora->copy()->setTime(20, 0);
+        } else {
+            $turnoFin = $ahora->hour >= 20
+                ? $ahora->copy()->addDay()->setTime(8, 0)
+                : $ahora->copy()->setTime(8, 0);
+            $turnoInicio = $turnoFin->copy()->subHours(12);
+        }
+
+        $ocupacionesTurno = Ocupacion::whereNotNull('fecha_fin')
+            ->whereBetween('fecha_fin', [$turnoInicio, $turnoFin])
+            ->count();
+
+        return compact('habitaciones', 'ocupadas', 'reservadas', 'limpieza', 'disponibles', 'transitos', 'ocupacionesTurno');
     }
 
     public function getDatosOcupacion(Ocupacion $ocupacion): array

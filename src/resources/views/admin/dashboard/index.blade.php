@@ -6,6 +6,9 @@
 <div class="space-y-8">
     {{-- Stats --}}
     <div class="container-fluid px-0">
+        <div class="row g-2 g-lg-3">
+            {{-- Columna izquierda: las 2 filas superiores ocupan 6 columnas --}}
+            <div class="col-12 col-lg-6">
         {{-- Fila 1: 3 cards --}}
         <div class="row row-cols-1 row-cols-sm-3 g-2 g-lg-3 mb-2">
             <div class="col">
@@ -61,7 +64,7 @@
         </div>
 
         {{-- Fila 2: 2 cards centradas --}}
-        <div class="row row-cols-1 row-cols-sm-2 g-2 g-lg-3 justify-content-center" style="max-width: 66.666%; margin: 0 auto;">
+        <div class="row row-cols-1 row-cols-sm-2 g-2 g-lg-3 mb-2">
             <div class="col">
                 <div class="backdrop-blur-xl rounded-2xl p-2 h-100 d-flex flex-column justify-content-between group" style="transition: all .3s; cursor: default; background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(255,255,255,0.15);">
                     <div class="d-flex align-items-center justify-content-between">
@@ -91,6 +94,24 @@
                     <div class="mt-1 d-flex align-items-baseline justify-content-between">
                         <span class="text-xl lg:text-2xl fw-bolder text-orange-400" style="letter-spacing: -0.025em;" data-stat="transitos">{{ $transitos }}</span>
                         <span class="small fw-medium px-2 py-0.5 rounded-pill" style="background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.25); color: rgba(249, 115, 22, 0.8);">Tránsito</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+
+            {{-- Columna derecha: small-box Ocupaciones (6 columnas) --}}
+            <div class="col-12 col-lg-6 d-flex">
+                <div class="card bg-success text-white w-100 rounded-2xl shadow-lg border-0 overflow-hidden">
+                    <div class="card-body d-flex align-items-center justify-content-between position-relative p-3" style="min-height: 7rem;">
+                        <div class="position-relative" style="z-index: 2;">
+                            <span class="d-block text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; opacity: 0.9;">Ocupaciones</span>
+                            <span class="d-block fw-bolder lh-1" data-stat="ocupaciones" style="font-size: 2.5rem;">{{ $ocupacionesTurno }}</span>
+                            <span class="d-block small fw-medium" style="opacity: 0.85;">Turno actual (08:00-20:00 / 20:00-08:00)</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 4.5rem; height: 4.5rem; background: rgba(255,255,255,0.18); z-index: 2;">
+                            <i class="fas fa-bed-pulse fa-beat" style="font-size: 2rem;"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1380,15 +1401,11 @@ class DashboardManager {
         const forma = document.getElementById('pago-forma').value;
         if (!monto || monto <= 0) { Swal.fire({ icon: 'error', title: 'Ingrese un monto válido' }); return; }
 
-        const pendiente = this.saldoPendiente();
-        if (pendiente <= 0) {
-            Swal.fire({ icon: 'warning', title: 'Cuenta saldada', text: 'No hay saldo pendiente para registrar otro pago.' });
-            return;
-        }
-
+        // Si el monto pagado supera el TOTAL de la cuenta, el excedente va a propina.
+        const totalActual = this.totalOcupacion();
         let excedente = 0;
-        if (monto > pendiente) {
-            excedente = monto - pendiente;
+        if (monto > totalActual) {
+            excedente = monto - totalActual;
             this.propina = (this.propina || 0) + excedente;
             await this._guardarPropina();
         }
@@ -1629,22 +1646,24 @@ class DashboardManager {
 
         const promoBtnContainer = document.getElementById('consumos-promo-btns');
         const yaAgregados = this._promoProductosYaAgregados();
-        if (yaAgregados) {
+        // Solo se muestran los botones si la promocion cumple las reglas vigentes
+        // (promocionesAplicables ya filtra por activa, horario/hora y horas_beneficio).
+        const aplicables = (this.promocionesAplicables || []).filter(p => p.productos && p.productos.length > 0);
+
+        if (yaAgregados || aplicables.length === 0) {
             promoBtnContainer.innerHTML = '';
-        } else if (this.ocupacion.promocion && this.ocupacion.promocion.productos && this.ocupacion.promocion.productos.length > 0) {
-            promoBtnContainer.innerHTML = '<button onclick="dashboard.agregarPromoProductos(dashboard.ocupacion.promocion.id)" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm">+ Agregar Promoción</button>';
-        } else if (!this.ocupacion.promocion) {
-            const promos = this.promocionesAplicables || [];
-            const withProducts = promos.filter(p => p.productos && p.productos.length > 0);
-            if (withProducts.length > 0) {
-                promoBtnContainer.innerHTML = withProducts.map(p =>
-                    '<button onclick="dashboard.agregarPromoProductos(' + p.id + ')" class="w-full bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm">+ Agregar ' + this._escapeHtml(p.titulo) + '</button>'
-                ).join('');
+        } else if (this.ocupacion.promocion) {
+            // La promo activa solo ofrece "Agregar" si sigue cumpliendo las reglas
+            const activaAplicable = aplicables.some(p => p.id === this.ocupacion.promocion.id);
+            if (activaAplicable) {
+                promoBtnContainer.innerHTML = '<button onclick="dashboard.agregarPromoProductos(dashboard.ocupacion.promocion.id)" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm">+ Agregar Promoción</button>';
             } else {
                 promoBtnContainer.innerHTML = '';
             }
         } else {
-            promoBtnContainer.innerHTML = '';
+            promoBtnContainer.innerHTML = aplicables.map(p =>
+                '<button onclick="dashboard.agregarPromoProductos(' + p.id + ')" class="w-full bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm">+ Agregar ' + this._escapeHtml(p.titulo) + '</button>'
+            ).join('');
         }
 
         const consumosList = document.getElementById('consumos-list');

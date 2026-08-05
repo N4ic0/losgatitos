@@ -21,14 +21,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Restaurar fechas de archivos segun ultimo commit
-        run: |
-          set -e
-          while IFS= read -r f; do
-            ft=$(git log -1 --format=%ci -- "$f")
-            touch -d "$ft" "$f"
-          done < <(git ls-files)
-
       - name: Detectar archivos cambiados
         id: changed
         run: |
@@ -37,6 +29,7 @@ jobs:
           if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
             composer_changed=true
             assets_changed=true
+            changed_files=""
           else
             changed=$(git diff --name-only "$BEFORE" HEAD || true)
             composer_changed=false
@@ -49,11 +42,24 @@ jobs:
                   assets_changed=true;;
               esac
             done
+            # Solo archivos que se suben al servidor (dentro de src/, excluyendo pesados/sensibles)
+            changed_files=$(git diff --name-only "$BEFORE" HEAD -- src || true | \
+              grep -vE '(^|/)(node_modules|vendor|tests)/' | \
+              grep -vE '(^|/)\.env(\.|$)|\.env\.example|docker-compose|Dockerfile|phpunit\.xml|README\.md|\.gitignore|\.htaccess|public/storage/' || true)
+          fi
+          # Si cambio composer, deben subirse tambien los archivos de vendor/ (fuera de la lista)
+          if [ "$composer_changed" = "true" ]; then
+            echo "ALL" > /tmp/changed_files.txt
+          elif [ -n "$changed_files" ]; then
+            echo "$changed_files" > /tmp/changed_files.txt
+          else
+            echo "ALL" > /tmp/changed_files.txt
           fi
           echo "composer_changed=$composer_changed"
           echo "assets_changed=$assets_changed"
           echo "composer_changed=$composer_changed" >> $GITHUB_OUTPUT
           echo "assets_changed=$assets_changed" >> $GITHUB_OUTPUT
+          echo "Numero de archivos a subir: $(wc -l < /tmp/changed_files.txt)"
 
       - name: Setup PHP (8.3)
         if: steps.changed.outputs.composer_changed == 'true'
@@ -105,6 +111,19 @@ jobs:
 
           cd src
 
+          # El archivo down activa el modo mantenimiento de Laravel (503 con aviso)
+          mkdir -p /tmp/down-dir && echo "Deploy en curso, vuelva en unos momentos." > /tmp/down
+
+          # Si hay una lista real de archivos cambiados, subir SOLO esos (deploy en segundos).
+          # Si la lista es "ALL" (nuevo repo / fallback) se usa mirror completo.
+          CHANGE_FILE=/tmp/changed_files.txt
+          if [ -s "$CHANGE_FILE" ] && [ "$(cat "$CHANGE_FILE")" != "ALL" ]; then
+            DEPLOY_MODE=changed
+          else
+            DEPLOY_MODE=all
+          fi
+          echo "Modo deploy: $DEPLOY_MODE ($(wc -l < "$CHANGE_FILE" 2>/dev/null) archivos)"
+
           {
             echo "set ftp:passive-mode off"
             echo "set ftp:ssl-allow yes"
@@ -117,17 +136,24 @@ jobs:
             echo "open -u $FTP_USER,$FTP_PASS $FTP_HOST"
             # Modo mantenimiento ANTES de tocar archivos: evita 500 durante el deploy
             echo "put /tmp/down -o storage/framework/down"
-            echo "mirror -R --only-newer --exclude node_modules/ --exclude vendor/ --exclude tests/ --exclude .env --exclude .env.example --exclude .gitignore --exclude docker-compose.yml --exclude docker-compose.opencode.yml --exclude Dockerfile --exclude phpunit.xml --exclude README.md --exclude .htaccess --exclude bootstrap/cache/ --exclude public/storage --exclude storage/app/public/ --exclude storage/framework/cache/ --exclude storage/framework/sessions/ --exclude storage/framework/views/ --exclude storage/logs/ --exclude storage/framework/down --verbose . /"
+
+            if [ "$DEPLOY_MODE" = "changed" ]; then
+              # Subir SOLO los archivos modificados: deploy mucho mas rapido
+              while IFS= read -r f; do
+                [ -z "$f" ] && continue
+                echo "mirror --continue --no-recursion -R \"./$f\" \"/$f\""
+              done < "$CHANGE_FILE"
+            else
+              echo "mirror -R --only-newer --exclude node_modules/ --exclude tests/ --exclude .env --exclude .env.example --exclude .gitignore --exclude docker-compose.yml --exclude docker-compose.opencode.yml --exclude Dockerfile --exclude phpunit.xml --exclude README.md --exclude .htaccess --exclude bootstrap/cache/ --exclude public/storage/ --exclude storage/app/public/ --exclude storage/framework/cache/ --exclude storage/framework/sessions/ --exclude storage/framework/views/ --exclude storage/logs/ --exclude storage/framework/down . /"
+            fi
+
+            # Limpiar caches (sin borrar vistas compiladas: Laravel las recompila sola)
             echo "rm -f bootstrap/cache/routes-*.php"
             echo "rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php"
-            echo "rm -f storage/framework/views/*.php"
-            # Salir de modo mantenimiento al terminar
+            # Salir de modo mantenimiento al terminar (ultimo paso)
             echo "rm -f storage/framework/down"
             echo "quit"
           } > /tmp/lftp.cmd
-
-          # El archivo down activa el modo mantenimiento de Laravel (503 con aviso)
-          mkdir -p /tmp/down-dir && echo "Deploy en curso, vuelva en unos momentos." > /tmp/down
 
           lftp -f /tmp/lftp.cmd
 
