@@ -44,6 +44,7 @@ jobs:
             done
             # Solo archivos que se suben al servidor (dentro de src/, excluyendo pesados/sensibles)
             changed_files=$(git diff --name-only "$BEFORE" HEAD -- src || true | \
+              sed 's#^src/##' | \
               grep -vE '(^|/)(node_modules|vendor|tests)/' | \
               grep -vE '(^|/)\.env(\.|$)|\.env\.example|docker-compose|Dockerfile|phpunit\.xml|README\.md|\.gitignore|\.htaccess|public/storage/' || true)
           fi
