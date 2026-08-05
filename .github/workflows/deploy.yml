@@ -48,13 +48,16 @@ jobs:
               grep -vE '(^|/)(node_modules|vendor|tests)/' | \
               grep -vE '(^|/)\.env(\.|$)|\.env\.example|docker-compose|Dockerfile|phpunit\.xml|README\.md|\.gitignore|\.htaccess|public/storage/' || true)
           fi
-          # Si cambio composer, deben subirse tambien los archivos de vendor/ (fuera de la lista)
+          # Modo de deploy:
+          #   - ALL    : cambio composer/vendor -> mirror completo
+          #   - changed: hay archivos en src/ que subir
+          #   - none   : no hay nada que subir en src/ (p.ej. push solo de deploy.yml)
           if [ "$composer_changed" = "true" ]; then
             echo "ALL" > /tmp/changed_files.txt
           elif [ -n "$changed_files" ]; then
             echo "$changed_files" > /tmp/changed_files.txt
           else
-            echo "ALL" > /tmp/changed_files.txt
+            echo "NONE" > /tmp/changed_files.txt
           fi
           echo "composer_changed=$composer_changed"
           echo "assets_changed=$assets_changed"
@@ -116,47 +119,72 @@ jobs:
           mkdir -p /tmp/down-dir && echo "Deploy en curso, vuelva en unos momentos." > /tmp/down
 
           # Si hay una lista real de archivos cambiados, subir SOLO esos (deploy en segundos).
-          # Si la lista es "ALL" (nuevo repo / fallback) se usa mirror completo.
+          # Si la lista es "ALL" (cambio composer/nuevo repo) se usa mirror completo.
+          # La lista "NONE" (sin cambios en src/) no sube nada.
           CHANGE_FILE=/tmp/changed_files.txt
-          if [ -s "$CHANGE_FILE" ] && [ "$(cat "$CHANGE_FILE")" != "ALL" ]; then
-            DEPLOY_MODE=changed
-          else
+          MODE=$(cat "$CHANGE_FILE" 2>/dev/null || echo "NONE")
+          if [ "$MODE" = "ALL" ]; then
             DEPLOY_MODE=all
+          elif [ "$MODE" = "NONE" ]; then
+            DEPLOY_MODE=none
+          else
+            DEPLOY_MODE=changed
           fi
-          echo "Modo deploy: $DEPLOY_MODE ($(wc -l < "$CHANGE_FILE" 2>/dev/null) archivos)"
+          echo "Modo deploy: $DEPLOY_MODE"
 
-          {
-            echo "set ftp:passive-mode off"
-            echo "set ftp:ssl-allow yes"
-            echo "set ssl:verify-certificate no"
-            echo "set net:timeout 60"
-            echo "set net:max-retries 3"
-            echo "set net:reconnect-interval-base 5"
-            echo "set mirror:parallel-transfer-count 20"
-            echo "set mirror:use-pget-n 20"
-            echo "open -u $FTP_USER,$FTP_PASS $FTP_HOST"
-            # Modo mantenimiento ANTES de tocar archivos: evita 500 durante el deploy
-            echo "put /tmp/down -o storage/framework/down"
-
-            if [ "$DEPLOY_MODE" = "changed" ]; then
+          if [ "$DEPLOY_MODE" = "changed" ]; then
+            {
+              echo "set ftp:passive-mode off"
+              echo "set ftp:ssl-allow yes"
+              echo "set ssl:verify-certificate no"
+              echo "set net:timeout 60"
+              echo "set net:max-retries 3"
+              echo "set net:reconnect-interval-base 5"
+              echo "set mirror:parallel-transfer-count 20"
+              echo "set mirror:use-pget-n 20"
+              echo "open -u $FTP_USER,$FTP_PASS $FTP_HOST"
+              # Modo mantenimiento ANTES de tocar archivos: evita 500 durante el deploy
+              echo "put /tmp/down -o storage/framework/down"
               # Subir SOLO los archivos modificados: deploy mucho mas rapido
               while IFS= read -r f; do
                 [ -z "$f" ] && continue
                 echo "mirror --continue --no-recursion -R \"./$f\" \"/$f\""
               done < "$CHANGE_FILE"
-            else
+              # Limpiar caches (sin borrar vistas compiladas: Laravel las recompila sola)
+              echo "rm -f bootstrap/cache/routes-*.php"
+              echo "rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php"
+              # Salir de modo mantenimiento al terminar (ultimo paso)
+              echo "rm -f storage/framework/down"
+              echo "quit"
+            } > /tmp/lftp.cmd
+
+            lftp -f /tmp/lftp.cmd
+          elif [ "$DEPLOY_MODE" = "all" ]; then
+            {
+              echo "set ftp:passive-mode off"
+              echo "set ftp:ssl-allow yes"
+              echo "set ssl:verify-certificate no"
+              echo "set net:timeout 60"
+              echo "set net:max-retries 3"
+              echo "set net:reconnect-interval-base 5"
+              echo "set mirror:parallel-transfer-count 20"
+              echo "set mirror:use-pget-n 20"
+              echo "open -u $FTP_USER,$FTP_PASS $FTP_HOST"
+              # Modo mantenimiento ANTES de tocar archivos: evita 500 durante el deploy
+              echo "put /tmp/down -o storage/framework/down"
               echo "mirror -R --only-newer --exclude node_modules/ --exclude tests/ --exclude .env --exclude .env.example --exclude .gitignore --exclude docker-compose.yml --exclude docker-compose.opencode.yml --exclude Dockerfile --exclude phpunit.xml --exclude README.md --exclude .htaccess --exclude bootstrap/cache/ --exclude public/storage/ --exclude storage/app/public/ --exclude storage/framework/cache/ --exclude storage/framework/sessions/ --exclude storage/framework/views/ --exclude storage/logs/ --exclude storage/framework/down . /"
-            fi
+              # Limpiar caches (sin borrar vistas compiladas: Laravel las recompila sola)
+              echo "rm -f bootstrap/cache/routes-*.php"
+              echo "rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php"
+              # Salir de modo mantenimiento al terminar (ultimo paso)
+              echo "rm -f storage/framework/down"
+              echo "quit"
+            } > /tmp/lftp.cmd
 
-            # Limpiar caches (sin borrar vistas compiladas: Laravel las recompila sola)
-            echo "rm -f bootstrap/cache/routes-*.php"
-            echo "rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php"
-            # Salir de modo mantenimiento al terminar (ultimo paso)
-            echo "rm -f storage/framework/down"
-            echo "quit"
-          } > /tmp/lftp.cmd
-
-          lftp -f /tmp/lftp.cmd
+            lftp -f /tmp/lftp.cmd
+          else
+            echo "Sin cambios en src/, no se sube nada (modo NONE)."
+          fi
 
       - name: Smoke test - verificar que el sitio responde con contenido
         env:
