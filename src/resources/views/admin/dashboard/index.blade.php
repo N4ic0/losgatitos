@@ -102,6 +102,7 @@
         <div id="room-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem;">
             @foreach($habitaciones as $habitacion)
             <div onclick="dashboard.abrirModal({{ $habitacion->id }})"
+                 data-alerta-box="{{ $habitacion->id }}"
                  class="cursor-pointer rounded-xl px-3 py-2.5 border flex flex-col transition-all duration-300
                     @if($habitacion->estado === 'Disponible') bg-white/5 backdrop-blur-xl border-white/5 hover:border-[#D4AF37]/30 hover:bg-white/[0.07]
                     @elseif($habitacion->estado === 'Transito') bg-black border-orange-500/40 transito-cell
@@ -133,13 +134,13 @@
                     @if($habitacion->ultimoEstado && $habitacion->estado !== 'Disponible')
                     <span class="timer-{{ $habitacion->id }} text-[#D4AF37] text-[10px] font-mono"
                           data-inicio="{{ $habitacion->ultimoEstado->fecha_inicio->timestamp }}"
-                          data-duracion="{{ $habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa ? ($habitacion->ocupacionActiva->tarifa->tipo_tiempo === '8h' ? 28800 : 10800) : '' }}"
+                          data-duracion="{{ $habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa ? ($habitacion->ocupacionActiva->tarifa->tipo_tiempo === '8h' ? 28800 : 10800) + ($habitacion->ocupacionActiva->horas_beneficio ? $habitacion->ocupacionActiva->horas_beneficio * 3600 : 0) : '' }}"
                           data-alarma-key="{{ $habitacion->id }}">
                         <span class="tiempo-valor">00:00:00</span>
                     </span>
                     @endif
                     @if($habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa)
-                        <span class="text-gray-300 text-[9px] font-medium bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded">{{ $habitacion->ocupacionActiva->tarifa->tipo_tiempo }}</span>
+                        <span class="text-gray-300 text-[9px] font-medium bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded">{{ $habitacion->ocupacionActiva->tarifa->tipo_tiempo }}{{ $habitacion->ocupacionActiva->horas_beneficio ? ' +' . $habitacion->ocupacionActiva->horas_beneficio . 'h' : '' }}</span>
                     @elseif($habitacion->estado === 'Reservada' && $habitacion->reservaActiva)
                         <span class="text-[#D4AF37] text-[10px] font-medium bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded">{{ \Carbon\Carbon::parse($habitacion->reservaActiva->hora)->format('H:i') }} hrs</span>
                     @endif
@@ -148,6 +149,19 @@
             @endforeach
         </div>
     </div>
+
+    {{-- Botón flotante silenciar alarmas --}}
+    <button id="btn-silenciar-alarmas"
+            onclick="dashboard.silenciarAlarmas()"
+            class="d-none fixed z-50 bottom-4 right-4 bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-3 rounded-xl shadow-lg transition-all"
+            style="position: fixed; bottom: 1rem; right: 1rem;">
+        <span class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9 2.121a7 7 0 010-9.9m7.072 0a7 7 0 010 9.9M12 12l3 3m0-3l-3 3" />
+            </svg>
+            Silenciar alarmas
+        </span>
+    </button>
 
     {{-- Management Modal --}}
     @include('admin.dashboard.partials._modal')
@@ -187,6 +201,9 @@ class DashboardManager {
         this.promocionesAplicables = [];
         this.cortesiaAdded = false;
         this._tieneCortesiaBackend = false;
+        this._alarmasSonando = new Set();
+        this._alarmasSilenciadas = new Set();
+        this._alarmaLoopId = null;
 
         this.modalInstance = null;
         this._unlockAudio();
@@ -226,7 +243,7 @@ class DashboardManager {
             this._timerIntervals.forEach(id => clearInterval(id));
         }
         this._timerIntervals = [];
-        if (!this._alarmados) this._alarmados = new Set();
+        const clavesVivas = new Set();
         document.querySelectorAll('[data-inicio]').forEach(el => {
             const inicio = parseInt(el.dataset.inicio) * 1000;
             if (isNaN(inicio)) return;
@@ -234,6 +251,9 @@ class DashboardManager {
             const duracion = parseInt(el.dataset.duracion);
             const hasDuracion = !isNaN(duracion) && duracion > 0;
             const fin = inicio + (hasDuracion ? duracion * 1000 : 0);
+            const key = el.dataset.alarmaKey;
+            if (key) clavesVivas.add(key);
+            const box = el.closest('[data-alerta-box]');
             const id = setInterval(() => {
                 const now = Date.now();
                 const diff = Math.max(0, now - inicio);
@@ -241,69 +261,141 @@ class DashboardManager {
                 const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                 const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                 span.textContent = h + ':' + m + ':' + s;
-                if (hasDuracion && el.dataset.alarmaKey) {
+                if (hasDuracion && key) {
                     const restante = fin - now;
-                    if (restante > 0 && restante <= 900000 && !this._alarmados.has(el.dataset.alarmaKey)) {
+                    const enAlerta = restante > 0 && restante <= 900000;
+                    if (enAlerta) {
                         if (!span.classList.contains('timer-alerta')) span.classList.add('timer-alerta');
-                        this._alarmados.add(el.dataset.alarmaKey);
-                        this.dinDon();
+                        if (box && !box.classList.contains('box-alerta')) box.classList.add('box-alerta');
+                        if (!this._alarmasSilenciadas.has(key)) {
+                            if (!this._alarmasSonando.has(key)) {
+                                this._alarmasSonando.add(key);
+                                this._renderAlarmaUI();
+                            }
+                            this._arrancarAlarmaContinua();
+                        }
+                    } else {
+                        span.classList.remove('timer-alerta');
+                        if (box) box.classList.remove('box-alerta');
+                        if (this._alarmasSonando.has(key)) {
+                            this._alarmasSonando.delete(key);
+                            this._renderAlarmaUI();
+                        }
+                        this._detenerAlarmaContinuaSiVacia();
                     }
                 }
             }, 1000);
             this._timerIntervals.push(id);
         });
-    }
 
-    dinDon() {
-        try {
-            if (this._audioCtx && this._audioCtx.state === 'running') {
-                this._tocarDindon();
-            } else {
-                this._pendientesDindon = (this._pendientesDindon || 0) + 1;
-                if (!this._audioCtx) {
-                    try { this._audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+        if (this._alarmasSonando.size) {
+            let huboCambio = false;
+            this._alarmasSonando.forEach(k => {
+                if (!clavesVivas.has(k)) {
+                    this._alarmasSonando.delete(k);
+                    huboCambio = true;
                 }
-                if (this._audioCtx && this._audioCtx.state === 'suspended') {
-                    this._audioCtx.resume().then(() => this._flushPendientes()).catch(() => {});
-                }
+            });
+            if (huboCambio) {
+                this._detenerAlarmaContinuaSiVacia();
+                this._renderAlarmaUI();
             }
-        } catch (e) {}
-    }
-
-    _flushPendientes() {
-        if (this._audioCtx && this._audioCtx.state === 'running' && this._pendientesDindon > 0) {
-            const n = this._pendientesDindon;
-            this._pendientesDindon = 0;
-            for (let i = 0; i < n; i++) this._tocarDindon();
         }
     }
 
-    _tocarDindon() {
+    _arrancarAlarmaContinua() {
+        try {
+            if (this._alarmaLoopId) return;
+            if (!this._alarmasSonando.size) return;
+            if (!this._audioCtx) {
+                try { this._audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+            }
+            const intentar = () => {
+                if (this._audioCtx.state === 'running') {
+                    this._reproducirBeep();
+                    this._alarmaLoopId = setInterval(() => this._reproducirBeep(), 650);
+                } else if (this._audioCtx.state === 'suspended') {
+                    this._audioCtx.resume().then(() => {
+                        if (this._alarmasSonando.size && !this._alarmaLoopId) {
+                            this._reproducirBeep();
+                            this._alarmaLoopId = setInterval(() => this._reproducirBeep(), 650);
+                        }
+                    }).catch(() => {});
+                }
+            };
+            intentar();
+        } catch (e) {}
+    }
+
+    _detenerAlarmaContinuaSiVacia() {
+        if (!this._alarmasSonando.size && this._alarmaLoopId) {
+            clearInterval(this._alarmaLoopId);
+            this._alarmaLoopId = null;
+        }
+    }
+
+    _reproducirBeep() {
         try {
             const ctx = this._audioCtx;
             if (!ctx || ctx.state !== 'running') return;
             const t = ctx.currentTime;
-            const freq = [880, 660];
-            freq.forEach((f, i) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.frequency.value = f;
-                const start = t + i * 0.32;
-                const dur = 0.25;
-                gain.gain.setValueAtTime(0, start);
-                gain.gain.linearRampToValueAtTime(0.25, start + 0.03);
-                gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
-                osc.start(start);
-                osc.stop(start + dur + 0.05);
-            });
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = 1000;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.exponentialRampToValueAtTime(0.35, t + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+            osc.start(t);
+            osc.stop(t + 0.35);
         } catch (e) {}
     }
 
+    silenciarAlarmas() {
+        this._alarmasSonando.forEach(k => this._alarmasSilenciadas.add(k));
+        this._alarmasSonando.clear();
+        this._detenerAlarmaContinuaSiVacia();
+        this._renderAlarmaUI();
+    }
+
+    _renderAlarmaUI() {
+        const btn = document.getElementById('btn-silenciar-alarmas');
+        if (!btn) return;
+        if (this._alarmasSonando.size > 0) {
+            btn.classList.remove('d-none');
+        } else {
+            btn.classList.add('d-none');
+        }
+    }
+
+    _actualizarDuracionTimersEnVivo() {
+        const beneficio = this.ocupacion && this.ocupacion.horas_beneficio ? this.ocupacion.horas_beneficio * 3600 : 0;
+        const tt = this.ocupacion && this.ocupacion.tarifa ? this.ocupacion.tarifa.tipo_tiempo : null;
+        const base = tt === '8h' ? 28800 : 10800;
+        const total = beneficio ? (base + beneficio) : '';
+        const boxSpan = document.querySelector('[data-alerta-box="' + this.habitacionId + '"] .timer-' + this.habitacionId);
+        if (boxSpan) boxSpan.dataset.duracion = total;
+        const modalTimer = document.getElementById('modal-timer');
+        if (modalTimer && tt) modalTimer.dataset.duracion = total;
+        this.iniciarTimers();
+    }
+
+    dinDon() {
+        this._arrancarAlarmaContinua();
+    }
+
+    _flushPendientes() {
+        this._arrancarAlarmaContinua();
+    }
+
+    _tocarDindon() {
+        this._reproducirBeep();
+    }
+
     _unlockAudio() {
-        document.addEventListener('pointerdown', () => {
+        const unlock = () => {
             try {
                 if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (this._audioCtx.state === 'suspended') {
@@ -312,7 +404,15 @@ class DashboardManager {
                     this._flushPendientes();
                 }
             } catch (e) {}
-        }, { once: true });
+        };
+        ['pointerdown', 'keydown', 'touchstart', 'mousedown', 'wheel', 'scroll', 'mousemove'].forEach(ev => {
+            document.addEventListener(ev, unlock, { once: true });
+        });
+        if (document.readyState !== 'loading') {
+            setTimeout(() => { this._arrancarAlarmaContinua(); }, 200);
+        } else {
+            document.addEventListener('DOMContentLoaded', () => { this._arrancarAlarmaContinua(); }, { once: true });
+        }
     }
 
     _initModal() {
@@ -347,6 +447,18 @@ class DashboardManager {
 
         this._showLoading();
         this.modalInstance.show();
+
+        const alertKey = String(id);
+        if (this._alarmasSonando.has(alertKey)) {
+            this._alarmasSonando.delete(alertKey);
+            this._alarmasSilenciadas.add(alertKey);
+            this._detenerAlarmaContinuaSiVacia();
+            this._renderAlarmaUI();
+        }
+        const alertBox = document.querySelector('[data-alerta-box="' + id + '"]');
+        if (alertBox && alertBox.classList.contains('box-alerta')) {
+            alertBox.classList.remove('box-alerta');
+        }
 
         try {
             const res = await fetch('/admin/dashboard/habitacion/' + id);
@@ -462,7 +574,8 @@ class DashboardManager {
             timerEl.dataset.inicio = new Date(this.habitacion.ultimo_estado.fecha_inicio).getTime() / 1000;
             timerEl.dataset.alarmaKey = String(this.habitacion.id);
             const tt = this.ocupacion && this.ocupacion.tarifa ? this.ocupacion.tarifa.tipo_tiempo : null;
-            timerEl.dataset.duracion = (this.habitacion.estado === 'Ocupada' && tt) ? (tt === '8h' ? 28800 : 10800) : '';
+            const beneficio = this.ocupacion && this.ocupacion.horas_beneficio ? this.ocupacion.horas_beneficio * 3600 : 0;
+            timerEl.dataset.duracion = (this.habitacion.estado === 'Ocupada' && tt) ? ((tt === '8h' ? 28800 : 10800) + beneficio) : '';
             const valEl = timerEl.querySelector('.tiempo-valor');
             if (valEl) { valEl.textContent = '00:00:00'; valEl.classList.remove('timer-alerta'); }
         } else {
@@ -785,6 +898,8 @@ class DashboardManager {
                 this.promocionesAplicables = data.promociones_aplicables || [];
                 this._renderOcupacionTab();
                 this._renderConsumosTab();
+                this._renderHeader();
+                this._actualizarDuracionTimersEnVivo();
                 Swal.fire({ icon: 'success', title: 'Promoción aplicada: ' + promo.titulo, timer: 2000, showConfirmButton: false });
             }
         } catch(e) { console.error(e); }
@@ -1492,6 +1607,15 @@ class DashboardManager {
         }
     }
 
+    _promoProductosYaAgregados() {
+        if (!this.ocupacion || !this.ocupacion.consumos) return false;
+        const productoIds = (this.ocupacion.promocion?.productos || []).map(p => p.id);
+        if (!productoIds.length) return false;
+        return this.ocupacion.consumos.some(c =>
+            c.origen === 'Promocion' && c.producto_id && productoIds.includes(c.producto_id)
+        );
+    }
+
     _renderConsumosTab() {
         const empty = document.getElementById('consumos-empty');
         const content = document.getElementById('consumos-content');
@@ -1504,10 +1628,11 @@ class DashboardManager {
         content.classList.remove('d-none');
 
         const promoBtnContainer = document.getElementById('consumos-promo-btns');
-        if (this.ocupacion.productos_promocion_agregados) {
+        const yaAgregados = this._promoProductosYaAgregados();
+        if (yaAgregados) {
             promoBtnContainer.innerHTML = '';
         } else if (this.ocupacion.promocion && this.ocupacion.promocion.productos && this.ocupacion.promocion.productos.length > 0) {
-            promoBtnContainer.innerHTML = '<button onclick="dashboard.agregarPromoProductos(dashboard.ocupacion.promocion)" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm">+ Agregar Promoción</button>';
+            promoBtnContainer.innerHTML = '<button onclick="dashboard.agregarPromoProductos(dashboard.ocupacion.promocion.id)" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm">+ Agregar Promoción</button>';
         } else if (!this.ocupacion.promocion) {
             const promos = this.promocionesAplicables || [];
             const withProducts = promos.filter(p => p.productos && p.productos.length > 0);

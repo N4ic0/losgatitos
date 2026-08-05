@@ -565,4 +565,13 @@ select:hover {
     animation: timerBlink 1s step-start infinite;
     color: #ef4444 !important;
 }
+@keyframes boxAlerta {
+    0%, 100% { border-color: rgba(239, 68, 68, 0.9); box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35), 0 0 22px rgba(239, 68, 68, 0.45); }
+    50% { border-color: rgba(239, 68, 68, 0.35); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.6), 0 0 34px rgba(239, 68, 68, 0.65); }
+}
+.box-alerta {
+    animation: boxAlerta 0.8s ease-in-out infinite;
+    border-color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+}
 </style>

@@ -302,13 +302,14 @@ class OcupacionService
 
     private function agregarConsumoPromocion(Ocupacion $ocupacion, Producto $producto, int $cantidad): Consumo
     {
-        $total = $producto->precio * $cantidad;
+        $valorPromocional = $producto->pivot?->valor_promocion ?? $producto->precio;
+        $total = $valorPromocional * $cantidad;
 
         $consumo = Consumo::create([
             'ocupacion_id' => $ocupacion->id,
             'producto_id' => $producto->id,
             'cantidad' => $cantidad,
-            'precio_unitario' => $producto->precio,
+            'precio_unitario' => $valorPromocional,
             'total' => $total,
             'origen' => 'Promocion',
             'user_id' => auth()->id(),
