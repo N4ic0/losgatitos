@@ -7,8 +7,8 @@
     {{-- Stats --}}
     <div class="container-fluid px-0">
         <div class="row g-2 g-lg-3">
-            {{-- Columna izquierda: las 2 filas superiores ocupan 6 columnas --}}
-            <div class="col-12 col-lg-6">
+            {{-- Columna izquierda: las 2 filas superiores ocupan 9 columnas --}}
+            <div class="col-12 col-lg-9">
         {{-- Fila 1: 3 cards --}}
         <div class="row row-cols-1 row-cols-sm-3 g-2 g-lg-3 mb-2">
             <div class="col">
@@ -100,8 +100,8 @@
         </div>
             </div>
 
-            {{-- Columna derecha: small-box Ocupaciones (6 columnas) --}}
-            <div class="col-12 col-lg-6 d-flex">
+            {{-- Columna derecha: small-box Ocupaciones (3 columnas) --}}
+            <div class="col-12 col-lg-3 d-flex">
                 <div class="card bg-success text-white w-100 rounded-2xl shadow-lg border-0 overflow-hidden">
                     <div class="card-body d-flex align-items-center justify-content-between position-relative p-3" style="min-height: 7rem;">
                         <div class="position-relative" style="z-index: 2;">
