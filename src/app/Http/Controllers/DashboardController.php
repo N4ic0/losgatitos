@@ -293,6 +293,21 @@ class DashboardController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function actualizarHoraAdicional(Request $request, Ocupacion $ocupacion)
+    {
+        $request->validate([
+            'hora_adicional' => 'required|integer|min:0',
+            'valor' => 'required|integer|min:0',
+        ]);
+
+        $ocupacion->update([
+            'hora_adicional' => $request->integer('hora_adicional'),
+            'valor_h_adi' => $request->integer('valor'),
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function eliminarPago(Pago $pago)
     {
         $ocupacion = $pago->ocupacion;

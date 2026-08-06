@@ -17,6 +17,8 @@ class Ocupacion extends Model
         'precio_base',
         'personas_adicionales',
         'propinas',
+        'hora_adicional',
+        'valor_h_adi',
         'fecha_inicio',
         'fecha_fin',
         'promocion_id',
@@ -33,6 +35,8 @@ class Ocupacion extends Model
             'precio_base' => 'integer',
             'personas_adicionales' => 'integer',
             'horas_beneficio' => 'integer',
+            'hora_adicional' => 'integer',
+            'valor_h_adi' => 'integer',
             'vehiculo' => 'boolean',
         ];
     }
@@ -89,7 +93,10 @@ class Ocupacion extends Model
 
     public function getTotalAttribute()
     {
-        return $this->precio_base + $this->total_consumos + $this->propinas;
+        return $this->precio_base
+            + $this->total_consumos
+            + $this->propinas
+            + (int) $this->valor_h_adi;
     }
 
     public function getSaldoAttribute()

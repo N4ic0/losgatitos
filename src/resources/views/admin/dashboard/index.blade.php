@@ -222,6 +222,7 @@ class DashboardManager {
         this.promocionesAplicables = [];
         this.cortesiaAdded = false;
         this._tieneCortesiaBackend = false;
+        this.valorHoraAdicionalGuardado = 0;
         this._alarmasSonando = new Set();
         this._alarmasSilenciadas = new Set();
         this._alarmaLoopId = null;
@@ -465,6 +466,7 @@ class DashboardManager {
         this.propina = 0;
         this.cortesiaAdded = false;
         this._tieneCortesiaBackend = false;
+        this.valorHoraAdicionalGuardado = 0;
 
         this._showLoading();
         this.modalInstance.show();
@@ -491,6 +493,8 @@ class DashboardManager {
                 this.ocupacion = data.ocupacion;
                 this.promocionesAplicables = data.promociones_aplicables || [];
                 this.propina = this.ocupacion.propinas || 0;
+                this.horasAdicionales = this.ocupacion.hora_adicional || 0;
+                this.valorHoraAdicionalGuardado = this.ocupacion.valor_h_adi || 0;
                 this.ocupacionVehiculo = this.ocupacion.vehiculo ? 1 : 0;
                 this.ocupacionPatente = this.ocupacion.patente || '';
                 this._tieneCortesiaBackend = data.tiene_cortesia || false;
@@ -830,6 +834,22 @@ class DashboardManager {
     cambiarHorasAdicionales(delta) {
         this.horasAdicionales = Math.max(0, this.horasAdicionales + delta);
         this._renderCobroTab();
+        this._guardarHoraAdicional();
+    }
+
+    async _guardarHoraAdicional() {
+        if (!this.ocupacion) return;
+        try {
+            await fetch('/admin/dashboard/ocupacion/' + this.ocupacion.id + '/hora-adicional', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ hora_adicional: this.horasAdicionales, valor: this.totalHoraAdicional() }),
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    totalHoraAdicional() {
+        return (this.horasAdicionales || 0) * (this.precioHoraAdicional || this.getPrecioHoraAdicional() || 0);
     }
 
     cambiarPropina(valor) {
@@ -1866,7 +1886,7 @@ class DashboardManager {
         if (!this.ocupacion) return 0;
         const base = this.ocupacion.precio_base || 0;
         const consumos = (this.ocupacion.consumos || []).filter(c => c.origen === 'Consumo').reduce((s, c) => s + c.total, 0);
-        const extras = (this.horasAdicionales || 0) * (this.precioHoraAdicional || 0);
+        const extras = this.totalHoraAdicional();
         const propina = this.propina || 0;
         return base + consumos + extras + propina;
     }

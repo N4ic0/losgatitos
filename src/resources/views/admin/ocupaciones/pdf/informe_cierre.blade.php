@@ -123,7 +123,7 @@ table.data tr:last-child td { border-bottom: none; }
         $estado = $o->fecha_fin === null ? 'EN CURSO' : 'FINALIZADA';
         $sumConsumos = $o->consumos->sum('total');
         $sumPagos = $o->pagos->sum('monto');
-        $totalOc = $o->precio_base + $sumConsumos + $o->propinas;
+        $totalOc = $o->precio_base + $sumConsumos + $o->propinas + (int) $o->valor_h_adi;
         $saldoOc = $totalOc - $sumPagos;
     @endphp
 
@@ -214,6 +214,9 @@ table.data tr:last-child td { border-bottom: none; }
             @if($o->propinas > 0)
             <tr><td class="lbl">Propina</td><td class="val">{{ fmt($o->propinas) }}</td></tr>
             @endif
+            @if((int)$o->valor_h_adi > 0)
+            <tr><td class="lbl">Hora adicional{{ $o->hora_adicional > 1 ? ' (' . $o->hora_adicional . 'h)' : '' }}</td><td class="val">{{ fmt($o->valor_h_adi) }}</td></tr>
+            @endif
             <tr class="grand"><td class="lbl">Total ocupaci&oacute;n</td><td class="val">{{ fmt($totalOc) }}</td></tr>
             <tr><td class="lbl">Pagado</td><td class="val">{{ fmt($sumPagos) }}</td></tr>
             <tr>
@@ -243,14 +246,15 @@ table.data tr:last-child td { border-bottom: none; }
 
     <table class="sum-table">
         <tr><th>Dinero del per&iacute;odo</th><th class="tright">Monto</th></tr>
-        <tr><td>Total ocupaci&oacute;n del per&iacute;odo (precio base + consumos + propina)</td><td class="tright">{{ fmt($totalOcupaciones) }}</td></tr>
+        <tr><td>Total ocupaci&oacute;n del per&iacute;odo (precio base + consumos + propina + hora adicional)</td><td class="tright">{{ fmt($totalOcupaciones) }}</td></tr>
         <tr><td>&mdash; Total consumos</td><td class="tright">{{ fmt($totalConsumos) }}</td></tr>
         <tr><td>&mdash; Total propinas</td><td class="tright">{{ fmt($totalPropinas) }}</td></tr>
+        <tr><td>&mdash; Total hora adicional</td><td class="tright">{{ fmt($totalHoraAdicional) }}</td></tr>
         <tr><td style="height: 2mm;"></td><td></td></tr>
         @foreach($totalesPorForma as $forma => $monto)
         <tr><td>Total {{ $formaLabels[$forma] ?? ucfirst($forma) }}</td><td class="tright">{{ fmt($monto) }}</td></tr>
         @endforeach
-        <tr class="grand"><td>DINERO COBRADO EN EL PER&Iacute;ODO</td><td class="tright">{{ fmt($totalPagos + $totalPropinas) }}</td></tr>
+        <tr class="grand"><td>DINERO COBRADO EN EL PER&Iacute;ODO</td><td class="tright">{{ fmt($totalPagos) }}</td></tr>
     </table>
 
     <table class="signature">

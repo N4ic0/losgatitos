@@ -70,7 +70,8 @@ class OcupacionController extends Controller
         $totalConsumos = $ocupaciones->sum(fn ($o) => $o->consumos->sum('total'));
         $totalPagos = $ocupaciones->sum(fn ($o) => $o->pagos->sum('monto'));
         $totalPropinas = $ocupaciones->sum('propinas');
-        $totalOcupaciones = $totalConsumos + $totalPropinas + $ocupaciones->sum('precio_base');
+        $totalHoraAdicional = $ocupaciones->sum('valor_h_adi');
+        $totalOcupaciones = $totalConsumos + $totalPropinas + $totalHoraAdicional + $ocupaciones->sum('precio_base');
 
         $totalesPorForma = $ocupaciones
             ->flatMap(fn ($o) => $o->pagos)
@@ -84,7 +85,7 @@ class OcupacionController extends Controller
 
         $pdf = Pdf::loadView('admin.ocupaciones.pdf.informe_cierre', compact(
             'ocupaciones', 'desde', 'hasta', 'totalOcupaciones', 'totalConsumos',
-            'totalPagos', 'totalPropinas', 'totalesPorForma', 'logoPath',
+            'totalPagos', 'totalPropinas', 'totalHoraAdicional', 'totalesPorForma', 'logoPath',
             'completadas', 'enCurso'
         ));
         $pdf->setPaper('A4', 'portrait');

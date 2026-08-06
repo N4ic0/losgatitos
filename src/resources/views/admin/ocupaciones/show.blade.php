@@ -79,6 +79,12 @@
                 <dd class="text-white font-medium">${{ number_format($ocupacion->propinas, 0, '', '.') }}</dd>
             </div>
             @endif
+            @if($ocupacion->valor_h_adi > 0)
+            <div class="flex justify-between">
+                <dt class="text-gray-400">Hora adicional{{ $ocupacion->hora_adicional > 1 ? ' (' . $ocupacion->hora_adicional . 'h)' : '' }}</dt>
+                <dd class="text-white font-medium">${{ number_format($ocupacion->valor_h_adi, 0, '', '.') }}</dd>
+            </div>
+            @endif
             <div class="flex justify-between pt-3 border-t border-white/5">
                 <dt class="text-gray-300 font-semibold">Total</dt>
                 <dd class="text-white font-bold text-lg">${{ number_format($ocupacion->total, 0, '', '.') }}</dd>

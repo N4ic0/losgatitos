@@ -395,7 +395,7 @@ class OcupacionService
 
         $totalConsumos = $ocupacion->consumos()->where('origen', 'Consumo')->sum('total');
         $totalPagado = $ocupacion->pagos()->sum('monto');
-        $total = $ocupacion->precio_base + $totalConsumos + ($ocupacion->propinas ?? 0);
+        $total = $ocupacion->precio_base + $totalConsumos + ($ocupacion->propinas ?? 0) + (int) $ocupacion->valor_h_adi;
 
         $tieneCortesia = $ocupacion->consumos->contains(function ($consumo) {
             return $consumo->producto && $consumo->producto->cortesia;
