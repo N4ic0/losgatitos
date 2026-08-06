@@ -148,6 +148,8 @@ jobs:
               # Subir SOLO los archivos modificados: deploy mucho mas rapido
               while IFS= read -r f; do
                 [ -z "$f" ] && continue
+                # Quitar prefijo src/ por seguridad (nunca deben quedar rutas src/src/...)
+                f="${f#src/}"
                 echo "mirror --continue --no-recursion -R \"./$f\" \"/$f\""
               done < "$CHANGE_FILE"
               # Limpiar caches (sin borrar vistas compiladas: Laravel las recompila sola)
