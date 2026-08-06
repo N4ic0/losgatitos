@@ -25,7 +25,14 @@ jobs:
         id: changed
         run: |
           set -e
-          BEFORE="${{ github.event.before }}"
+          # En workflow_dispatch github.event.before viene vacio, por eso comparamos
+          # contra el commit anterior (HEAD~1) para que el deploy manual suba solo
+          # los archivos del ultimo commit (modo changed), no un mirror completo.
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            BEFORE="$(git rev-parse HEAD~1 2>/dev/null || true)"
+          else
+            BEFORE="${{ github.event.before }}"
+          fi
           if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
             composer_changed=true
             assets_changed=true
