@@ -133,6 +133,27 @@ jobs:
           echo "Modo deploy: $DEPLOY_MODE"
 
           if [ "$DEPLOY_MODE" = "changed" ]; then
+            # Construir un arbol temporal SOLO con los archivos cambiados,
+            # conservando su estructura de directorios relativa a src/.
+            # Luego un UNICO mirror -R del arbol sube todo de forma fiable
+            # (lftp mirror por archivo individual no es fiable y sube 0 archivos).
+            rm -rf /tmp/staging
+            mkdir -p /tmp/staging
+            COUNT=0
+            while IFS= read -r f; do
+              [ -z "$f" ] && continue
+              # Quitar prefijo src/ por seguridad (nunca deben quedar rutas src/src/...)
+              f="${f#src/}"
+              [ -f "./$f" ] || continue
+              mkdir -p "/tmp/staging/$(dirname "$f")"
+              cp "./$f" "/tmp/staging/$f"
+              COUNT=$((COUNT+1))
+            done < "$CHANGE_FILE"
+            echo "Archivos a subir: $COUNT"
+            if [ "$COUNT" -eq 0 ]; then
+              echo "Sin archivos validos para subir (modo NONE)."
+              exit 0
+            fi
             {
               echo "set ftp:passive-mode off"
               echo "set ftp:ssl-allow yes"
@@ -145,13 +166,8 @@ jobs:
               echo "open -u $FTP_USER,$FTP_PASS $FTP_HOST"
               # Modo mantenimiento ANTES de tocar archivos: evita 500 durante el deploy
               echo "put /tmp/down -o storage/framework/down"
-              # Subir SOLO los archivos modificados: deploy mucho mas rapido
-              while IFS= read -r f; do
-                [ -z "$f" ] && continue
-                # Quitar prefijo src/ por seguridad (nunca deben quedar rutas src/src/...)
-                f="${f#src/}"
-                echo "mirror --continue --no-recursion -R \"./$f\" \"/$f\""
-              done < "$CHANGE_FILE"
+              # Subir SOLO el arbol con los archivos modificados (mirror sin --delete: nunca borra)
+              echo "mirror -R --continue /tmp/staging/ /"
               # Limpiar caches (sin borrar vistas compiladas: Laravel las recompila sola)
               echo "rm -f bootstrap/cache/routes-*.php"
               echo "rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php"
@@ -227,7 +243,14 @@ jobs:
           [ "$DISPO" = "200" ] || { echo "FAIL: /disponibilidad no responde 200"; exit 1; }
           grep -q '"suites"' /tmp/dispo.json || { echo "FAIL: /disponibilidad no devuelve JSON esperado"; exit 1; }
 
-          # 5) laravel.log: fallar si hay ERROR/FATAL nuevos (post-deploy)
+          # 5) robots.txt: detecta deploys "exitosos" que suben 0 archivos
+          #    (el mirror por archivo individual fallaba silenciosamente).
+          ROBOTS=$(curl -sS -o /tmp/robots.txt -w "%{http_code}" "$SITE_URL/robots.txt")
+          echo "robots.txt: $ROBOTS"
+          [ "$ROBOTS" = "200" ] || { echo "FAIL: robots.txt no devuelve 200 (deploy subio 0 archivos?)"; exit 1; }
+          grep -q "Sitemap:" /tmp/robots.txt || { echo "FAIL: robots.txt sin Sitemap"; exit 1; }
+
+          # 6) laravel.log: fallar si hay ERROR/FATAL nuevos (post-deploy)
           #    Se descarga via FTP el log y se buscan errores graves.
           echo "=== Revisando laravel.log en busca de errores ==="
           lftp -u "$FTP_USER,$FTP_PASS" "$FTP_HOST" -e "pget -n 1 -o /tmp/laravel.log storage/logs/laravel.log; quit" 2>/dev/null || echo "No se pudo bajar laravel.log (se ignora)"
