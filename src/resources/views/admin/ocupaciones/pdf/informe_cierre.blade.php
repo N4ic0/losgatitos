@@ -230,6 +230,8 @@ table.data tr:last-child td { border-bottom: none; }
     <p style="text-align:center; color:#666; margin-top:15mm;">No hay ocupaciones en el per&iacute;odo seleccionado.</p>
 @endforelse
 
+<!-- -->
+
 <div class="footer-summary">
     <div class="sum-head">Resumen del Per&iacute;odo</div>
 

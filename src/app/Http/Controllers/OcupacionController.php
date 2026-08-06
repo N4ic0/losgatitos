@@ -50,7 +50,7 @@ class OcupacionController extends Controller
         $request->validate([
             'desde' => 'required|date_format:Y-m-d\TH:i',
             'hasta' => 'required|date_format:Y-m-d\TH:i|after_or_equal:desde',
-        ]);
+        ]); // periodo del informe
 
         $desde = Carbon::parse($request->desde);
         $hasta = Carbon::parse($request->hasta);

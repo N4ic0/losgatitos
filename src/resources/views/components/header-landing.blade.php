@@ -32,7 +32,7 @@
                 <a href="{{ route('landing.promociones') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5">Promociones</a>
                 <a href="{{ route('landing.contacto') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5">Contacto</a>
                 <div class="pt-4">
-                    <a href="/login" class="block text-center border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black font-bold px-6 py-3 rounded-full uppercase text-sm tracking-wider transition-all duration-300">Iniciar</a>
+                    <a href="/login" aria-label="Iniciar sesión" class="block text-center border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black font-bold px-6 py-3 rounded-full uppercase text-sm tracking-wider transition-all duration-300">Iniciar</a>
                 </div>
             </div>
         </div>
