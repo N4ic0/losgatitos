@@ -78,7 +78,7 @@ class OcupacionController extends Controller
             ->map(fn ($p) => $p->sum('monto'));
 
         $completadas = $ocupaciones->filter(fn ($o) => $o->fecha_fin !== null)->count();
-        $enCurso = $ocupaciones->filter(fn ($o) => $o->fecha_fin === null)->count();
+        $enCurso = $ocupaciones->filter(fn ($o) => $o->fecha_fin === null && $o->habitacion?->estado === 'Ocupada')->count();
 
         $logoPath = public_path('img/logo.png');
 

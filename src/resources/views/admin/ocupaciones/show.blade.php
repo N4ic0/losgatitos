@@ -51,8 +51,8 @@
         <div class="space-y-3">
             @foreach($ocupacion->clientes as $cliente)
             <div class="bg-white/5 rounded-xl p-4">
-                <p class="text-white font-medium">{{ $cliente->nombre }} {{ $cliente->apellido }}</p>
-                <p class="text-gray-400 text-xs">{{ $cliente->rut ?? 'Sin RUT' }}</p>
+                <p class="text-white font-medium">{{ $cliente->nombres }} {{ $cliente->apellidos }}</p>
+                <p class="text-gray-400 text-xs">{{ $cliente->tipo_documento ?? 'Documento' }}: {{ $cliente->numero_documento ?? 'Sin documento' }}</p>
             </div>
             @endforeach
         </div>
@@ -73,6 +73,12 @@
                 <dt class="text-gray-400">Consumos</dt>
                 <dd class="text-white font-medium">${{ number_format($ocupacion->total_consumos, 0, '', '.') }}</dd>
             </div>
+            @if($ocupacion->propinas > 0)
+            <div class="flex justify-between">
+                <dt class="text-gray-400">Propina</dt>
+                <dd class="text-white font-medium">${{ number_format($ocupacion->propinas, 0, '', '.') }}</dd>
+            </div>
+            @endif
             <div class="flex justify-between pt-3 border-t border-white/5">
                 <dt class="text-gray-300 font-semibold">Total</dt>
                 <dd class="text-white font-bold text-lg">${{ number_format($ocupacion->total, 0, '', '.') }}</dd>
@@ -137,7 +143,7 @@
                 @foreach($ocupacion->pagos as $pago)
                 <tr>
                     <td class="px-4 py-3 text-white font-medium">${{ number_format($pago->monto, 0, '', '.') }}</td>
-                    <td class="px-4 py-3 text-gray-300">{{ $pago->metodo_pago ?? '-' }}</td>
+                    <td class="px-4 py-3 text-gray-300">{{ ucfirst($pago->forma_pago ?? '-') }}</td>
                     <td class="px-4 py-3 text-gray-300">{{ $pago->created_at->format('d/m/Y H:i') }}</td>
                 </tr>
                 @endforeach

@@ -89,7 +89,7 @@ class Ocupacion extends Model
 
     public function getTotalAttribute()
     {
-        return $this->precio_base + $this->total_consumos;
+        return $this->precio_base + $this->total_consumos + $this->propinas;
     }
 
     public function getSaldoAttribute()
