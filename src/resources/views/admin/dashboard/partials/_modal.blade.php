@@ -320,9 +320,9 @@
                             <div class="d-flex gap-3">
                                 <input type="number" id="pago-monto" placeholder="Monto" min="1" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.75rem 1rem; color: #fff; outline: none; font-size: 0.875rem;">
                                 <select id="pago-forma" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.75rem 1rem; color: #fff; outline: none; font-size: 0.875rem;">
+                                    <option value="tarjeta" selected>Tarjeta</option>
                                     <option value="efectivo">Efectivo</option>
                                     <option value="transferencia">Transferencia</option>
-                                    <option value="tarjeta">Tarjeta</option>
                                 </select>
                             </div>
                             <button id="btn-registrar-pago" onclick="dashboard.registrarPago()" class="w-100 mt-3" style="background: #16a34a; color: #fff; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.75rem; border: none; cursor: pointer; font-size: 0.875rem;">
