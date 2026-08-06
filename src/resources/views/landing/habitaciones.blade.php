@@ -1,6 +1,8 @@
 @extends('layouts.landing')
 
 @section('title', 'Habitaciones - Motel Los Gatitos')
+@section('meta_description', 'Conoce las suites y departamentos de Motel Los Gatitos: cama King Size, TV Smart 50", aire acondicionado y WiFi premium. Estacionamiento privado incluido, atención 24 horas.')
+@section('og_image', url('/img/habitaciones.jpeg'))
 
 @section('content')
 <section class="relative pt-32 pb-20 lg:pb-32 min-h-screen overflow-hidden">

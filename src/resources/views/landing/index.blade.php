@@ -1,6 +1,8 @@
 @extends('layouts.landing')
 
 @section('title', 'Motel Los Gatitos - Hotel de Lujo en Santiago')
+@section('meta_description', 'Motel de lujo en Santiago. Suites y departamentos con estacionamiento privado, TV Smart y WiFi premium para una experiencia íntima. Atención y check-in las 24 horas.')
+@section('og_image', url('/img/habitaciones.jpeg'))
 
 @section('content')
 {{-- HERO SECTION WITH VIDEO --}}

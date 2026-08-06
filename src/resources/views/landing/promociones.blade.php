@@ -1,6 +1,8 @@
 @extends('layouts.landing')
 
 @section('title', 'Promociones - Motel Los Gatitos')
+@section('meta_description', 'Aprovecha las promociones vigentes de Motel Los Gatitos en Santiago: ofertas especiales en suites y departamentos con estacionamiento, TV Smart y WiFi premium.')
+@section('og_image', url('/img/ofertas.jpeg'))
 
 @section('content')
 <section class="relative pt-32 pb-20 lg:pb-32 min-h-screen overflow-hidden">

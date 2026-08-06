@@ -1,6 +1,8 @@
 @extends('layouts.landing')
 
 @section('title', 'Contacto - Motel Los Gatitos')
+@section('meta_description', 'Contacta con Motel Los Gatitos en Av. Macul 4849, Santiago. Atención y check-in las 24 horas, estacionamiento privado y reservas disponibles de domingo a jueves.')
+@section('og_image', url('/img/contacto.jpg'))
 
 @section('content')
 <section class="relative pt-32 pb-20 lg:pb-32 min-h-screen overflow-hidden">
