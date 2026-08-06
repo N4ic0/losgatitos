@@ -60,28 +60,32 @@ class OcupacionController extends Controller
             'tarifa',
             'promocion',
             'clientes',
-            'consumos' => fn ($q) => $q->with('producto')->orderBy('created_at'),
-            'pagos' => fn ($q) => $q->orderBy('created_at'),
+            'consumos' => fn ($q) => $q->with('producto')->whereBetween('created_at', [$desde, $hasta])->orderBy('created_at'),
+            'pagos' => fn ($q) => $q->whereBetween('created_at', [$desde, $hasta])->orderBy('created_at'),
         ])
             ->whereBetween('fecha_inicio', [$desde, $hasta])
             ->orderBy('fecha_inicio')
             ->get();
 
-        $totalOcupaciones = $ocupaciones->sum(fn ($o) => $o->total);
-        $totalConsumos = $ocupaciones->sum(fn ($o) => $o->total_consumos);
-        $totalPagos = $ocupaciones->sum(fn ($o) => $o->total_pagado);
+        $totalConsumos = $ocupaciones->sum(fn ($o) => $o->consumos->sum('total'));
+        $totalPagos = $ocupaciones->sum(fn ($o) => $o->pagos->sum('monto'));
         $totalPropinas = $ocupaciones->sum('propinas');
+        $totalOcupaciones = $totalConsumos + $totalPropinas + $ocupaciones->sum('precio_base');
 
         $totalesPorForma = $ocupaciones
             ->flatMap(fn ($o) => $o->pagos)
             ->groupBy('forma_pago')
             ->map(fn ($p) => $p->sum('monto'));
 
+        $completadas = $ocupaciones->filter(fn ($o) => $o->fecha_fin !== null)->count();
+        $enCurso = $ocupaciones->filter(fn ($o) => $o->fecha_fin === null)->count();
+
         $logoPath = public_path('img/logo.png');
 
         $pdf = Pdf::loadView('admin.ocupaciones.pdf.informe_cierre', compact(
             'ocupaciones', 'desde', 'hasta', 'totalOcupaciones', 'totalConsumos',
-            'totalPagos', 'totalPropinas', 'totalesPorForma', 'logoPath'
+            'totalPagos', 'totalPropinas', 'totalesPorForma', 'logoPath',
+            'completadas', 'enCurso'
         ));
         $pdf->setPaper('A4', 'portrait');
 

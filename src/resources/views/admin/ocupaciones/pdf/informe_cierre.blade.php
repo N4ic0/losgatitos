@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <style>
 @page {
-    margin: 14mm 10mm 16mm 10mm;
+    margin: 14mm 10mm 22mm 10mm;
     size: A4 portrait;
 }
 
@@ -13,6 +13,7 @@ body {
     color: #1f2937;
     font-size: 8.5pt;
     line-height: 1.35;
+    padding-bottom: 6mm;
 }
 
 .header {
@@ -28,7 +29,7 @@ body {
 .header-title .sub { font-size: 7pt; color: #555; letter-spacing: 1.5px; margin-top: 1mm; text-transform: uppercase; }
 .header-meta { width: 34mm; text-align: right; font-size: 6.5pt; color: #666; line-height: 1.5; }
 
-.ocp { margin-bottom: 4mm; }
+.ocp { margin-bottom: 4mm; page-break-inside: avoid; }
 .ocp-head { width: 100%; border-collapse: collapse; background: #f3efdf; border-left: 3px solid #b08a3e; }
 .ocp-head td { padding: 1.6mm 3mm; font-size: 9pt; font-weight: bold; color: #111; }
 .ocp-head .right { text-align: right; font-weight: normal; color: #555; font-size: 7.5pt; }
@@ -63,7 +64,7 @@ table.data tr:last-child td { border-bottom: none; }
 
 .divider { border-top: 1px dashed #d4c9a8; margin: 4mm 0; }
 
-.footer-summary { page-break-before: always; margin-top: 8mm; }
+.footer-summary { page-break-before: always; margin-top: 8mm; page-break-inside: avoid; }
 .sum-head { text-align: center; font-size: 13pt; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; color: #111; margin-bottom: 5mm; }
 .sum-table { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
 .sum-table th { background: #e9e2cc; color: #333; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.5px; padding: 1.8mm 3mm; text-align: left; }
@@ -120,6 +121,10 @@ table.data tr:last-child td { border-bottom: none; }
         $dur = $o->fecha_inicio->diff($fin);
         $duracion = $dur->h . 'h ' . $dur->i . 'm';
         $estado = $o->fecha_fin === null ? 'EN CURSO' : 'FINALIZADA';
+        $sumConsumos = $o->consumos->sum('total');
+        $sumPagos = $o->pagos->sum('monto');
+        $totalOc = $o->precio_base + $sumConsumos + $o->propinas;
+        $saldoOc = $totalOc - $sumPagos;
     @endphp
 
     <div class="ocp">
@@ -205,15 +210,15 @@ table.data tr:last-child td { border-bottom: none; }
 
         <table class="ocp-total">
             <tr><td class="lbl">Precio base</td><td class="val">{{ fmt($o->precio_base) }}</td></tr>
-            <tr><td class="lbl">Consumos</td><td class="val">{{ fmt($o->total_consumos) }}</td></tr>
+            <tr><td class="lbl">Consumos</td><td class="val">{{ fmt($sumConsumos) }}</td></tr>
             @if($o->propinas > 0)
             <tr><td class="lbl">Propina</td><td class="val">{{ fmt($o->propinas) }}</td></tr>
             @endif
-            <tr class="grand"><td class="lbl">Total ocupaci&oacute;n</td><td class="val">{{ fmt($o->total) }}</td></tr>
-            <tr><td class="lbl">Pagado</td><td class="val">{{ fmt($o->total_pagado) }}</td></tr>
+            <tr class="grand"><td class="lbl">Total ocupaci&oacute;n</td><td class="val">{{ fmt($totalOc) }}</td></tr>
+            <tr><td class="lbl">Pagado</td><td class="val">{{ fmt($sumPagos) }}</td></tr>
             <tr>
                 <td class="lbl">Saldo</td>
-                <td class="val" style="color: {{ $o->saldo > 0 ? '#b91c1c' : '#15803d' }};">{{ fmt($o->saldo) }}</td>
+                <td class="val" style="color: {{ $saldoOc > 0 ? '#b91c1c' : '#15803d' }};">{{ fmt($saldoOc) }}</td>
             </tr>
         </table>
     </div>
@@ -229,16 +234,21 @@ table.data tr:last-child td { border-bottom: none; }
     <div class="sum-head">Resumen del Per&iacute;odo</div>
 
     <table class="sum-table">
-        <tr><th>Concepto</th><th class="tright">Monto</th></tr>
-        <tr><td>Ocupaciones del per&iacute;odo</td><td class="tright">{{ count($ocupaciones) }}</td></tr>
-        <tr><td>Ventas del per&iacute;odo (precio base + consumos)</td><td class="tright">{{ fmt($totalOcupaciones) }}</td></tr>
+        <tr><th>Resumen de ocupaciones</th><th class="tright">Cant.</th></tr>
+        <tr><td>Ocupaciones completadas</td><td class="tright">{{ $completadas }}</td></tr>
+        <tr><td>Ocupaciones en curso</td><td class="tright">{{ $enCurso }}</td></tr>
+    </table>
+
+    <table class="sum-table">
+        <tr><th>Dinero del per&iacute;odo</th><th class="tright">Monto</th></tr>
+        <tr><td>Total ocupaci&oacute;n del per&iacute;odo (precio base + consumos + propina)</td><td class="tright">{{ fmt($totalOcupaciones) }}</td></tr>
         <tr><td>&mdash; Total consumos</td><td class="tright">{{ fmt($totalConsumos) }}</td></tr>
+        <tr><td>&mdash; Total propinas</td><td class="tright">{{ fmt($totalPropinas) }}</td></tr>
         <tr><td style="height: 2mm;"></td><td></td></tr>
         @foreach($totalesPorForma as $forma => $monto)
         <tr><td>Total {{ $formaLabels[$forma] ?? ucfirst($forma) }}</td><td class="tright">{{ fmt($monto) }}</td></tr>
         @endforeach
-        <tr><td>Total propinas</td><td class="tright">{{ fmt($totalPropinas) }}</td></tr>
-        <tr class="grand"><td>GRAN TOTAL DEL PER&Iacute;ODO</td><td class="tright">{{ fmt($totalPagos + $totalPropinas) }}</td></tr>
+        <tr class="grand"><td>DINERO COBRADO EN EL PER&Iacute;ODO</td><td class="tright">{{ fmt($totalPagos + $totalPropinas) }}</td></tr>
     </table>
 
     <table class="signature">

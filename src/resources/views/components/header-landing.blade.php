@@ -27,12 +27,12 @@
         </div>
         <div class="offcanvas-body p-6">
             <div class="space-y-4">
-                <a href="{{ route('landing.index') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5" data-bs-dismiss="offcanvas">Inicio</a>
-                <a href="{{ route('landing.habitaciones') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5" data-bs-dismiss="offcanvas">Habitaciones</a>
-                <a href="{{ route('landing.promociones') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5" data-bs-dismiss="offcanvas">Promociones</a>
-                <a href="{{ route('landing.contacto') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5" data-bs-dismiss="offcanvas">Contacto</a>
+                <a href="{{ route('landing.index') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5">Inicio</a>
+                <a href="{{ route('landing.habitaciones') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5">Habitaciones</a>
+                <a href="{{ route('landing.promociones') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5">Promociones</a>
+                <a href="{{ route('landing.contacto') }}" class="block text-gray-300 hover:text-[#D4AF37] py-2 uppercase text-sm tracking-wider border-b border-white/5">Contacto</a>
                 <div class="pt-4">
-                    <a href="/login" class="block text-center border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black font-bold px-6 py-3 rounded-full uppercase text-sm tracking-wider transition-all duration-300" data-bs-dismiss="offcanvas">Iniciar</a>
+                    <a href="/login" class="block text-center border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black font-bold px-6 py-3 rounded-full uppercase text-sm tracking-wider transition-all duration-300">Iniciar</a>
                 </div>
             </div>
         </div>
@@ -69,6 +69,13 @@ document.addEventListener('DOMContentLoaded', function () {
         mobileMenu.addEventListener('hide.bs.offcanvas', function () {
             hamburger.classList.remove('d-none');
             closeIcon.classList.add('d-none');
+        });
+
+        mobileMenu.querySelectorAll('a[href]').forEach(function (link) {
+            link.addEventListener('click', function () {
+                var offcanvas = bootstrap.Offcanvas.getInstance(mobileMenu);
+                if (offcanvas) offcanvas.hide();
+            });
         });
     }
 });
