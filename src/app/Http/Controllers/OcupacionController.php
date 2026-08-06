@@ -64,6 +64,7 @@ class OcupacionController extends Controller
             'pagos' => fn ($q) => $q->whereBetween('created_at', [$desde, $hasta])->orderBy('created_at'),
         ])
             ->whereBetween('fecha_inicio', [$desde, $hasta])
+            ->whereHas('historialEstados', fn ($q) => $q->where('estado', 'Ocupada'))
             ->orderBy('fecha_inicio')
             ->get();
 
@@ -71,7 +72,11 @@ class OcupacionController extends Controller
         $totalPagos = $ocupaciones->sum(fn ($o) => $o->pagos->sum('monto'));
         $totalPropinas = $ocupaciones->sum('propinas');
         $totalHoraAdicional = $ocupaciones->sum('valor_h_adi');
-        $totalOcupaciones = $totalConsumos + $totalPropinas + $totalHoraAdicional + $ocupaciones->sum('precio_base');
+
+        $totalOcupaciones = $ocupaciones->sum('precio_base')
+            + $ocupaciones->sum(fn ($o) => $o->consumos->sum('total'))
+            + $ocupaciones->sum('propinas')
+            + $ocupaciones->sum('valor_h_adi');
 
         $totalesPorForma = $ocupaciones
             ->flatMap(fn ($o) => $o->pagos)

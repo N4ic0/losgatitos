@@ -376,6 +376,7 @@ class OcupacionService
 
         $ocupacionesTurno = Ocupacion::whereNotNull('fecha_fin')
             ->whereBetween('fecha_fin', [$turnoInicio, $turnoFin])
+            ->whereHas('historialEstados', fn ($q) => $q->where('estado', 'Ocupada'))
             ->count();
 
         return compact('habitaciones', 'ocupadas', 'reservadas', 'limpieza', 'disponibles', 'transitos', 'ocupacionesTurno');

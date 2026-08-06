@@ -184,14 +184,8 @@ class KioskController extends Controller
             default => null,
         };
 
-        if ($request->estado === 'TRANSITO' && $habitacion->estado === 'Disponible') {
-            $ocupacion = $this->ocupacionService->iniciarOcupacion($habitacion, '8h', 0, 'Transito');
-            return response()->json([
-                'success' => true,
-                'estado' => 'TRANSITO',
-                'ocupacion_id' => $ocupacion->id,
-                'mensaje' => "Habitación {$habitacion->numero} asignada. Portón abierto.",
-            ]);
+        if ($estado === null) {
+            return response()->json(['error' => 'Estado no válido'], 422);
         }
 
         $this->ocupacionService->cambiarEstado($habitacion, $estado);
