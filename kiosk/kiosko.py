@@ -560,7 +560,6 @@ def flujo_sin_reserva():
     num_hab = data.get("mensaje", f"Habitación {habitacion['numero']}")
     hablar(f"Diríjase a la {tipo} {habitacion['numero']}. El portón se va a abrir.")
     abrir_porton()
-    hablar("Gracias por escoger el Motel Los Gatitos.")
 
 
 # ─── MAIN LOOP ────────────────────────────────────────────────────────
