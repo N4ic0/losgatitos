@@ -202,13 +202,28 @@ def abrir_porton():
 
 
 def esperar_boton():
-    """Bloquea hasta presionar el botón (flanco descendente)."""
-    print("[BOTON] Esperando pulsación...")
+    """Bloquea hasta presionar el bot??n (flanco descendente mantenido).
+
+    Filtra interferencias (picos cortos de ruido o el receptor del port??n):
+    el flanco descendente se ignora si el pin no permanece LOW ~150ms.
+    Un bot??n f??sico se mantiene presionado ese tiempo; el ruido no.
+    """
+    print("[BOTON] Esperando pulsaci??n...")
     GPIO.output(LED_PIN, GPIO.HIGH)
-    GPIO.wait_for_edge(BUTTON_PIN, GPIO.FALLING)
-    time.sleep(0.05)
+    while True:
+        GPIO.wait_for_edge(BUTTON_PIN, GPIO.FALLING)
+        time.sleep(0.02)
+        if GPIO.input(BUTTON_PIN) == GPIO.LOW:
+            # Confirmar que se mantiene presionado (debounce de ruido)
+            t0 = time.time()
+            while GPIO.input(BUTTON_PIN) == GPIO.LOW and time.time() - t0 < 0.18:
+                time.sleep(0.02)
+            if time.time() - t0 >= 0.15:
+                break
+        # Fue ruido/un pulso corto: seguir esperando
     print("[BOTON] Pulsado!")
     led_parpadear()
+
 
 
 # ─── API ──────────────────────────────────────────────────────────────
