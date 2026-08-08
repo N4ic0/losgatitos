@@ -37,6 +37,8 @@ RELAY_PIN = 22        # GPIO22 - relay del portón
 KEY_D0 = 23           # GPIO23 - Wiegand D0 (verde)
 KEY_D1 = 24           # GPIO24 - Wiegand D1 (blanco)
 
+CODIGO_PORTON_DIRECTO = "4849"
+
 MODEL_DIR = Path.home() / "kiosko" / "models"
 VOSK_MODEL = str(MODEL_DIR / "vosk-model-small-es-0.42")
 PIPER_MODEL = str(MODEL_DIR / "voz.onnx")
@@ -205,46 +207,94 @@ def abrir_porton():
     print("[RELAY] Portón cerrado")
 
 
-def esperar_timbre():
-    """Bloquea hasta que se presione el timbre del teclado (GPIO4).
+def esperar_activacion():
+    """Espera el timbre del teclado o el codigo maestro 4849 (directo).
 
-    El timbre es open-collector: en reposo HIGH, al pulsar baja a LOW.
-    Regresa cuando el pin se mantiene LOW ~150ms (filtra ruido picos cortos).
+    - Timbre (GPIO4 LOW sostenido ~150ms) -> arranca el flujo normal.
+    - Teclas del keypad 4-8-4-9 -> abre el porton directamente.
+
+    Usa polling del pin (no wait_for_edge) para no mezclar subsistemas
+    de eventos de RPi.GPIO, que se rompe con add_event_detect activo.
+
+    Retorna "timbre" o "codigo".
     """
-    print("[TIMBRE] En espera del timbre...")
+    print("[TIMBRE] Esperando timbre o codigo 4849...")
     GPIO.output(LED_PIN, GPIO.HIGH)
+    secuencia = []
     while True:
-        GPIO.wait_for_edge(TIMBRE_PIN, GPIO.FALLING)
-        time.sleep(0.02)
         if GPIO.input(TIMBRE_PIN) == GPIO.LOW:
-            t0 = time.time()
-            while GPIO.input(TIMBRE_PIN) == GPIO.LOW and time.time() - t0 < 0.18:
-                time.sleep(0.02)
-            if time.time() - t0 >= 0.15:
-                break
-    print("[TIMBRE] Timbre pulsado!")
-    led_parpadear()
+            time.sleep(0.02)
+            if GPIO.input(TIMBRE_PIN) == GPIO.LOW:
+                t0 = time.time()
+                while GPIO.input(TIMBRE_PIN) == GPIO.LOW and time.time() - t0 < 0.18:
+                    time.sleep(0.01)
+                if time.time() - t0 >= 0.15:
+                    print("[TIMBRE] Timbre pulsado!")
+                    led_parpadear()
+                    return "timbre"
+        try:
+            tecla = cola_teclas.get_nowait()
+        except queue.Empty:
+            tecla = None
+        if tecla is not None:
+            secuencia.append(str(tecla))
+            secuencia = secuencia[-4:]
+            seq = "".join(secuencia)
+            print(f"[KEYPAD] Tecla {tecla} | secuencia: {seq}")
+            if seq == CODIGO_PORTON_DIRECTO:
+                print("[CODIGO] porton abierto por 4849")
+                led_parpadear()
+                abrir_porton()
+                return "codigo"
+        time.sleep(0.005)
 
 
 # --- Lector del teclado Wiegand (keypad) ---
+_key_lock = threading.Lock()
 _bits_tecla = []
 _t_ultimo_bit = [0.0]
+cola_teclas = queue.Queue()
 
 
 def _on_key_d0(_ch=None):
     ahora = time.time()
-    if not _bits_tecla or ahora - _t_ultimo_bit[0] > 0.05:
-        _bits_tecla.clear()
-    _bits_tecla.append(0)
-    _t_ultimo_bit[0] = ahora
+    with _key_lock:
+        if not _bits_tecla or ahora - _t_ultimo_bit[0] > 0.15:
+            _bits_tecla.clear()
+        _bits_tecla.append(0)
+        _t_ultimo_bit[0] = ahora
 
 
 def _on_key_d1(_ch=None):
     ahora = time.time()
-    if not _bits_tecla or ahora - _t_ultimo_bit[0] > 0.05:
-        _bits_tecla.clear()
-    _bits_tecla.append(1)
-    _t_ultimo_bit[0] = ahora
+    with _key_lock:
+        if not _bits_tecla or ahora - _t_ultimo_bit[0] > 0.15:
+            _bits_tecla.clear()
+        _bits_tecla.append(1)
+        _t_ultimo_bit[0] = ahora
+
+
+def _decodificador_teclas():
+    """Hilo: ensambla frames de 3+ bits del Wiegand y los vuelca a una cola."""
+    while True:
+        with _key_lock:
+            lista = list(_bits_tecla) if _bits_tecla else []
+            if lista and time.time() - _t_ultimo_bit[0] > 0.06:
+                _bits_tecla.clear()
+                pendiente = list(lista)
+            else:
+                pendiente = None
+        if pendiente:
+            try:
+                if len(pendiente) >= 2:
+                    valor = int("".join(map(str, pendiente)), 2)
+                else:
+                    valor = None
+            except Exception:
+                valor = None
+            if valor is not None:
+                cola_teclas.put(valor)
+        time.sleep(0.005)
 
 
 def registrar_teclado():
@@ -252,25 +302,28 @@ def registrar_teclado():
         return
     GPIO.add_event_detect(KEY_D0, GPIO.FALLING, callback=_on_key_d0, bouncetime=1)
     GPIO.add_event_detect(KEY_D1, GPIO.FALLING, callback=_on_key_d1, bouncetime=1)
+    threading.Thread(target=_decodificador_teclas, daemon=True).start()
 
 
 def leer_tecla(timeout=3.0):
-    """Espera que el keypad complete un frame (2 bits de igual tecla) y
-    devuelve el valor entero (bits como binario MSB-first)."""
-    _bits_tecla.clear()
-    _t_ultimo_bit[0] = 0.0
-    t0 = time.time()
-    while time.time() - t0 < timeout:
-        if _bits_tecla:
-            if time.time() - _t_ultimo_bit[0] > 0.05:
-                bits = list(_bits_tecla)
-                _bits_tecla.clear()
-                try:
-                    return int("".join(map(str, bits)), 2)
-                except Exception:
-                    return None
+    """Espera la siguiente tecla del keypad (desde la cola). Retorna int o None."""
+    try:
+        return cola_teclas.get(timeout=timeout)
+    except queue.Empty:
+        return None
         time.sleep(0.005)
     _bits_tecla.clear()
+    return None
+
+
+def _tecla_si_lista():
+    """Si un frame completo (>=4 bits con idle >50ms) está acumulado,
+    lo devuelve como int SIN limpiar el buffer (una sola lectura)."""
+    if _bits_tecla and time.time() - _t_ultimo_bit[0] > 0.05:
+        try:
+            return int("".join(map(str, _bits_tecla)), 2)
+        except Exception:
+            return None
     return None
 
 
@@ -525,7 +578,10 @@ def loop_principal():
                 time.sleep(30)
                 continue
 
-            esperar_timbre()
+            motivo = esperar_activacion()
+            if motivo == "codigo":
+                print("[LOOP] Porton abierto por codigo maestro. Volviendo a la espera.")
+                continue
             flujo_bienvenida()
             print("[LOOP] Cliente atendido. Volviendo a la espera del pulsor.")
         except Exception as e:
