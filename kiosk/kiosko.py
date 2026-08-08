@@ -31,9 +31,11 @@ API_TOKEN = os.getenv("API_TOKEN", "1|llE7NvmHemmqqKh2b5zfzoVwm4fZj7FII2qvCTXR7e
 HEADERS = {"Authorization": f"Bearer {API_TOKEN}", "Accept": "application/json",
            "User-Agent": "kiosko-losgatitos/1.0"}
 
-BUTTON_PIN = 17       # GPIO17 (físico) para activar
+TIMBRE_PIN = 4        # GPIO4 - timbre del teclado (arranca el ciclo)
 LED_PIN = 27          # GPIO27 - LED indicador de espera
 RELAY_PIN = 22        # GPIO22 - relay del portón
+KEY_D0 = 23           # GPIO23 - Wiegand D0 (verde)
+KEY_D1 = 24           # GPIO24 - Wiegand D1 (blanco)
 
 MODEL_DIR = Path.home() / "kiosko" / "models"
 VOSK_MODEL = str(MODEL_DIR / "vosk-model-small-es-0.42")
@@ -175,7 +177,9 @@ def setup_gpio():
         print("[GPIO] RPi.GPIO no disponible - modo sin GPIO")
         return
     GPIO.setmode(GPIO.BCM)
-    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(TIMBRE_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(KEY_D0, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(KEY_D1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(LED_PIN, GPIO.OUT)
     GPIO.setup(RELAY_PIN, GPIO.OUT)
     GPIO.output(LED_PIN, GPIO.HIGH)
@@ -201,28 +205,73 @@ def abrir_porton():
     print("[RELAY] Portón cerrado")
 
 
-def esperar_boton():
-    """Bloquea hasta presionar el bot??n (flanco descendente mantenido).
+def esperar_timbre():
+    """Bloquea hasta que se presione el timbre del teclado (GPIO4).
 
-    Filtra interferencias (picos cortos de ruido o el receptor del port??n):
-    el flanco descendente se ignora si el pin no permanece LOW ~150ms.
-    Un bot??n f??sico se mantiene presionado ese tiempo; el ruido no.
+    El timbre es open-collector: en reposo HIGH, al pulsar baja a LOW.
+    Regresa cuando el pin se mantiene LOW ~150ms (filtra ruido picos cortos).
     """
-    print("[BOTON] Esperando pulsaci??n...")
+    print("[TIMBRE] En espera del timbre...")
     GPIO.output(LED_PIN, GPIO.HIGH)
     while True:
-        GPIO.wait_for_edge(BUTTON_PIN, GPIO.FALLING)
+        GPIO.wait_for_edge(TIMBRE_PIN, GPIO.FALLING)
         time.sleep(0.02)
-        if GPIO.input(BUTTON_PIN) == GPIO.LOW:
-            # Confirmar que se mantiene presionado (debounce de ruido)
+        if GPIO.input(TIMBRE_PIN) == GPIO.LOW:
             t0 = time.time()
-            while GPIO.input(BUTTON_PIN) == GPIO.LOW and time.time() - t0 < 0.18:
+            while GPIO.input(TIMBRE_PIN) == GPIO.LOW and time.time() - t0 < 0.18:
                 time.sleep(0.02)
             if time.time() - t0 >= 0.15:
                 break
-        # Fue ruido/un pulso corto: seguir esperando
-    print("[BOTON] Pulsado!")
+    print("[TIMBRE] Timbre pulsado!")
     led_parpadear()
+
+
+# --- Lector del teclado Wiegand (keypad) ---
+_bits_tecla = []
+_t_ultimo_bit = [0.0]
+
+
+def _on_key_d0(_ch=None):
+    ahora = time.time()
+    if not _bits_tecla or ahora - _t_ultimo_bit[0] > 0.05:
+        _bits_tecla.clear()
+    _bits_tecla.append(0)
+    _t_ultimo_bit[0] = ahora
+
+
+def _on_key_d1(_ch=None):
+    ahora = time.time()
+    if not _bits_tecla or ahora - _t_ultimo_bit[0] > 0.05:
+        _bits_tecla.clear()
+    _bits_tecla.append(1)
+    _t_ultimo_bit[0] = ahora
+
+
+def registrar_teclado():
+    if not GPIO_OK:
+        return
+    GPIO.add_event_detect(KEY_D0, GPIO.FALLING, callback=_on_key_d0, bouncetime=1)
+    GPIO.add_event_detect(KEY_D1, GPIO.FALLING, callback=_on_key_d1, bouncetime=1)
+
+
+def leer_tecla(timeout=3.0):
+    """Espera que el keypad complete un frame (2 bits de igual tecla) y
+    devuelve el valor entero (bits como binario MSB-first)."""
+    _bits_tecla.clear()
+    _t_ultimo_bit[0] = 0.0
+    t0 = time.time()
+    while time.time() - t0 < timeout:
+        if _bits_tecla:
+            if time.time() - _t_ultimo_bit[0] > 0.05:
+                bits = list(_bits_tecla)
+                _bits_tecla.clear()
+                try:
+                    return int("".join(map(str, bits)), 2)
+                except Exception:
+                    return None
+        time.sleep(0.005)
+    _bits_tecla.clear()
+    return None
 
 
 
@@ -417,22 +466,24 @@ def flujo_sin_reserva():
         desde_d = min(d["tarifa"] for d in deptos)
         hablar(f"Hay {len(deptos)} departamentos desde {desde_d} pesos. "
                f"Y {len(suites)} suits desde {desde_s} pesos. "
-               "Decí 1 para departamento o 2 para suit.")
-        print("[FLUJO] Esperando opción (1=depto, 2=suite)...")
+               "Pulse 1 para departamento o 2 para suit.")
+        print("[FLUJO] Esperando opción por teclado (1=depto, 2=suite)...")
+        seleccion = None
+        tipo = None
         for intento in range(2):
-            texto = escuchar(3)
-            if "1" in texto or "uno" in texto or "departamento" in texto:
+            tecla = leer_tecla(8)
+            if tecla == 1:
                 seleccion = deptos
                 tipo = "departamento"
                 break
-            elif "2" in texto or "dos" in texto or "suite" in texto or "suit" in texto:
+            elif tecla == 2:
                 seleccion = suites
                 tipo = "suite"
                 break
             if intento == 0:
-                hablar("No te escuché bien. Diga 1 para departamento o 2 para suit.")
-        else:
-            hablar("No entendí la opción. ")
+                hablar("No se recibió la opción. Pulse 1 para departamento o 2 para suit.")
+        if seleccion is None or tipo is None:
+            hablar("No se entendió la opción. ")
             hablar_contacto()
             return
     elif suites:
@@ -474,7 +525,7 @@ def loop_principal():
                 time.sleep(30)
                 continue
 
-            esperar_boton()
+            esperar_timbre()
             flujo_bienvenida()
             print("[LOOP] Cliente atendido. Volviendo a la espera del pulsor.")
         except Exception as e:
@@ -486,8 +537,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--test-voz", action="store_true", help="Prueba de micrófono")
     parser.add_argument("--test-ping", action="store_true", help="Prueba de conexión API")
-    parser.add_argument("--test-button", action="store_true", help="Prueba de botón")
-    parser.add_argument("--no-button", action="store_true", help="Sin botón físico (modo SSH / solo voz)")
+    parser.add_argument("--test-timbre", action="store_true", help="Prueba de timbre")
+    parser.add_argument("--no-button", action="store_true", help="Sin esperar timbre (modo SSH / solo teclado)")
     parser.add_argument("--test-rut", type=str, help="Simula RUT para probar (sin micrófono)")
     args = parser.parse_args()
 
@@ -504,20 +555,21 @@ if __name__ == "__main__":
         print("OK" if api_ping() else "FALLO")
         sys.exit(0)
 
-    if args.test_button:
+    if args.test_timbre:
         if not GPIO_OK:
             print("RPi.GPIO no disponible")
             sys.exit(1)
         setup_gpio()
-        print("Presioná el botón...")
-        GPIO.wait_for_edge(BUTTON_PIN, GPIO.FALLING)
-        print("Botón detectado!")
+        print("Presioná el timbre del teclado...")
+        GPIO.wait_for_edge(TIMBRE_PIN, GPIO.FALLING)
+        print("Timbre detectado!")
         GPIO.cleanup()
         sys.exit(0)
 
     if args.no_button:
-        print("[MODO] Sin botón - solo voz, ideal para SSH")
+        print("[MODO] Sin timbre - solo teclado, ideal para SSH")
         setup_gpio()
+        registrar_teclado()
         iniciar_vosk()
         try:
             if not api_ping():
@@ -531,6 +583,7 @@ if __name__ == "__main__":
             sys.exit(0)
 
     setup_gpio()
+    registrar_teclado()
     iniciar_vosk()
 
     try:
