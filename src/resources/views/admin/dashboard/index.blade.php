@@ -155,13 +155,13 @@
                     @if($habitacion->ultimoEstado && $habitacion->estado !== 'Disponible')
                     <span class="timer-{{ $habitacion->id }} text-[#D4AF37] text-[10px] font-mono"
                           data-inicio="{{ $habitacion->ultimoEstado->fecha_inicio->timestamp }}"
-                          data-duracion="{{ $habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa ? ($habitacion->ocupacionActiva->tarifa->tipo_tiempo === '8h' ? 28800 : 10800) + ($habitacion->ocupacionActiva->horas_beneficio ? $habitacion->ocupacionActiva->horas_beneficio * 3600 : 0) : '' }}"
+                          data-duracion="{{ $habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa ? ($habitacion->ocupacionActiva->tarifa->tipo_tiempo === '8h' ? 28800 : 10800) + ($habitacion->ocupacionActiva->horas_beneficio ? $habitacion->ocupacionActiva->horas_beneficio * 3600 : 0) + ($habitacion->ocupacionActiva->hora_adicional ? $habitacion->ocupacionActiva->hora_adicional * 3600 : 0) : '' }}"
                           data-alarma-key="{{ $habitacion->id }}">
                         <span class="tiempo-valor">00:00:00</span>
                     </span>
                     @endif
                     @if($habitacion->estado === 'Ocupada' && $habitacion->ocupacionActiva && $habitacion->ocupacionActiva->tarifa)
-                        <span class="text-gray-300 text-[9px] font-medium bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded">{{ $habitacion->ocupacionActiva->tarifa->tipo_tiempo }}{{ $habitacion->ocupacionActiva->horas_beneficio ? ' +' . $habitacion->ocupacionActiva->horas_beneficio . 'h' : '' }}</span>
+                        <span class="text-gray-300 text-[9px] font-medium bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded">{{ $habitacion->ocupacionActiva->tarifa->tipo_tiempo }}{{ $habitacion->ocupacionActiva->horas_beneficio ? ' +' . $habitacion->ocupacionActiva->horas_beneficio . 'h' : '' }}{{ $habitacion->ocupacionActiva->hora_adicional ? ' +' . $habitacion->ocupacionActiva->hora_adicional . 'h' : '' }}</span>
                     @elseif($habitacion->estado === 'Reservada' && $habitacion->reservaActiva)
                         <span class="text-[#D4AF37] text-[10px] font-medium bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded">{{ \Carbon\Carbon::parse($habitacion->reservaActiva->hora)->format('H:i') }} hrs</span>
                     @endif
@@ -394,9 +394,10 @@ class DashboardManager {
 
     _actualizarDuracionTimersEnVivo() {
         const beneficio = this.ocupacion && this.ocupacion.horas_beneficio ? this.ocupacion.horas_beneficio * 3600 : 0;
+        const horasExtra = this.ocupacion && this.ocupacion.hora_adicional ? this.ocupacion.hora_adicional * 3600 : 0;
         const tt = this.ocupacion && this.ocupacion.tarifa ? this.ocupacion.tarifa.tipo_tiempo : null;
         const base = tt === '8h' ? 28800 : 10800;
-        const total = beneficio ? (base + beneficio) : '';
+        const total = (beneficio || horasExtra) ? (base + beneficio + horasExtra) : '';
         const boxSpan = document.querySelector('[data-alerta-box="' + this.habitacionId + '"] .timer-' + this.habitacionId);
         if (boxSpan) boxSpan.dataset.duracion = total;
         const modalTimer = document.getElementById('modal-timer');
@@ -600,7 +601,8 @@ class DashboardManager {
             timerEl.dataset.alarmaKey = String(this.habitacion.id);
             const tt = this.ocupacion && this.ocupacion.tarifa ? this.ocupacion.tarifa.tipo_tiempo : null;
             const beneficio = this.ocupacion && this.ocupacion.horas_beneficio ? this.ocupacion.horas_beneficio * 3600 : 0;
-            timerEl.dataset.duracion = (this.habitacion.estado === 'Ocupada' && tt) ? ((tt === '8h' ? 28800 : 10800) + beneficio) : '';
+            const horasExtra = this.ocupacion && this.ocupacion.hora_adicional ? this.ocupacion.hora_adicional * 3600 : 0;
+            timerEl.dataset.duracion = (this.habitacion.estado === 'Ocupada' && tt) ? ((tt === '8h' ? 28800 : 10800) + beneficio + horasExtra) : '';
             const valEl = timerEl.querySelector('.tiempo-valor');
             if (valEl) { valEl.textContent = '00:00:00'; valEl.classList.remove('timer-alerta'); }
         } else {
@@ -845,6 +847,9 @@ class DashboardManager {
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                 body: JSON.stringify({ hora_adicional: this.horasAdicionales, valor: this.totalHoraAdicional() }),
             });
+            this.ocupacion.hora_adicional = this.horasAdicionales;
+            this.ocupacion.valor_h_adi = this.totalHoraAdicional();
+            this._actualizarDuracionTimersEnVivo();
         } catch(e) { console.error(e); }
     }
 
