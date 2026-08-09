@@ -168,10 +168,8 @@ def hablar(texto):
 
 def hablar_contacto():
     """En caso de error, indica los canales de contacto con recepción."""
-    hablar("Para más ayuda, llámenos al 4 4 3 6 8 7 9 9 9, "
-           "o escríbanos por WhatsApp al 5 6 9 9 8 8 9 8 6 9 3.")
-
-
+    hablar("Si necesita ayuda, marque el número que está en la ventanilla "
+           "o vuelva a presionar la campana.")
 # ─── GPIO ─────────────────────────────────────────────────────────────
 
 def setup_gpio():
@@ -504,7 +502,7 @@ def flujo_con_reserva():
 
 
 def flujo_sin_reserva():
-    #hablar("Déjame consultar la disponibilidad.")
+    hablar("Buscando habitaciones disponibles.")
     disp = api_disponibilidad()
     suites = disp.get("suites", [])
     deptos = disp.get("departamentos", [])
@@ -523,8 +521,8 @@ def flujo_sin_reserva():
         print("[FLUJO] Esperando opción por teclado (1=depto, 2=suite)...")
         seleccion = None
         tipo = None
-        for intento in range(2):
-            tecla = leer_tecla(8)
+        for intento in range(3):
+            tecla = leer_tecla(3)
             if tecla == 1:
                 seleccion = deptos
                 tipo = "departamento"
@@ -533,8 +531,8 @@ def flujo_sin_reserva():
                 seleccion = suites
                 tipo = "suite"
                 break
-            if intento == 0:
-                hablar("No se recibió la opción. Pulse 1 para departamento o 2 para suit.")
+            if intento < 2:
+                hablar("No se entendió el número. Pulse 1 para departamento o 2 para suit.")
         if seleccion is None or tipo is None:
             hablar("No se entendió la opción. ")
             hablar_contacto()
