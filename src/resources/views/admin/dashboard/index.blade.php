@@ -107,7 +107,7 @@
                         <div class="position-relative" style="z-index: 2;">
                             <span class="d-block text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; opacity: 0.9;">Ocupaciones</span>
                             <span class="d-block fw-bolder lh-1" data-stat="ocupaciones" style="font-size: 2.5rem;">{{ $ocupacionesTurno }}</span>
-                            <span class="d-block small fw-medium" style="opacity: 0.85;">Turno actual (08:00-20:00 / 20:00-08:00)</span>
+                            <span class="d-block small fw-medium" style="opacity: 0.85;">Turno actual</span>
                         </div>
                         <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 4.5rem; height: 4.5rem; background: rgba(255,255,255,0.18); z-index: 2;">
                             <i class="fas fa-bed-pulse fa-beat" style="font-size: 2rem;"></i>
@@ -824,12 +824,16 @@ class DashboardManager {
         } catch(e) { console.error(e); }
     }
 
-    getPrecioHoraAdicional() {
+getPrecioHoraAdicional() {
         const desdeTabla = this.tarifaInfo?.precio_hora_adicional;
         if (typeof desdeTabla === 'number' && desdeTabla >= 0) return desdeTabla;
         const regla = this.tarifaInfo?.regla || '';
-        if (regla.includes('Viernes')) return 6000;
-        if (regla.includes('Sábado')) return 6000;
+        const categoria = (this.tarifaInfo?.categoria || this.habitacion?.categoria || '');
+        if (regla.includes('D-J') || regla.includes('Viernes')
+            || regla.includes('Sábado') || regla.includes('Víspera')
+            || regla.includes('Vispera')) {
+            return categoria.includes('Suit') ? 6700 : 6000;
+        }
         return 5500;
     }
 
