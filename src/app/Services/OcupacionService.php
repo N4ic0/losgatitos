@@ -374,9 +374,7 @@ class OcupacionService
             $turnoInicio = $turnoFin->copy()->subHours(12);
         }
 
-        $ocupacionesTurno = Ocupacion::whereNotNull('fecha_fin')
-            ->whereBetween('fecha_inicio', [$turnoInicio, $turnoFin])
-            ->whereBetween('fecha_fin', [$turnoInicio, $turnoFin])
+        $ocupacionesTurno = Ocupacion::whereBetween('fecha_inicio', [$turnoInicio, $turnoFin])
             ->whereHas('historialEstados', fn ($q) => $q->where('estado', 'Ocupada'))
             ->count();
 
